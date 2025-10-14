@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		E194453E2E9E54EE000187BC /* WorkoutWacthApp Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = E194451E2E9E54EC000187BC /* WorkoutWacthApp Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		E19444F62E9E53B7000187BC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,12 +25,50 @@
 			remoteGlobalIDString = E19444E32E9E53B5000187BC;
 			remoteInfo = WorkoutApp;
 		};
+		E194452B2E9E54EE000187BC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E19444DC2E9E53B5000187BC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E194451D2E9E54EC000187BC;
+			remoteInfo = "WorkoutWacthApp Watch App";
+		};
+		E19445352E9E54EE000187BC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E19444DC2E9E53B5000187BC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E194451D2E9E54EC000187BC;
+			remoteInfo = "WorkoutWacthApp Watch App";
+		};
+		E194453C2E9E54EE000187BC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E19444DC2E9E53B5000187BC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E194451D2E9E54EC000187BC;
+			remoteInfo = "WorkoutWacthApp Watch App";
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E19445422E9E54EE000187BC /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				E194453E2E9E54EE000187BC /* WorkoutWacthApp Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		E19444E42E9E53B5000187BC /* WorkoutApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WorkoutApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E19444F52E9E53B7000187BC /* WorkoutAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WorkoutAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E19444FF2E9E53B7000187BC /* WorkoutAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WorkoutAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E194451E2E9E54EC000187BC /* WorkoutWacthApp Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "WorkoutWacthApp Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E194452A2E9E54EE000187BC /* WorkoutWacthApp Watch AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "WorkoutWacthApp Watch AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E19445342E9E54EE000187BC /* WorkoutWacthApp Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "WorkoutWacthApp Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -58,6 +100,21 @@
 			path = WorkoutAppUITests;
 			sourceTree = "<group>";
 		};
+		E194451F2E9E54EC000187BC /* WorkoutWacthApp Watch App */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "WorkoutWacthApp Watch App";
+			sourceTree = "<group>";
+		};
+		E194452D2E9E54EE000187BC /* WorkoutWacthApp Watch AppTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "WorkoutWacthApp Watch AppTests";
+			sourceTree = "<group>";
+		};
+		E19445372E9E54EE000187BC /* WorkoutWacthApp Watch AppUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "WorkoutWacthApp Watch AppUITests";
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +139,27 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E194451B2E9E54EC000187BC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E19445272E9E54EE000187BC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E19445312E9E54EE000187BC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -91,6 +169,9 @@
 				E19444E62E9E53B5000187BC /* WorkoutApp */,
 				E19444F82E9E53B7000187BC /* WorkoutAppTests */,
 				E19445022E9E53B7000187BC /* WorkoutAppUITests */,
+				E194451F2E9E54EC000187BC /* WorkoutWacthApp Watch App */,
+				E194452D2E9E54EE000187BC /* WorkoutWacthApp Watch AppTests */,
+				E19445372E9E54EE000187BC /* WorkoutWacthApp Watch AppUITests */,
 				E19444E52E9E53B5000187BC /* Products */,
 			);
 			sourceTree = "<group>";
@@ -101,6 +182,9 @@
 				E19444E42E9E53B5000187BC /* WorkoutApp.app */,
 				E19444F52E9E53B7000187BC /* WorkoutAppTests.xctest */,
 				E19444FF2E9E53B7000187BC /* WorkoutAppUITests.xctest */,
+				E194451E2E9E54EC000187BC /* WorkoutWacthApp Watch App.app */,
+				E194452A2E9E54EE000187BC /* WorkoutWacthApp Watch AppTests.xctest */,
+				E19445342E9E54EE000187BC /* WorkoutWacthApp Watch AppUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -115,10 +199,12 @@
 				E19444E02E9E53B5000187BC /* Sources */,
 				E19444E12E9E53B5000187BC /* Frameworks */,
 				E19444E22E9E53B5000187BC /* Resources */,
+				E19445422E9E54EE000187BC /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				E194453D2E9E54EE000187BC /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				E19444E62E9E53B5000187BC /* WorkoutApp */,
@@ -176,6 +262,74 @@
 			productReference = E19444FF2E9E53B7000187BC /* WorkoutAppUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		E194451D2E9E54EC000187BC /* WorkoutWacthApp Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E194453F2E9E54EE000187BC /* Build configuration list for PBXNativeTarget "WorkoutWacthApp Watch App" */;
+			buildPhases = (
+				E194451A2E9E54EC000187BC /* Sources */,
+				E194451B2E9E54EC000187BC /* Frameworks */,
+				E194451C2E9E54EC000187BC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				E194451F2E9E54EC000187BC /* WorkoutWacthApp Watch App */,
+			);
+			name = "WorkoutWacthApp Watch App";
+			packageProductDependencies = (
+			);
+			productName = "WorkoutWacthApp Watch App";
+			productReference = E194451E2E9E54EC000187BC /* WorkoutWacthApp Watch App.app */;
+			productType = "com.apple.product-type.application";
+		};
+		E19445292E9E54EE000187BC /* WorkoutWacthApp Watch AppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E19445432E9E54EE000187BC /* Build configuration list for PBXNativeTarget "WorkoutWacthApp Watch AppTests" */;
+			buildPhases = (
+				E19445262E9E54EE000187BC /* Sources */,
+				E19445272E9E54EE000187BC /* Frameworks */,
+				E19445282E9E54EE000187BC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E194452C2E9E54EE000187BC /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				E194452D2E9E54EE000187BC /* WorkoutWacthApp Watch AppTests */,
+			);
+			name = "WorkoutWacthApp Watch AppTests";
+			packageProductDependencies = (
+			);
+			productName = "WorkoutWacthApp Watch AppTests";
+			productReference = E194452A2E9E54EE000187BC /* WorkoutWacthApp Watch AppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		E19445332E9E54EE000187BC /* WorkoutWacthApp Watch AppUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E19445462E9E54EE000187BC /* Build configuration list for PBXNativeTarget "WorkoutWacthApp Watch AppUITests" */;
+			buildPhases = (
+				E19445302E9E54EE000187BC /* Sources */,
+				E19445312E9E54EE000187BC /* Frameworks */,
+				E19445322E9E54EE000187BC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E19445362E9E54EE000187BC /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				E19445372E9E54EE000187BC /* WorkoutWacthApp Watch AppUITests */,
+			);
+			name = "WorkoutWacthApp Watch AppUITests";
+			packageProductDependencies = (
+			);
+			productName = "WorkoutWacthApp Watch AppUITests";
+			productReference = E19445342E9E54EE000187BC /* WorkoutWacthApp Watch AppUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -197,6 +351,17 @@
 						CreatedOnToolsVersion = 16.4;
 						TestTargetID = E19444E32E9E53B5000187BC;
 					};
+					E194451D2E9E54EC000187BC = {
+						CreatedOnToolsVersion = 16.4;
+					};
+					E19445292E9E54EE000187BC = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = E194451D2E9E54EC000187BC;
+					};
+					E19445332E9E54EE000187BC = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = E194451D2E9E54EC000187BC;
+					};
 				};
 			};
 			buildConfigurationList = E19444DF2E9E53B5000187BC /* Build configuration list for PBXProject "WorkoutApp" */;
@@ -216,6 +381,9 @@
 				E19444E32E9E53B5000187BC /* WorkoutApp */,
 				E19444F42E9E53B7000187BC /* WorkoutAppTests */,
 				E19444FE2E9E53B7000187BC /* WorkoutAppUITests */,
+				E194451D2E9E54EC000187BC /* WorkoutWacthApp Watch App */,
+				E19445292E9E54EE000187BC /* WorkoutWacthApp Watch AppTests */,
+				E19445332E9E54EE000187BC /* WorkoutWacthApp Watch AppUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -236,6 +404,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		E19444FD2E9E53B7000187BC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E194451C2E9E54EC000187BC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E19445282E9E54EE000187BC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E19445322E9E54EE000187BC /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -266,6 +455,27 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E194451A2E9E54EC000187BC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E19445262E9E54EE000187BC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E19445302E9E54EE000187BC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -278,6 +488,21 @@
 			isa = PBXTargetDependency;
 			target = E19444E32E9E53B5000187BC /* WorkoutApp */;
 			targetProxy = E19445002E9E53B7000187BC /* PBXContainerItemProxy */;
+		};
+		E194452C2E9E54EE000187BC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E194451D2E9E54EC000187BC /* WorkoutWacthApp Watch App */;
+			targetProxy = E194452B2E9E54EE000187BC /* PBXContainerItemProxy */;
+		};
+		E19445362E9E54EE000187BC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E194451D2E9E54EC000187BC /* WorkoutWacthApp Watch App */;
+			targetProxy = E19445352E9E54EE000187BC /* PBXContainerItemProxy */;
+		};
+		E194453D2E9E54EE000187BC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E194451D2E9E54EC000187BC /* WorkoutWacthApp Watch App */;
+			targetProxy = E194453C2E9E54EE000187BC /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -535,6 +760,142 @@
 			};
 			name = Release;
 		};
+		E19445402E9E54EE000187BC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = AM6F45J357;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = WorkoutWacthApp;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = dawnhazed.WorkoutApp;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dawnhazed.WorkoutApp.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.5;
+			};
+			name = Debug;
+		};
+		E19445412E9E54EE000187BC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = AM6F45J357;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = WorkoutWacthApp;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = dawnhazed.WorkoutApp;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dawnhazed.WorkoutApp.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.5;
+			};
+			name = Release;
+		};
+		E19445442E9E54EE000187BC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = AM6F45J357;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "dawnhazed.WorkoutWacthApp-Watch-AppTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/WorkoutWacthApp Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/WorkoutWacthApp Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 11.5;
+			};
+			name = Debug;
+		};
+		E19445452E9E54EE000187BC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = AM6F45J357;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "dawnhazed.WorkoutWacthApp-Watch-AppTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/WorkoutWacthApp Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/WorkoutWacthApp Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 11.5;
+			};
+			name = Release;
+		};
+		E19445472E9E54EE000187BC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = AM6F45J357;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "dawnhazed.WorkoutWacthApp-Watch-AppUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = "WorkoutWacthApp Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 11.5;
+			};
+			name = Debug;
+		};
+		E19445482E9E54EE000187BC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = AM6F45J357;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "dawnhazed.WorkoutWacthApp-Watch-AppUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = "WorkoutWacthApp Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 11.5;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -570,6 +931,33 @@
 			buildConfigurations = (
 				E19445112E9E53B7000187BC /* Debug */,
 				E19445122E9E53B7000187BC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E194453F2E9E54EE000187BC /* Build configuration list for PBXNativeTarget "WorkoutWacthApp Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E19445402E9E54EE000187BC /* Debug */,
+				E19445412E9E54EE000187BC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E19445432E9E54EE000187BC /* Build configuration list for PBXNativeTarget "WorkoutWacthApp Watch AppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E19445442E9E54EE000187BC /* Debug */,
+				E19445452E9E54EE000187BC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E19445462E9E54EE000187BC /* Build configuration list for PBXNativeTarget "WorkoutWacthApp Watch AppUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E19445472E9E54EE000187BC /* Debug */,
+				E19445482E9E54EE000187BC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
