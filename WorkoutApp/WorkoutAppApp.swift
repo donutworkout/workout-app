@@ -22,6 +22,8 @@ struct WorkoutAppApp: App {
             fatalError("Could not create ModelContainer: \(error)")
         }
     }()
+    
+    var iPhoneConnect = iPhoneConnectivityManager.shared
 
     var body: some Scene {
         WindowGroup {
