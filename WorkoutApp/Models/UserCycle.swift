@@ -8,20 +8,28 @@
 import Foundation
 import SwiftData
 
+enum CycleBehavior: String, Codable, CaseIterable {
+  case buildMuscle = "Build Muscle"
+  case loseWeight = "Lose Weight"
+  case keepFit = "Keep Fit"
+}
+
 @Model
 class UserCycle: Identifiable {
   
   var id: UUID = UUID()
   var start_date: Date = Date()
   var end_date: Date = Date()
-  var cycle_length: Int
+  var cycleLength: Int
+  var behavior: CycleBehavior
   
-  @Relationship(deleteRule: .nullify, inverse: \UserProfile.id)
+  @Relationship(deleteRule: .nullify)
   var user: UserProfile?
   
-  init(start_date: Date, end_date: Date, cycle_length: Int) {
+  init(start_date: Date, end_date: Date, cycleLength: Int, behavior: CycleBehavior) {
     self.start_date = start_date
     self.end_date = end_date
-    self.cycle_length = cycle_length
+    self.cycleLength = cycleLength
+    self.behavior = behavior
   }
 }

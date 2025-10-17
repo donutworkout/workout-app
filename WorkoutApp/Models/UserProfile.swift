@@ -12,7 +12,6 @@ import SwiftData
 class UserProfile: Identifiable {
   var id: UUID = UUID()
   var name: String
-  var email: String
   var age: Int
   var weight: Double
   var height: Double
@@ -23,9 +22,8 @@ class UserProfile: Identifiable {
   @Relationship(deleteRule: .cascade, inverse: \UserCycle.user)
   var userCycle: [UserCycle] = []
   
-  init(name: String, email: String, age: Int, weight: Double, height: Double) {
+  init(name: String, age: Int, weight: Double, height: Double) {
     self.name = name
-    self.email = email
     self.age = age
     self.weight = weight
     self.height = height
