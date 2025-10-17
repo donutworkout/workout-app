@@ -61,17 +61,13 @@ struct OnboardingView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 24))
                 .padding(.horizontal)
                 .padding(.bottom, 40)
-                
-                // Hidden NavigationLink triggered by state
-                NavigationLink(destination: SurveyView()
-                    .navigationBarBackButtonHidden(true),
-                               isActive: $navigateToSurvey) {
-                    EmptyView()
-                }
-                .hidden()
             }
             .padding()
             .background(Color(.systemBackground))
+            .navigationDestination(isPresented: $navigateToSurvey) {
+                SurveyView()
+                    .navigationBarBackButtonHidden(true)
+            }
         }
     }
 }

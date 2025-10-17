@@ -15,24 +15,50 @@ struct SelectableButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
+                .font(.headline)
                 .foregroundColor(isSelected ? .white : .black)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 20)
+                .padding(.vertical, 18)
                 .background(
                     RoundedRectangle(cornerRadius: 100)
-                        .fill(isSelected ? Color("pinkTextSecondary") : Color.secondary.opacity(0.3))
+                        .fill(isSelected ? Color("pinkTextSecondary") : Color.secondary.opacity(0.15))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 100)
+                        .stroke(isSelected ? Color("pinkTextSecondary") : Color.clear, lineWidth: 1)
                 )
                 .animation(.easeInOut(duration: 0.2), value: isSelected)
         }
+        .glassEffect(.regular.interactive())
         .buttonStyle(.plain)
     }
 }
 
-#Preview {
-    VStack(spacing: 10) {
-        SelectableButton(title: "Build Muscle", isSelected: true) {}
-        SelectableButton(title: "Lose Weight", isSelected: false) {}
-        SelectableButton(title: "Keep Fit", isSelected: false) {}
+struct MultiSelectableButtonView: View {
+    @State private var selectedGoals: [String] = []
+    
+    let goals = ["Build Muscle", "Lose Weight", "Keep Fit", "Gain Strength", "Improve Flexibility"]
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            ForEach(goals, id: \.self) { goal in
+                SelectableButton(
+                    title: goal,
+                    isSelected: selectedGoals.contains(goal)
+                ) {
+                    // Toggle selection logic
+                    if selectedGoals.contains(goal) {
+                        selectedGoals.removeAll { $0 == goal }
+                    } else {
+                        selectedGoals.append(goal)
+                    }
+                }
+            }
+        }
+        .padding()
     }
-    .padding()
+}
+
+#Preview {
+    MultiSelectableButtonView()
 }
