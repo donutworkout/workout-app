@@ -12,9 +12,16 @@ import SwiftData
 struct WorkoutAppApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            UserProfile.self,
+            UserWorkout.self,
+            UserCycle.self
         ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        
+        let modelConfiguration = ModelConfiguration(
+            schema: schema,
+            isStoredInMemoryOnly: false,
+            cloudKitDatabase: .automatic  // enables CloudKit sync
+        )
 
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])

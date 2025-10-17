@@ -79,6 +79,13 @@
 			);
 			target = E19444E32E9E53B5000187BC /* WorkoutApp */;
 		};
+		E19445582EA206CD000187BC /* Exceptions for "WorkoutWacthApp Watch App" folder in "WorkoutWacthApp Watch App" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"WorkoutWacthApp-Watch-App-Info.plist",
+			);
+			target = E194451D2E9E54EC000187BC /* WorkoutWacthApp Watch App */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -102,6 +109,9 @@
 		};
 		E194451F2E9E54EC000187BC /* WorkoutWacthApp Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				E19445582EA206CD000187BC /* Exceptions for "WorkoutWacthApp Watch App" folder in "WorkoutWacthApp Watch App" target */,
+			);
 			path = "WorkoutWacthApp Watch App";
 			sourceTree = "<group>";
 		};
@@ -770,6 +780,7 @@
 				DEVELOPMENT_TEAM = AM6F45J357;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "WorkoutWacthApp-Watch-App-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = WorkoutWacthApp;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = dawnhazed.WorkoutApp;
@@ -799,6 +810,7 @@
 				DEVELOPMENT_TEAM = AM6F45J357;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "WorkoutWacthApp-Watch-App-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = WorkoutWacthApp;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = dawnhazed.WorkoutApp;
