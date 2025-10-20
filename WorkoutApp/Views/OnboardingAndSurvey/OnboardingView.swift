@@ -10,6 +10,7 @@ import AuthenticationServices
 
 struct OnboardingView: View {
     @State private var navigateToSurvey = false
+    @EnvironmentObject var router: Router
     
     var body: some View {
         NavigationStack {
@@ -50,7 +51,7 @@ struct OnboardingView: View {
                             print("✅ Apple Sign-In success: user=\(userID), token=\(identityToken ?? "nil"), code=\(authorizationCode ?? "nil")")
                         }
                         withAnimation(.easeInOut) {
-                            navigateToSurvey = true
+                            router.navigateTo(.survey)
                         }
                         
                     case .failure(let error):
@@ -61,13 +62,11 @@ struct OnboardingView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 24))
                 .padding(.horizontal)
                 .padding(.bottom, 40)
+                
             }
             .padding()
             .background(Color(.systemBackground))
-            .navigationDestination(isPresented: $navigateToSurvey) {
-                SurveyView()
-                    .navigationBarBackButtonHidden(true)
-            }
+            .navigationBarBackButtonHidden(true)
         }
     }
 }

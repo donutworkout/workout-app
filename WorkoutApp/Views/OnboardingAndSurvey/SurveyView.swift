@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct SurveyView: View {
-    @State private var currentPage = 0
+    @EnvironmentObject var router: Router
+       @State private var currentPage = 0
     
     var body: some View {
         VStack {
@@ -27,7 +28,7 @@ struct SurveyView: View {
                 SurveyPreferencedWorkoutView(onNext: { currentPage += 1 })
             case 6:
                 SurveyCycleView(onFinish: {
-                    print("Survey selesai 🎉")
+                    router.navigateTo(.home)
                 })
             default:
                 Text("Selesai ✅")
