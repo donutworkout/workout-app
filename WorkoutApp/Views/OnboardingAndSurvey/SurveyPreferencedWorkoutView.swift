@@ -66,7 +66,10 @@ struct SurveyPreferencedWorkoutView: View {
                 .padding(.horizontal)
                 .padding(.vertical)
                 .disabled(selectedPreferedWorkout == nil) // disable kalau belum pilih
-                .opacity(selectedPreferedWorkout == nil ? 0.5 : 1) // efek visual disabled
+                .opacity(selectedPreferedWorkout == nil ? 0.5 : 1)
+            
+            PageControl(totalPages: 7, currentPage: 5)
+
         }
     }
 }

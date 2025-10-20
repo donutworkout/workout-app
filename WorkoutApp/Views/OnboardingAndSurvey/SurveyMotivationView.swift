@@ -65,8 +65,11 @@ struct SurveyMotivationView: View {
             PrimaryGlassButton(title: "Next", action: onNext)
                 .padding(.horizontal)
                 .padding(.vertical)
-                .disabled(selectedMotivation == nil) // disable kalau belum pilih
-                .opacity(selectedMotivation == nil ? 0.5 : 1) // efek visual disabled
+                .disabled(selectedMotivation == nil)
+                .opacity(selectedMotivation == nil ? 0.5 : 1)
+            
+            PageControl(totalPages: 7, currentPage: 2)
+
         }
     }
 }

@@ -66,7 +66,10 @@ struct SurveyAreaFocusView: View {
                 .padding(.horizontal)
                 .padding(.vertical)
                 .disabled(selectedFocus.isEmpty) // tidak bisa lanjut kalau belum pilih
-                .opacity(selectedFocus.isEmpty ? 0.5 : 1.0) // efek visual tombol disabled
+                .opacity(selectedFocus.isEmpty ? 0.5 : 1.0)
+            
+            PageControl(totalPages: 7, currentPage: 3)
+
         }
     }
 }

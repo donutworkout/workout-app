@@ -66,7 +66,10 @@ struct SurveyFitnessLevelView: View {
                 .padding(.horizontal)
                 .padding(.vertical)
                 .disabled(selectedLevel == nil) // disable kalau belum pilih
-                .opacity(selectedLevel == nil ? 0.5 : 1) // efek visual disabled
+                .opacity(selectedLevel == nil ? 0.5 : 1)
+            
+            PageControl(totalPages: 7, currentPage: 4)
+
         }
     }
 }

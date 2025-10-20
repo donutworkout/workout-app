@@ -19,6 +19,11 @@ struct SurveyBodyInfoView: View {
     
     var onNext: () -> Void
     
+    // MARK: - Validation
+    var isFormValid: Bool {
+        selectedHeight != 0 && selectedWeight != 0
+    }
+    
     var body: some View {
         VStack(spacing: 32) {
             
@@ -47,7 +52,7 @@ struct SurveyBodyInfoView: View {
             .padding(.horizontal)
             
             // MARK: - Height Field
-            HStack() {
+            HStack {
                 Text("Height")
                     .font(.title3)
                     .fontWeight(.bold)
@@ -56,21 +61,19 @@ struct SurveyBodyInfoView: View {
                 Button {
                     showHeightPicker = true
                 } label: {
-                    
-                    Text("\(selectedHeight) cm")
+                    Text(selectedHeight == 0 ? "Select" : "\(selectedHeight) cm")
                         .fontWeight(.semibold)
                         .foregroundColor(.black)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
                         .background(Color.gray.opacity(0.1))
                         .clipShape(Capsule())
-                    
                 }
             }
             .padding(.horizontal)
             
             // MARK: - Weight Field
-            HStack() {
+            HStack {
                 Text("Weight")
                     .font(.title3)
                     .fontWeight(.bold)
@@ -79,58 +82,27 @@ struct SurveyBodyInfoView: View {
                 Button {
                     showWeightPicker = true
                 } label: {
-                    
-                    Text("\(selectedWeight) kg")
+                    Text(selectedWeight == 0 ? "Select" : "\(selectedWeight) kg")
                         .fontWeight(.semibold)
                         .foregroundColor(.black)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
                         .background(Color.gray.opacity(0.1))
                         .clipShape(Capsule())
-                    
                 }
             }
             .padding(.horizontal)
             
             Spacer()
             
-            // MARK: - Next Button
-            Button(action: {
-                if selectedHeight != 0 && selectedWeight != 0 {
-                    onNext()
-                }
-            }) {
-                Text("Next")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 25)
-                            .fill(selectedHeight != 0 && selectedWeight != 0 ?
-                                  Color("pinkTextSecondary") :
-                                    Color.gray.opacity(0.4))
-                    )
-                    .animation(.easeInOut(duration: 0.2), value: selectedHeight)
-                    .animation(.easeInOut(duration: 0.2), value: selectedWeight)
-            }
-            .padding(.horizontal)
-            .padding(.bottom)
-            .disabled(selectedHeight == 0 || selectedWeight == 0)
+            // MARK: - Next Button (Reusable)
+            PrimaryGlassButton(title: "Next", action: onNext)
+                .padding(.horizontal)
+                .padding(.bottom)
+                .disabled(!isFormValid)
+                .opacity(isFormValid ? 1 : 0.5)
             
-            
-            //            // MARK: - Page Indicator
-            //            HStack(spacing: 6) {
-            //                ForEach(0..<6) { index in
-            //                    Circle()
-            //                        .fill(index == 1 ? .black : .gray.opacity(0.3))
-            //                        .frame(width: 8, height: 8)
-            //                }
-            //            }
-            //            .padding(.bottom, 20)
-            
-            
-            
+            PageControl(totalPages: 7, currentPage: 1)
         }
         .background(Color.white.ignoresSafeArea())
         .sheet(isPresented: $showHeightPicker) {

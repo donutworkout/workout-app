@@ -59,7 +59,6 @@ struct SurveyCycleView: View {
                     
                     // MARK: - Question Sections
                     Group {
-                        // Single select
                         SurveySection(
                             title: "Is your menstrual cycle regular?",
                             subtitle: "The variation of cycle length is less than 7 days",
@@ -68,7 +67,6 @@ struct SurveyCycleView: View {
                             allowsMultipleSelection: false
                         )
                         
-                        // Multi select
                         SurveySection(
                             title: "What you feel when menstrual?",
                             subtitle: "Physical symptoms before or during",
@@ -77,7 +75,6 @@ struct SurveyCycleView: View {
                             allowsMultipleSelection: true
                         )
                         
-                        // Single select
                         SurveySection(
                             title: "How do your energy levels?",
                             subtitle: "Energy pattern during cycle",
@@ -86,7 +83,6 @@ struct SurveyCycleView: View {
                             allowsMultipleSelection: false
                         )
                         
-                        // Single select
                         SurveySection(
                             title: "Do mood changes affect workouts?",
                             subtitle: "It affects your motivation to exercise",
@@ -97,29 +93,19 @@ struct SurveyCycleView: View {
                     }
                     .padding(.horizontal)
                 }
-                .padding(.bottom, 100) // extra space for button
+                .padding(.bottom, 100)
             }
             
             // MARK: - Finish Button
-            Button(action: {
-                if isAllAnswered {
-                    onFinish()
-                }
-            }) {
-                Text("Finish")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 25)
-                            .fill(isAllAnswered ? Color("pinkTextSecondary") : Color.gray.opacity(0.4))
-                    )
-                    .animation(.easeInOut(duration: 0.2), value: isAllAnswered)
-            }
-            .padding(.horizontal)
-            .padding(.vertical)
-            .disabled(!isAllAnswered)
+            PrimaryGlassButton(title: "Finish", action: onFinish)
+                .padding(.horizontal)
+                .padding(.vertical)
+                .disabled(!isAllAnswered)
+                .opacity(isAllAnswered ? 1 : 0.5)
+            
+            // MARK: - Page Control
+            PageControl(totalPages: 7, currentPage: 6)
+                .padding(.bottom, 8)
         }
         .background(Color.white.ignoresSafeArea())
     }

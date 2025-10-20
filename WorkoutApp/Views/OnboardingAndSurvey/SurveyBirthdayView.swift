@@ -99,7 +99,10 @@ struct SurveyBirthdayView: View {
                 .padding(.horizontal)
                 .padding(.vertical)
                 .disabled(!isNameFilled)
-                .opacity(isNameFilled ? 1 : 0.5) // efek visual agar terlihat disabled
+                .opacity(isNameFilled ? 1 : 0.5)
+            
+            PageControl(totalPages: 7, currentPage: 0)
+
         }
         .background(Color.white.ignoresSafeArea())
     }
