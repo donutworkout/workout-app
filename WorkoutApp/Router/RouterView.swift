@@ -22,14 +22,14 @@ struct RouterView: View {
     @ViewBuilder
     private var rootView: some View {
         switch router.currentRoute {
-        case .login:
-            // TODO: Login View disini
+        case .onboarding:
+            OnboardingView()
         case .survey:
-            // TODO: 1st Survey View disini
+            SurveyView()
         case .home, .summary, .profile:
             TabBarView()
         default:
-            TabBarView()
+            OnboardingView()
         }
     }
     
@@ -38,11 +38,16 @@ struct RouterView: View {
     @ViewBuilder
     private func destinationView(for route: Route) -> some View {
         switch route {
-        case .login:
+        case .onboarding:
+            OnboardingView()
         case .survey:
+            SurveyView()
         case .home:
+            TabBarView()
         case .summary:
+            TabBarView()
         case .profile:
+            TabBarView()
         //TODO: nanti bisa ditambahin sendiri buat detail"nya, jangan lupa tambahin di file Router casenya
         }
     }

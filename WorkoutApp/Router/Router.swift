@@ -9,7 +9,7 @@ import SwiftUI
 
 enum Route: Hashable {
    //tambahin kalo mau buat page route baru
-    case login
+    case onboarding
     case survey
     case home
     case summary
