@@ -59,7 +59,7 @@ struct SurveyBirthdayView: View {
                     .background(
                         RoundedRectangle(cornerRadius: 12)
                             .fill(Color.white)
-                            .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                            .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
                     )
             }
             .padding(.horizontal)
