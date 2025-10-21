@@ -8,18 +8,19 @@
 import Foundation
 import HealthKit
 
-final class WorkoutSessionManager: NSObject, ObservableObject {
+@Observable
+class WorkoutSessionManager: NSObject {
 
 
     private let healthStore = HKHealthStore()
     private var workoutSession: HKWorkoutSession?
     private var workoutBuilder: HKLiveWorkoutBuilder?
 
-    @Published var heartRate: Double = 0.0
-    @Published var energyBurned: Double = 0.0
-    @Published var distance: Double = 0.0
-    @Published var isRunning: Bool = false
-    @Published var timeActive: Double = 0.0
+    var heartRate: Double = 0.0
+    var energyBurned: Double = 0.0
+    var distance: Double = 0.0
+    var isRunning: Bool = false
+    var timeActive: Double = 0.0
     
     // MARK: - Start Workout
 
@@ -149,8 +150,8 @@ extension WorkoutSessionManager: HKLiveWorkoutBuilderDelegate {
             DispatchQueue.main.async {
                 switch quantityType {
                 case HKQuantityType.quantityType(forIdentifier: .heartRate):
-                    let unit = HKUnit(from: "count/min")
-                    self.heartRate = statistics?.mostRecentQuantity()?.doubleValue(for: unit) ?? 0
+                    let heartRateUnit = HKUnit.count().unitDivided(by: HKUnit.minute())
+                    self.heartRate = statistics?.mostRecentQuantity()?.doubleValue(for: heartRateUnit) ?? 0
 
                 case HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned):
                     self.energyBurned = statistics?.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
@@ -171,6 +172,7 @@ func typesToRead(for activity: HKWorkoutActivityType) -> Set<HKObjectType> {
         HKQuantityType.quantityType(forIdentifier: .heartRate)!,
         HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)!,
         HKQuantityType.quantityType(forIdentifier: .appleExerciseTime)!,
+        HKQuantityType.quantityType(forIdentifier: .basalEnergyBurned)!
     ]
 
     switch activity {

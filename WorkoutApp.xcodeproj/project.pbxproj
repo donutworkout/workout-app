@@ -79,6 +79,7 @@
 		786D1E552EA0B9F7006D891B /* Exceptions for "WorkoutApp" folder in "WorkoutWacthApp Watch App" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Services/HealthKitManager.swift,
 				Services/WatchConnectivityManager.swift,
 				Services/WorkoutSessionManager.swift,
 			);
@@ -804,6 +805,7 @@
 				DEVELOPMENT_TEAM = YR734YSZQS;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "WorkoutWacthApp-Watch-App-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = WorkoutWacthApp;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "We need your permission for this app to read Health data";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "We need your permission for this app to write Health data";
@@ -836,6 +838,7 @@
 				DEVELOPMENT_TEAM = YR734YSZQS;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "WorkoutWacthApp-Watch-App-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = WorkoutWacthApp;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "We need your permission for this app to read Health data";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "We need your permission for this app to write Health data";

@@ -10,7 +10,9 @@ import HealthKit
 
 struct WatchWorkoutListView: View {
     
-    @StateObject var workoutManager = WorkoutSessionManager()
+    @State private var workoutManager = WorkoutSessionManager()
+    
+    //@EnvironmentObject var workoutManager: WorkoutSessionManager
     
     let workouts: [(String, HKWorkoutActivityType)] = [
         ("Running", .running),

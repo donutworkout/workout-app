@@ -10,6 +10,10 @@ import SwiftData
 
 @main
 struct WorkoutAppApp: App {
+    
+    init() {
+        HealthKitManager.shared.requestAuthorization()
+    }
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
