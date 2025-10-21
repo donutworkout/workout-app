@@ -10,6 +10,10 @@ import SwiftData
 
 @main
 struct WorkoutAppApp: App {
+    
+    init() {
+        HealthKitManager.shared.requestAuthorization()
+    }
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
@@ -22,6 +26,8 @@ struct WorkoutAppApp: App {
             fatalError("Could not create ModelContainer: \(error)")
         }
     }()
+    
+    var iPhoneConnect = iPhoneConnectivityManager.shared
 
     var body: some Scene {
         WindowGroup {

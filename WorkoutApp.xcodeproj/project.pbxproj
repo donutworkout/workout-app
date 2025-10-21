@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		786D1E512EA0B6A1006D891B /* WatchConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 786D1E502EA0B6A1006D891B /* WatchConnectivity.framework */; };
+		786D1E532EA0B6C1006D891B /* WatchConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 786D1E522EA0B6C1006D891B /* WatchConnectivity.framework */; };
 		E194453E2E9E54EE000187BC /* WorkoutWacthApp Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = E194451E2E9E54EC000187BC /* WorkoutWacthApp Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -63,6 +65,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		786D1E502EA0B6A1006D891B /* WatchConnectivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WatchConnectivity.framework; path = System/Library/Frameworks/WatchConnectivity.framework; sourceTree = SDKROOT; };
+		786D1E522EA0B6C1006D891B /* WatchConnectivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WatchConnectivity.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS26.0.sdk/System/Library/Frameworks/WatchConnectivity.framework; sourceTree = DEVELOPER_DIR; };
 		E19444E42E9E53B5000187BC /* WorkoutApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WorkoutApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E19444F52E9E53B7000187BC /* WorkoutAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WorkoutAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E19444FF2E9E53B7000187BC /* WorkoutAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WorkoutAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -72,6 +76,15 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		786D1E552EA0B9F7006D891B /* Exceptions for "WorkoutApp" folder in "WorkoutWacthApp Watch App" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Services/HealthKitManager.swift,
+				Services/WatchConnectivityManager.swift,
+				Services/WorkoutSessionManager.swift,
+			);
+			target = E194451D2E9E54EC000187BC /* WorkoutWacthApp Watch App */;
+		};
 		E19445072E9E53B7000187BC /* Exceptions for "WorkoutApp" folder in "WorkoutApp" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -86,6 +99,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				E19445072E9E53B7000187BC /* Exceptions for "WorkoutApp" folder in "WorkoutApp" target */,
+				786D1E552EA0B9F7006D891B /* Exceptions for "WorkoutApp" folder in "WorkoutWacthApp Watch App" target */,
 			);
 			path = WorkoutApp;
 			sourceTree = "<group>";
@@ -122,6 +136,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				786D1E512EA0B6A1006D891B /* WatchConnectivity.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -143,6 +158,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				786D1E532EA0B6C1006D891B /* WatchConnectivity.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -163,6 +179,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		786D1E4F2EA0B6A1006D891B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				786D1E522EA0B6C1006D891B /* WatchConnectivity.framework */,
+				786D1E502EA0B6A1006D891B /* WatchConnectivity.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		E19444DB2E9E53B5000187BC = {
 			isa = PBXGroup;
 			children = (
@@ -172,6 +197,7 @@
 				E194451F2E9E54EC000187BC /* WorkoutWacthApp Watch App */,
 				E194452D2E9E54EE000187BC /* WorkoutWacthApp Watch AppTests */,
 				E19445372E9E54EE000187BC /* WorkoutWacthApp Watch AppUITests */,
+				786D1E4F2EA0B6A1006D891B /* Frameworks */,
 				E19444E52E9E53B5000187BC /* Products */,
 			);
 			sourceTree = "<group>";
@@ -519,6 +545,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WorkoutApp/Info.plist;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "We need your permission for this app to read Health data";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "We need your permission for this app to write Health data";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -550,6 +578,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WorkoutApp/Info.plist;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "We need your permission for this app to read Health data";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "We need your permission for this app to write Health data";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -696,7 +726,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = AM6F45J357;
+				DEVELOPMENT_TEAM = YR734YSZQS;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
@@ -715,7 +745,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = AM6F45J357;
+				DEVELOPMENT_TEAM = YR734YSZQS;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
@@ -733,7 +763,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = AM6F45J357;
+				DEVELOPMENT_TEAM = YR734YSZQS;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
@@ -751,7 +781,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = AM6F45J357;
+				DEVELOPMENT_TEAM = YR734YSZQS;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
@@ -769,12 +799,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "WorkoutWacthApp Watch App/WorkoutWacthApp Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = YR734YSZQS;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "WorkoutWacthApp-Watch-App-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = WorkoutWacthApp;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "We need your permission for this app to read Health data";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "We need your permission for this app to write Health data";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = dawnhazed.WorkoutApp2;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -798,12 +832,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "WorkoutWacthApp Watch App/WorkoutWacthApp Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 7T6Q8ZMPNV;
+				DEVELOPMENT_TEAM = YR734YSZQS;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "WorkoutWacthApp-Watch-App-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = WorkoutWacthApp;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "We need your permission for this app to read Health data";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "We need your permission for this app to write Health data";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = dawnhazed.WorkoutApp2;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -828,7 +866,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = AM6F45J357;
+				DEVELOPMENT_TEAM = YR734YSZQS;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "dawnhazed.WorkoutWacthApp-Watch-AppTests";
@@ -848,7 +886,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = AM6F45J357;
+				DEVELOPMENT_TEAM = YR734YSZQS;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "dawnhazed.WorkoutWacthApp-Watch-AppTests";
@@ -867,7 +905,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = AM6F45J357;
+				DEVELOPMENT_TEAM = YR734YSZQS;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "dawnhazed.WorkoutWacthApp-Watch-AppUITests";
@@ -886,7 +924,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = AM6F45J357;
+				DEVELOPMENT_TEAM = YR734YSZQS;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "dawnhazed.WorkoutWacthApp-Watch-AppUITests";

@@ -10,14 +10,14 @@ import SwiftUI
 struct ContentView: View {
     var body: some View {
         VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+            Text("Watch App")
+            Button("Send Ping") {
+                WatchConnectivityManager.shared.sendMessage(["event": "ping"])
+            }
         }
-        .padding()
     }
 }
+
 
 #Preview {
     ContentView()
