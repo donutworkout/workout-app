@@ -14,7 +14,7 @@ struct ProfileView: View {
             // MARK: - Header
             Text("Profile")
                 .font(.system(size: 32, weight: .bold))
-                .padding(.top, 16)
+                .padding(.top, 30)
                 .padding(.horizontal)
             
             // MARK: - Profile Info

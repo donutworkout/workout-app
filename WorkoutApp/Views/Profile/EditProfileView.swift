@@ -14,13 +14,25 @@ struct EditProfileView: View {
     @State private var weight: String = "55 kg"
     @State private var goal: String = "Lose weight"
     @State private var workout: String = "Bodyweight"
+    @State private var isEditing: Bool = false
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         VStack(spacing: 20) {
-            // MARK: - Title
-            Text("Edit Profile")
-                .font(.system(size: 22, weight: .semibold))
-                .padding(.top, 20)
+            
+            // MARK: - Header (pakai HeaderButton)
+            HeaderButton(
+                title: "Edit Profile",
+                isEditing: isEditing,
+                onClose: { dismiss() },
+                onEditToggle: {
+                    withAnimation {
+                        isEditing.toggle()
+                    }
+                }
+            )
+            .padding(.horizontal)
+            .padding(.top, 8)
             
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
@@ -41,7 +53,7 @@ struct EditProfileView: View {
                                 .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
                                 .overlay(
                                     Image(systemName: "camera.fill")
-                                        .foregroundColor(Color.white)
+                                        .foregroundColor(.white)
                                         .font(.system(size: 16, weight: .semibold))
                                 )
                         }
@@ -49,12 +61,12 @@ struct EditProfileView: View {
                         
                         // Fields
                         VStack(spacing: 16) {
-                            ProfileTextField(title: "Name", text: $name)
-                            ProfileTextField(title: "Year of Birth", text: $yearOfBirth)
-                            ProfileTextField(title: "Height", text: $height)
-                            ProfileTextField(title: "Weight", text: $weight)
-                            ProfileTextField(title: "Goal", text: $goal)
-                            ProfileTextField(title: "Preferenced Workout", text: $workout)
+                            ProfileTextField(title: "Name", text: $name, isEditing: isEditing)
+                            ProfileTextField(title: "Year of Birth", text: $yearOfBirth, isEditing: isEditing)
+                            ProfileTextField(title: "Height", text: $height, isEditing: isEditing)
+                            ProfileTextField(title: "Weight", text: $weight, isEditing: isEditing)
+                            ProfileTextField(title: "Goal", text: $goal, isEditing: isEditing)
+                            ProfileTextField(title: "Preferenced Workout", text: $workout, isEditing: isEditing)
                         }
                     }
                     .padding()
@@ -84,18 +96,20 @@ struct EditProfileView: View {
 struct ProfileTextField: View {
     var title: String
     @Binding var text: String
+    var isEditing: Bool
     
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title)
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundColor(.black)
+            
             TextField("", text: $text)
-                .disabled(true)
+                .disabled(!isEditing)
                 .foregroundColor(.grayTextPrimary)
                 .padding(.vertical, 12)
                 .padding(.horizontal)
-                .background(.grayTextInput)
+                .background(Color.gray.opacity(0.1))
                 .cornerRadius(50)
         }
     }
