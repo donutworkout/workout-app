@@ -42,7 +42,7 @@ struct SummaryView: View {
                             }
                             .frame(width: 40, height: 40)
                         }
-                        
+
                         
                         // Day label
                         Text(weekDays[index])

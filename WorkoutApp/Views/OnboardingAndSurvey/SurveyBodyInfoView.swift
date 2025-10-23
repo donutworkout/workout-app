@@ -66,7 +66,7 @@ struct SurveyBodyInfoView: View {
                         .foregroundColor(.black)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
-                        .background(Color.gray.opacity(0.1))
+                        .background(.grayTextInput)
                         .clipShape(Capsule())
                 }
             }
@@ -87,7 +87,7 @@ struct SurveyBodyInfoView: View {
                         .foregroundColor(.black)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
-                        .background(Color.gray.opacity(0.1))
+                        .background(.grayTextInput)
                         .clipShape(Capsule())
                 }
             }
