@@ -32,13 +32,13 @@ enum CycleMoodAffectsMotivation: String, Codable, CaseIterable {
 class UserCycle: Identifiable {
   
   var id: UUID = UUID()
-  var isCycleRegular: Bool
-  var cycleStartDate: Date
-  var cycleEndDate: Date
-  var cycleLength: Int
-  var cycleSymptoms: CycleSymptoms
-  var cycleEnergy: CycleEnergy
-  var cycleMoodAffectsMotivation: CycleMoodAffectsMotivation
+  var isCycleRegular: Bool = false
+  var cycleStartDate: Date = Date()
+  var cycleEndDate: Date = Date()
+  var cycleLength: Int = 0
+    var cycleSymptoms: CycleSymptoms = CycleSymptoms.none
+    var cycleEnergy: CycleEnergy = CycleEnergy.stable
+    var cycleMoodAffectsMotivation: CycleMoodAffectsMotivation = CycleMoodAffectsMotivation.never
   
   @Relationship(deleteRule: .nullify)
   var user: UserProfile?

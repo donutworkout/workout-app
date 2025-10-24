@@ -44,7 +44,7 @@ struct WorkoutAppApp: App {
     
     var body: some Scene {
         WindowGroup {
-            SurveyView()
+            RouterView()
         }
         .modelContainer(modelContainer)
     }

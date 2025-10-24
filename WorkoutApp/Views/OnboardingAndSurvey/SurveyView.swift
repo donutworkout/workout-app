@@ -43,7 +43,7 @@ struct SurveyView: View {
             }
             
             // MARK: - Top Navigation Buttons
-            HStack {
+            /*HStack {
                 if currentPage > 0 {
                     Button(action: {
                         withAnimation {
@@ -77,14 +77,33 @@ struct SurveyView: View {
                 }
                 
                 Spacer()
+                
             }
             .padding(.top, 20) // jarak dari atas biar nggak mepet
-            .padding(.leading, 20) // jarak dari kiri biar rapi
+            .padding(.leading, 20) // jarak dari kiri biar rapi*/
         }
         .background(Color.white.ignoresSafeArea())
+        .navigationTitle("Survey")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                if currentPage > 0 {
+                    Button("Back", systemImage: "chevron.left") {
+                        withAnimation {
+                            currentPage -= 1
+                        }
+                    }
+                } else {
+                    Button("Close", systemImage: "xmark") {
+                        router.navigateTo(.onboarding)
+                    }
+                }
+            }
+        }
     }
 }
 
 #Preview {
     SurveyView()
+        
 }

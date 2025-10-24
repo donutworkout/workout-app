@@ -20,7 +20,7 @@ enum Route: Hashable {
 
 class Router: ObservableObject {
     @Published var path = NavigationPath()
-    @Published var currentRoute: Route = .home
+    @Published var currentRoute: Route = .survey
     @Published var selectedTab: Int = 0
     @Published var routeHistory: [Route] = []
     

@@ -62,13 +62,13 @@ enum WorkoutExperience: String, Codable, CaseIterable {
 class UserWorkout: Identifiable {
   
     var id: UUID = UUID()
-    var workoutMotivation: WorkoutMotivation
-    var workoutTimesAWeek: WorkoutTimesAWeek // berapa kali olahraga dalam seminggu
-    var workoutDuration: WorkoutDuration
-    var workoutIntensity: WorkoutIntensity
-    var workoutExperience: WorkoutExperience // sudah berapa lama berolahraga
-    var workoutLevel: WorkoutLevel
-    var workoutDaysPreference: [WorkoutDayPreference]
+    var workoutMotivation: WorkoutMotivation = WorkoutMotivation.keepFit
+    var workoutTimesAWeek: WorkoutTimesAWeek = WorkoutTimesAWeek.everyday // berapa kali olahraga dalam seminggu
+    var workoutDuration: WorkoutDuration = WorkoutDuration.underThirtyMinutes
+    var workoutIntensity: WorkoutIntensity = WorkoutIntensity.light
+    var workoutExperience: WorkoutExperience = WorkoutExperience.oneToThreeMonths // sudah berapa lama berolahraga
+    var workoutLevel: WorkoutLevel = WorkoutLevel.intermediate
+    var workoutDaysPreference: [WorkoutDayPreference] = []
   
     @Relationship(deleteRule: .nullify)
     var user: UserProfile?

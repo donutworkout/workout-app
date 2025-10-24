@@ -78,10 +78,10 @@ struct SurveyBirthdayView: View {
         VStack(spacing: 32) {
             
             // MARK: - Header
-            Text("Survey")
-                .font(.headline)
-                .foregroundColor(.black)
-                .padding(.top, 20)
+//            Text("Survey")
+//                .font(.headline)
+//                .foregroundColor(.black)
+//                .padding(.top, 20)
             
             // MARK: - Title & Character
             VStack(spacing: 16) {
