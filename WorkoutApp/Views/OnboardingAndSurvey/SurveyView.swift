@@ -21,12 +21,10 @@ struct SurveyView: View {
             case 2:
                 SurveyMotivationView(onNext: { currentPage += 1 })
             case 3:
-                SurveyAreaFocusView(onNext: { currentPage += 1 })
+                SurveyWorkoutLevelView(onNext: { currentPage += 1 })
             case 4:
-                SurveyFitnessLevelView(onNext: { currentPage += 1 })
+                WorkoutDayView(onNext: { currentPage += 1 })
             case 5:
-                SurveyPreferencedWorkoutView(onNext: { currentPage += 1 })
-            case 6:
                 SurveyCycleView(onFinish: {
                     router.navigateTo(.home)
                 })

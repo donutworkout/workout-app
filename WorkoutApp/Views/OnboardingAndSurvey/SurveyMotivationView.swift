@@ -25,8 +25,9 @@ struct SurveyMotivationView: View {
             VStack(spacing: 16) {
                 HStack {
                     VStack(alignment: .leading, spacing: 8) {
+                        SurveyProgressText(currentPage: 3, totalPages: 6)
                         Text("What motivates\n you the most?")
-                            .font(.system(.title, weight: .bold))
+                            .font(.system(.title, weight: .semibold))
                             .foregroundColor(Color("pinkTextPrimary"))
                     }
                     Spacer()
@@ -68,8 +69,6 @@ struct SurveyMotivationView: View {
                 .disabled(selectedMotivation == nil)
                 .opacity(selectedMotivation == nil ? 0.5 : 1)
             
-            PageControl(totalPages: 7, currentPage: 2)
-
         }
     }
 }

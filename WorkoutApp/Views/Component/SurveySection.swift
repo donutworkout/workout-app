@@ -21,12 +21,11 @@ struct SurveySection: View {
                 Text(title)
                     .font(.title3)
                     .fontWeight(.bold)
-                    .foregroundColor(Color("pinkTextSecondary"))
+                    .foregroundColor(Color.black)
                 Text(subtitle)
                     .font(.body)
-                    .foregroundColor(Color("pinkTextSecondary"))
+                    .foregroundColor(Color.black)
             }
-            .padding(.horizontal)
             
             VStack(spacing: 12) {
                 ForEach(options, id: \.self) { option in
