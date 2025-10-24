@@ -6,11 +6,17 @@
 //
 
 import SwiftUI
+import CloudKit
+import SwiftData
 
 struct SurveyBirthdayView: View {
+    @Environment(\.modelContext) private var modelContext
+    @State private var surveyManager: SurveyManager?
+  
     @State private var selectedYear: Int = 2003
     @State private var name: String = ""
     let years = Array(1980...2025)
+  
     var onNext: () -> Void
     
     // MARK: - Validation (cek apakah nama sudah diisi)
@@ -18,6 +24,56 @@ struct SurveyBirthdayView: View {
         !name.trimmingCharacters(in: .whitespaces).isEmpty
     }
     
+    private var calculateAge: Int {
+        let currentYear = Calendar.current.component(.year, from: Date())
+        return currentYear - selectedYear
+    }
+    
+    private func saveAndNext() {
+        surveyManager?.updateTempName(name.trimmingCharacters(in: .whitespaces))
+        surveyManager?.updateTempAge(calculateAge)
+      
+        checkLocalData()
+        
+        onNext()
+    }
+    
+    private func checkLocalData() {
+      let descriptor = FetchDescriptor<UserProfile>()
+      if let profiles = try? modelContext.fetch(descriptor) {
+          print("🔍 Local profiles count: \(profiles.count)")
+          for profile in profiles {
+              print("   Name: '\(profile.name)', Age: \(profile.age)")
+          }
+      } else {
+          print("❌ Could not fetch profiles")
+      }
+    }
+    
+//    
+//    func checkCloudKitStatus() {
+//      CKContainer.default().accountStatus { status, error in
+//          switch status {
+//          case .available:
+//              print("✅ iCloud available")
+//          case .noAccount:
+//              print("❌ No iCloud account")
+//          case .restricted:
+//              print("❌ iCloud restricted")
+//          case .couldNotDetermine:
+//              print("⚠️ Could not determine iCloud status")
+//          case .temporarilyUnavailable:
+//              print("⚠️ iCloud temporarily unavailable")
+//          @unknown default:
+//              print("⚠️ Unknown iCloud status")
+//          }
+//          
+//          if let error = error {
+//              print("❌ CloudKit error: \(error.localizedDescription)")
+//          }
+//      }
+//    }
+  
     var body: some View {
         VStack(spacing: 32) {
             
@@ -95,7 +151,7 @@ struct SurveyBirthdayView: View {
             Spacer()
             
             // MARK: - Next Button (disabled kalau nama kosong)
-            PrimaryGlassButton(title: "Next", action: onNext)
+            PrimaryGlassButton(title: "Next", action: saveAndNext)
                 .padding(.horizontal)
                 .padding(.vertical)
                 .disabled(!isNameFilled)
@@ -105,6 +161,12 @@ struct SurveyBirthdayView: View {
 
         }
         .background(Color.white.ignoresSafeArea())
+        .onAppear {
+          if surveyManager == nil {
+            surveyManager = SurveyManager(modelContext: modelContext)
+        }
+          //checkCloudKitStatus()
+      }
     }
 }
 

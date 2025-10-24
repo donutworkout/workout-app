@@ -10,30 +10,39 @@ import SwiftData
 
 @main
 struct WorkoutAppApp: App {
-    var sharedModelContainer: ModelContainer = {
+  
+    let modelContainer: ModelContainer
+      
+    init() {
+      do {
         let schema = Schema([
-            UserProfile.self,
-            UserWorkout.self,
-            UserCycle.self
+          UserProfile.self,
+          UserWorkout.self,
+          UserCycle.self
         ])
-        
+      
         let modelConfiguration = ModelConfiguration(
-            schema: schema,
-            isStoredInMemoryOnly: false,
-            cloudKitDatabase: .automatic  // enables CloudKit sync
+          schema: schema,
+          isStoredInMemoryOnly: false,
+          cloudKitDatabase: .automatic // This enables CloudKit!
         )
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
-
+      
+        modelContainer = try ModelContainer(
+          for: schema,
+          configurations: [modelConfiguration]
+        )
+        
+        modelContainer.mainContext.autosaveEnabled = true
+        
+      } catch {
+        fatalError("Could not create ModelContainer: \(error)")
+      }
+    }
+  
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            SurveyView()
         }
-        .modelContainer(sharedModelContainer)
+        .modelContainer(modelContainer)
     }
 }

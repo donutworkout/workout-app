@@ -8,28 +8,48 @@
 import Foundation
 import SwiftData
 
-enum CycleBehavior: String, Codable, CaseIterable {
-  case buildMuscle = "Build Muscle"
-  case loseWeight = "Lose Weight"
-  case keepFit = "Keep Fit"
+enum CycleSymptoms: String, Codable, CaseIterable {
+  case cramps
+  case backPain
+  case fatigue
+  case moodSwing
+  case none
+}
+
+enum CycleEnergy: String, Codable, CaseIterable {
+  case energetic
+  case drops
+  case stable
+}
+
+enum CycleMoodAffectsMotivation: String, Codable, CaseIterable {
+  case often
+  case sometimes
+  case never
 }
 
 @Model
 class UserCycle: Identifiable {
   
   var id: UUID = UUID()
-  var start_date: Date = Date()
-  var end_date: Date = Date()
+  var isCycleRegular: Bool
+  var cycleStartDate: Date
+  var cycleEndDate: Date
   var cycleLength: Int
-  var behavior: CycleBehavior
+  var cycleSymptoms: CycleSymptoms
+  var cycleEnergy: CycleEnergy
+  var cycleMoodAffectsMotivation: CycleMoodAffectsMotivation
   
   @Relationship(deleteRule: .nullify)
   var user: UserProfile?
   
-  init(start_date: Date, end_date: Date, cycleLength: Int, behavior: CycleBehavior) {
-    self.start_date = start_date
-    self.end_date = end_date
+  init(isCycleRegular: Bool, cycleStartDate: Date, cycleEndDate: Date, cycleLength: Int, cycleSymptoms: CycleSymptoms, cycleEnergy: CycleEnergy, cycleMoodAffectsMotivation: CycleMoodAffectsMotivation) {
+    self.isCycleRegular = isCycleRegular
+    self.cycleStartDate = cycleStartDate
+    self.cycleEndDate = cycleEndDate
     self.cycleLength = cycleLength
-    self.behavior = behavior
+    self.cycleSymptoms = cycleSymptoms
+    self.cycleEnergy = cycleEnergy
+    self.cycleMoodAffectsMotivation = cycleMoodAffectsMotivation
   }
 }
