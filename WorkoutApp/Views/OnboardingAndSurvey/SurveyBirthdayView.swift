@@ -10,8 +10,8 @@ import CloudKit
 import SwiftData
 
 struct SurveyBirthdayView: View {
-    @Environment(\.modelContext) private var modelContext
-    @State private var surveyManager: SurveyManager?
+    //@Environment(\.modelContext) private var modelContext
+    @EnvironmentObject var surveyManager: SurveyManager
   
     @State private var selectedYear: Int = 2003
     @State private var name: String = ""
@@ -30,24 +30,11 @@ struct SurveyBirthdayView: View {
     }
     
     private func saveAndNext() {
-        surveyManager?.updateTempName(name.trimmingCharacters(in: .whitespaces))
-        surveyManager?.updateTempAge(calculateAge)
+        surveyManager.updateTempName(name.trimmingCharacters(in: .whitespaces))
+        surveyManager.updateTempAge(calculateAge)
       
-        checkLocalData()
-        
+        print("na saved, \(name), \(calculateAge)")
         onNext()
-    }
-    
-    private func checkLocalData() {
-      let descriptor = FetchDescriptor<UserProfile>()
-      if let profiles = try? modelContext.fetch(descriptor) {
-          print("🔍 Local profiles count: \(profiles.count)")
-          for profile in profiles {
-              print("   Name: '\(profile.name)', Age: \(profile.age)")
-          }
-      } else {
-          print("❌ Could not fetch profiles")
-      }
     }
     
 //    
@@ -162,12 +149,12 @@ struct SurveyBirthdayView: View {
                 .opacity(isNameFilled ? 1 : 0.5)
         }
         .background(Color.white.ignoresSafeArea())
-        .onAppear {
-          if surveyManager == nil {
-            surveyManager = SurveyManager(modelContext: modelContext)
-        }
-          //checkCloudKitStatus()
-      }
+//        .onAppear {
+//          if surveyManager == nil {
+//              surveyManager = SurveyManager(modelContext: modelContext)
+//        }
+//          //checkCloudKitStatus()
+//      }
     }
 }
 

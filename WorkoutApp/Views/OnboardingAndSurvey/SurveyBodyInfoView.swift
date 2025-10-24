@@ -6,8 +6,12 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct SurveyBodyInfoView: View {
+    @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject var surveyManager: SurveyManager
+    
     @State private var selectedHeight: Int = 0
     @State private var selectedWeight: Int = 0
     
@@ -22,6 +26,29 @@ struct SurveyBodyInfoView: View {
     // MARK: - Validation
     var isFormValid: Bool {
         selectedHeight != 0 && selectedWeight != 0
+    }
+    
+    private func saveAndNext() {
+        surveyManager.updateTempHeight(selectedHeight)
+        surveyManager.updateTempWeight(selectedWeight)
+        
+        print("hw saved, button clicked")
+        surveyManager.finalizeUserProfile()
+        
+        checkLocalData()
+        onNext()
+    }
+    
+    private func checkLocalData() {
+      let descriptor = FetchDescriptor<UserProfile>()
+      if let profiles = try? modelContext.fetch(descriptor) {
+          print("🔍 Local profiles count: \(profiles.count)")
+          for profile in profiles {
+              print("   Name: '\(profile.name)', Age: \(profile.age), Weight: \(profile.weight), Height: \(profile.height)")
+          }
+      } else {
+          print("❌ Could not fetch profiles")
+      }
     }
     
     var body: some View {
@@ -97,7 +124,7 @@ struct SurveyBodyInfoView: View {
             Spacer()
             
             // MARK: - Next Button (Reusable)
-            PrimaryGlassButton(title: "Next", action: onNext)
+            PrimaryGlassButton(title: "Next", action: saveAndNext)
                 .padding(.horizontal)
                 .padding(.bottom)
                 .disabled(!isFormValid)
@@ -120,10 +147,15 @@ struct SurveyBodyInfoView: View {
                 selection: $selectedWeight
             )
         }
+//        .onAppear {
+//            if surveyManager == nil {
+//                surveyManager = SurveyManager(modelContext: modelContext)
+//            }
+//        }
     }
 }
 
 
-#Preview {
-    SurveyBodyInfoView(onNext: {})
-}
+//#Preview {
+//    SurveyBodyInfoView(onNext: {})
+//}

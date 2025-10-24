@@ -8,8 +8,8 @@
 import SwiftUI
 import SwiftData
 
-@Observable
-class SurveyManager {
+//@Observable
+class SurveyManager : ObservableObject {
     var modelContext: ModelContext
     
     // Temporary data (UserProfile)
@@ -169,7 +169,6 @@ class SurveyManager {
             return .beginner
         }
     }
-
     
     func finalizeUserProfile() {
         if userProfile == nil {
@@ -191,6 +190,7 @@ class SurveyManager {
         }
         
         isProfileComplete = true
+        print("UserProfile finalized")
         save()
     }
     
@@ -354,6 +354,7 @@ class SurveyManager {
         do {
             try modelContext.save()
             print("saved successfully")
+            print("\(tempName), \(tempAge), \(tempHeight), \(tempWeight)")
             print(modelContext.sqliteCommand)
         } catch {
             print("Failed to save: \(error)")
