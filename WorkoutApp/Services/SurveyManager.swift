@@ -98,6 +98,79 @@ class SurveyManager {
         
     }
     
+    func calculateWorkoutLevel() -> WorkoutLevel {
+        // Extract values from temp variables
+        let timesPerWeek = tempWorkoutTimesAWeek
+        let duration = tempWorkoutDuration
+        let intensity = tempWorkoutIntensity
+        let experience = tempWorkoutExperience
+        
+        // Scoring system
+        var beginnerScore = 0
+        var intermediateScore = 0
+        var advancedScore = 0
+        
+        // 1. Frequency evaluation (times per week)
+        switch timesPerWeek {
+        case .twoToThreeTimes:
+            beginnerScore += 3
+        case .fourToFiveTimes:
+            intermediateScore += 3
+        case .everyday:
+            advancedScore += 3
+        }
+        
+        // 2. Duration evaluation (per session)
+        switch duration {
+        case .underThirtyMinutes:
+            beginnerScore += 3
+        case .thirtyToSixtyMinutes:
+            intermediateScore += 3
+        case .aboveSixtyMinutes:
+            advancedScore += 3
+        }
+        
+        // 3. Intensity evaluation
+        switch intensity {
+        case .light:
+            beginnerScore += 3
+        case .moderate:
+            beginnerScore += 1
+            intermediateScore += 2
+        case .hard:
+            intermediateScore += 2
+            advancedScore += 1
+        case .superIntense:
+            advancedScore += 3
+        }
+        
+        // 4. Experience evaluation (adherence/consistency)
+        switch experience {
+        case .underOneMonth:
+            beginnerScore += 3
+        case .oneToThreeMonths:
+            beginnerScore += 1
+            intermediateScore += 2
+        case .fourToSixMonths:
+            intermediateScore += 2
+            advancedScore += 1
+        case .moreThanSixMonths:
+            advancedScore += 3
+        }
+        
+        // Determine level based on highest score
+        let maxScore = max(beginnerScore, intermediateScore, advancedScore)
+        
+        if maxScore == advancedScore && advancedScore >= 8 {
+            return .advanced
+        } else if maxScore == intermediateScore && intermediateScore >= 6 {
+            return .intermediate
+        } else {
+            return .beginner
+        }
+    }
+
+    
     func finalizeUserProfile() {
         if userProfile == nil {
             // Create new profile
@@ -122,6 +195,9 @@ class SurveyManager {
     }
     
     func finalizeUserWorkout() {
+        
+        tempWorkoutLevel = calculateWorkoutLevel()
+        
         if userWorkout == nil {
             // Create new workout
             let newWorkout = UserWorkout(
