@@ -1,5 +1,5 @@
 //
-//  PickerSheet.swift
+//  PickerSheetView.swift
 //  WorkoutApp
 //
 //  Created by Jennifer Evelyn on 16/10/25.
@@ -16,15 +16,20 @@ struct PickerSheetView: View {
     
     var body: some View {
         VStack(spacing: 16) {
+            
+            // MARK: - Indicator
             Capsule()
                 .fill(Color("pinkTextSecondary").opacity(0.8))
                 .frame(width: 40, height: 5)
                 .padding(.top, 10)
             
+            // MARK: - Title
             Text(title)
                 .font(.headline)
+                .foregroundColor(.black)
                 .padding(.top, 10)
             
+            // MARK: - Picker
             Picker(title, selection: $selection) {
                 ForEach(range, id: \.self) { value in
                     Text("\(value) \(unit)")
@@ -35,19 +40,23 @@ struct PickerSheetView: View {
             .labelsHidden()
             .frame(height: 180)
             
-            Button("Done") {
+            // MARK: - Done Button (same style as PrimaryGlassButton)
+            PrimaryGlassButton(title: "Done") {
                 dismiss()
             }
-            .font(.headline)
-            .foregroundColor(.white)
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color("pinkTextSecondary"))
-            .clipShape(RoundedRectangle(cornerRadius: 12))
             .padding(.horizontal)
             .padding(.bottom, 20)
         }
         .presentationDetents([.height(300)])
         .background(Color.white)
     }
+}
+
+#Preview {
+    PickerSheetView(
+        title: "Select Height",
+        unit: "cm",
+        range: Array(100...220),
+        selection: .constant(165)
+    )
 }

@@ -9,9 +9,14 @@ import SwiftUI
 
 @main
 struct WorkoutWacthApp_Watch_AppApp: App {
+    
+    init() {
+         HealthKitManager.shared.requestAuthorization()
+     }
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            WatchWorkoutListView()
         }
     }
 }

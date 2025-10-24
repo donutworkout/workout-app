@@ -31,14 +31,15 @@ struct SurveyBodyInfoView: View {
             Text("Survey")
                 .font(.headline)
                 .foregroundColor(.black)
-                .padding(.top, 8)
+                .padding(.top, 20)
             
             // MARK: - Title & Character
             VStack(spacing: 16) {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Get to know\nyou more!")
-                            .font(.system(.title, weight: .bold))
+                        SurveyProgressText(currentPage: 2, totalPages: 6)
+                        Text("Body Measurement")
+                            .font(.system(.title, weight: .semibold))
                             .foregroundColor(Color("pinkTextPrimary"))
                     }
                     Spacer()
@@ -66,7 +67,7 @@ struct SurveyBodyInfoView: View {
                         .foregroundColor(.black)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
-                        .background(Color.gray.opacity(0.1))
+                        .background(.grayTextInput)
                         .clipShape(Capsule())
                 }
             }
@@ -87,7 +88,7 @@ struct SurveyBodyInfoView: View {
                         .foregroundColor(.black)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
-                        .background(Color.gray.opacity(0.1))
+                        .background(.grayTextInput)
                         .clipShape(Capsule())
                 }
             }
@@ -101,8 +102,6 @@ struct SurveyBodyInfoView: View {
                 .padding(.bottom)
                 .disabled(!isFormValid)
                 .opacity(isFormValid ? 1 : 0.5)
-            
-            PageControl(totalPages: 7, currentPage: 1)
         }
         .background(Color.white.ignoresSafeArea())
         .sheet(isPresented: $showHeightPicker) {

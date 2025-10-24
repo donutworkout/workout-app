@@ -81,15 +81,19 @@ struct SurveyBirthdayView: View {
             Text("Survey")
                 .font(.headline)
                 .foregroundColor(.black)
-                .padding(.top, 8)
+                .padding(.top, 20)
             
             // MARK: - Title & Character
             VStack(spacing: 16) {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Get to know\nyou more!")
-                            .font(.system(.title, weight: .bold))
+                        SurveyProgressText(currentPage: 1, totalPages: 6)
+                        
+                        Text("Get to know you more!")
+                            .font(.system(.title, weight: .semibold))
                             .foregroundColor(Color("pinkTextPrimary"))
+                            .lineLimit(nil) // memastikan tidak terpotong
+                            .fixedSize(horizontal: false, vertical: true) // biar wrap teks
                     }
                     Spacer()
                     Image("characterSurvey")
@@ -115,7 +119,7 @@ struct SurveyBirthdayView: View {
                     .background(
                         RoundedRectangle(cornerRadius: 12)
                             .fill(Color.white)
-                            .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+                            .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
                     )
             }
             .padding(.horizontal)
@@ -156,9 +160,6 @@ struct SurveyBirthdayView: View {
                 .padding(.vertical)
                 .disabled(!isNameFilled)
                 .opacity(isNameFilled ? 1 : 0.5)
-            
-            PageControl(totalPages: 7, currentPage: 0)
-
         }
         .background(Color.white.ignoresSafeArea())
         .onAppear {
