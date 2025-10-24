@@ -14,7 +14,7 @@ struct WorkoutDayView: View {
                 Text("Survey")
                     .font(.headline)
                     .foregroundColor(.black)
-                    .padding(.top, 8)
+                    .padding(.top, 20)
                 
                 // MARK: - Title
                 VStack(spacing: 16) {
