@@ -10,11 +10,6 @@ struct WorkoutDayView: View {
     var body: some View {
         ZStack {
             VStack(spacing: 32) {
-                // MARK: - Header
-//                Text("Survey")
-//                    .font(.headline)
-//                    .foregroundColor(.black)
-//                    .padding(.top, 20)
                 
                 // MARK: - Title
                 VStack(spacing: 16) {
@@ -25,7 +20,6 @@ struct WorkoutDayView: View {
                                 .font(.system(.title, weight: .semibold))
                                 .foregroundColor(Color("pinkTextPrimary"))
                                 .multilineTextAlignment(.leading)
-                                .lineLimit(nil)
                                 .fixedSize(horizontal: false, vertical: true)
                                 .layoutPriority(1)
                         }
@@ -40,7 +34,7 @@ struct WorkoutDayView: View {
                 }
                 .padding(.horizontal)
                 
-                // MARK: - Days
+                // MARK: - Days Grid
                 VStack(spacing: 12) {
                     let gridItems = [GridItem(.flexible()), GridItem(.flexible())]
                     LazyVGrid(columns: gridItems, spacing: 12) {
@@ -85,51 +79,41 @@ struct WorkoutDayView: View {
                 .padding(.horizontal)
                 .padding(.vertical)
                 .opacity(isButtonEnabled ? 1 : 0.5)
-                
-
             }
             .animation(.easeInOut, value: selectedDays)
             .background(Color.white.ignoresSafeArea())
             
-            // MARK: - Custom Alert Overlay
+            // MARK: - Custom Alert (HIG Style + Glass Button)
             if showCustomAlert {
-                Color.white.opacity(0.5)
+                Color.white.opacity(0.7)
                     .ignoresSafeArea()
-                    .transition(.opacity)
                     .onTapGesture {
-                        withAnimation { showCustomAlert = false }
+                        withAnimation(.spring()) { showCustomAlert = false }
                     }
                 
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(spacing: 20) {
                     Text("Too chill")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.system(size: 22, weight: .semibold))
                         .foregroundColor(.black)
-                        .padding(.horizontal)
                     
                     Text("Pick at least 2 days so we can get that streak going!")
-                        .multilineTextAlignment(.leading)
-                        .font(.system(size: 15))
-                        .foregroundColor(.black.opacity(0.8))
+                        .multilineTextAlignment(.center)
+                        .font(.system(size: 16))
+                        .foregroundColor(.gray)
                         .padding(.horizontal)
                     
-                    Button {
-                        withAnimation { showCustomAlert = false }
-                    } label: {
-                        Text("Okay")
-                            .font(.system(size: 17, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(Color("pinkTextPrimary"))
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                    PrimaryGlassButton(title: "OK") {
+                        withAnimation(.spring()) {
+                            showCustomAlert = false
+                        }
                     }
-                    .padding(.horizontal, 20)
+                    .frame(height: 54)
+                    .padding(.horizontal)
                 }
                 .padding(.vertical, 24)
-                .frame(maxWidth: 280)
+                .frame(maxWidth: 300)
                 .background(.ultraThinMaterial)
-                .cornerRadius(28)
-                .shadow(radius: 10)
+                .clipShape(RoundedRectangle(cornerRadius: 26))
                 .transition(.scale.combined(with: .opacity))
             }
         }

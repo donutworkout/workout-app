@@ -11,7 +11,7 @@ struct AdjustMenuCardioView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedMenu: String? = nil
     @State private var showCustomAlert = false
-    
+
     // MARK: - Cardio Menu
     private let cardioMenu = [
         "Outdoor Walk", "Indoor Walk",
@@ -20,40 +20,10 @@ struct AdjustMenuCardioView: View {
         "Volleyball", "Tennis",
         "Padel", "Soccer"
     ]
-    
+
     var body: some View {
         ZStack {
             VStack(spacing: 32) {
-                
-                // MARK: - Header
-                HStack {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.black)
-                            .padding(12)
-                            .background(
-                                Circle()
-                                    .fill(.ultraThinMaterial)
-                                    .shadow(color: .black.opacity(0.1), radius: 3, x: 0, y: 2)
-                            )
-                    }
-                    
-                    Spacer()
-                    
-                    Text("Today’s Cardio Menu!")
-                        .font(.system(size: 22, weight: .bold))
-                        .foregroundColor(Color("pinkTextPrimary"))
-                    
-                    Spacer()
-                    
-                    Circle()
-                        .fill(Color.clear)
-                        .frame(width: 44, height: 44)
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, 12)
-                
                 // MARK: - Menu Grid
                 VStack(spacing: 12) {
                     let gridItems = [GridItem(.flexible()), GridItem(.flexible())]
@@ -80,9 +50,9 @@ struct AdjustMenuCardioView: View {
                 }
                 .padding(.horizontal)
                 .padding(.top, 8)
-                
+
                 Spacer()
-                
+
                 // MARK: - Start Button (Disabled if no selection)
                 PrimaryGlassButton(title: "Start Now") {
                     if selectedMenu == nil {
@@ -98,7 +68,7 @@ struct AdjustMenuCardioView: View {
             }
             .animation(.easeInOut, value: selectedMenu)
             .background(Color.white.ignoresSafeArea())
-            
+
             // MARK: - Custom Alert Overlay
             if showCustomAlert {
                 Color.white.opacity(0.5)
@@ -107,19 +77,19 @@ struct AdjustMenuCardioView: View {
                     .onTapGesture {
                         withAnimation { showCustomAlert = false }
                     }
-                
+
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Oops!")
                         .font(.system(size: 20, weight: .semibold))
                         .foregroundColor(.black)
                         .padding(.horizontal)
-                    
+
                     Text("Please pick one cardio activity to begin.")
                         .multilineTextAlignment(.leading)
                         .font(.system(size: 15))
                         .foregroundColor(.black.opacity(0.8))
                         .padding(.horizontal)
-                    
+
                     Button {
                         withAnimation { showCustomAlert = false }
                     } label: {
@@ -141,8 +111,20 @@ struct AdjustMenuCardioView: View {
                 .transition(.scale.combined(with: .opacity))
             }
         }
+        // MARK: - Native Navigation Title
+        .navigationTitle("Today’s Cardio Menu!")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.black)
+                }
+            }
+        }
     }
-    
+
     // MARK: - Logic
     private func handleSelection(for activity: String) {
         if selectedMenu == activity {
@@ -151,7 +133,7 @@ struct AdjustMenuCardioView: View {
             selectedMenu = activity
         }
     }
-    
+
     private var isButtonEnabled: Bool {
         selectedMenu != nil
     }
@@ -167,5 +149,7 @@ struct ScaleButtonStyle: ButtonStyle {
 }
 
 #Preview {
-    AdjustMenuCardioView()
+    NavigationStack {
+        AdjustMenuCardioView()
+    }
 }

@@ -9,7 +9,12 @@ import SwiftUI
 
 struct WorkoutItemCard: View {
     let workout: WorkoutItem
-    @State private var count: Int = 0
+    @State private var sets: Int
+    
+    init(workout: WorkoutItem) {
+        self.workout = workout
+        _sets = State(initialValue: workout.sets)
+    }
     
     var body: some View {
         HStack(spacing: 16) {
@@ -23,15 +28,17 @@ struct WorkoutItemCard: View {
                 Text(workout.name)
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.black)
-                Text(workout.detail)
+                
+                Text("\(sets) x \(workout.reps)")
                     .font(.system(size: 14))
                     .foregroundColor(.gray)
             }
             
             Spacer()
             
+            // MARK: - Plus & Minus
             HStack(spacing: 12) {
-                Button(action: { if count > 0 { count -= 1 } }) {
+                Button(action: { if sets > 1 { sets -= 1 } }) {
                     Image(systemName: "minus")
                         .font(.system(size: 14, weight: .semibold))
                         .frame(width: 28, height: 28)
@@ -40,7 +47,7 @@ struct WorkoutItemCard: View {
                         .foregroundColor(.gray)
                 }
                 
-                Button(action: { count += 1 }) {
+                Button(action: { sets += 1 }) {
                     Image(systemName: "plus")
                         .font(.system(size: 14, weight: .semibold))
                         .frame(width: 28, height: 28)
