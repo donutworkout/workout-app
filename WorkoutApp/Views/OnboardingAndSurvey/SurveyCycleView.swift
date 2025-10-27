@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct SurveyCycleView: View {
+    @EnvironmentObject var surveyManager: SurveyManager
+    
     var onFinish: () -> Void
     
     // MARK: - States
@@ -16,9 +18,21 @@ struct SurveyCycleView: View {
     
     // MARK: - Options
     let menstrualCycle = ["Yes", "No"]
-    let physicalSymptoms = ["Cramps", "Back Pain", "Fatigue / Low Energy", "Mood Swing", "None of the above"]
-    let energyLevel = ["I feel more energetic after my period", "Drops before/during period", "Stay stable"]
-    let moodChanges = ["Often", "Sometime", "Never"]
+    let physicalSymptoms = CycleSymptoms.allCases.map { $0.displayName }
+    let energyLevel = CycleEnergy.allCases.map { $0.displayName }
+    let moodChanges = CycleMoodAffectsMotivation.allCases.map { $0.displayName }
+    
+    private func symptomFromDisplayName(_ name: String) -> CycleSymptoms? {
+        CycleSymptoms.allCases.first { $0.displayName == name }
+    }
+    
+    private func energyFromDisplayName(_ name: String) -> CycleEnergy? {
+        CycleEnergy.allCases.first { $0.displayName == name }
+    }
+    
+    private func moodFromDisplayName(_ name: String) -> CycleMoodAffectsMotivation? {
+        CycleMoodAffectsMotivation.allCases.first { $0.displayName == name }
+    }
     
     // MARK: - Computed property
     var isAllAnswered: Bool {
@@ -181,7 +195,7 @@ struct SurveyCycleView: View {
             }
             
             // MARK: - Finish Button
-            PrimaryGlassButton(title: "Finish", action: onFinish)
+            PrimaryGlassButton(title: "Finish", action: saveAndFinish)
                 .padding(.horizontal)
                 .padding(.vertical)
                 .disabled(!isAllAnswered)
@@ -283,6 +297,59 @@ struct CalendarDayButton: View {
             }
             .frame(height: 40)
         }
+    }
+}
+
+extension SurveyCycleView {
+    private func saveAndFinish() {
+        // 1. Save regularity
+        if let regularityString = selectedMenstrualCycle.first {
+            let isRegular = regularityString == "Yes"
+            surveyManager.updateTempIsCycleRegular(isRegular)
+            print("✅ Cycle regularity saved: \(isRegular)")
+        }
+        
+        // 2. Save dates (start and end)
+        if let sortedDates = selectedDates.sorted().first {
+            surveyManager.updateTempCycleStartDate(sortedDates)
+            print("✅ Start date saved: \(sortedDates)")
+        }
+        
+        if let sortedDates = selectedDates.sorted().last {
+            surveyManager.updateTempCycleEndDate(sortedDates)
+            print("✅ End date saved: \(sortedDates)")
+        }
+        
+        // Calculate cycle length
+        let cycleLength = selectedDates.count
+        surveyManager.updateTempCycleLength(cycleLength)
+        print("✅ Cycle length saved: \(cycleLength) days")
+        
+        // 3. Save symptoms (handle multiple selections if needed)
+        let selectedSymptoms: [CycleSymptoms] = selectedPhysicalSymptoms.compactMap { name in
+            symptomFromDisplayName(name)
+        }
+        surveyManager.updateTempCycleSymptoms(selectedSymptoms)
+        print("✅ Symptoms saved: \(selectedSymptoms.map { $0.displayName }.joined(separator: ", "))")
+        
+        // 4. Save energy level
+        if let energyString = selectedEnergyLevel.first,
+           let energy = energyFromDisplayName(energyString) {
+            surveyManager.updateTempCycleEnergy(energy)
+            print("✅ Energy level saved: \(energy.rawValue) - Display: \(energy.displayName)")
+        }
+        
+        // 5. Save mood affects motivation
+        if let moodString = selectedMoodChanges.first,
+           let mood = moodFromDisplayName(moodString) {
+            surveyManager.updateTempCycleMoodAffectsMotivation(mood)
+            print("✅ Mood affects motivation saved: \(mood.rawValue) - Display: \(mood.displayName)")
+        }
+        
+        // Finalize cycle data
+        surveyManager.finalizeUserCycle()
+        
+        onFinish()
     }
 }
 

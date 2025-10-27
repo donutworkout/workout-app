@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct SurveyWorkoutLevelView: View {
+    @EnvironmentObject var surveyManager: SurveyManager
+    
     var onNext: () -> Void
     
     // MARK: - States
@@ -17,20 +19,26 @@ struct SurveyWorkoutLevelView: View {
     @State private var selectedExperience: [String] = []
     
     // MARK: - Options
-    let workoutFrequency = ["2–3x", "4–5x", "Everyday"]
-    let workoutDuration = ["< 30 min", "30–60 min", "> 60 min"]
-    let workoutIntensity = [
-        "Light (you can still chat easily)",
-        "Moderate (a bit sweaty)",
-        "Hard (sweating a lot, can’t really talk)",
-        "Super intense (pushing your max)"
-    ]
-    let workoutExperience = [
-        "Newbie (<1 month)",
-        "1–3 month",
-        "4–6 month",
-        "> 6 month"
-    ]
+    let workoutFrequency = WorkoutTimesAWeek.allCases.map { $0.displayName }
+    let workoutDuration = WorkoutDuration.allCases.map { $0.displayName }
+    let workoutIntensity = WorkoutIntensity.allCases.map { $0.displayName }
+    let workoutExperience = WorkoutExperience.allCases.map { $0.displayName }
+    
+    private func frequencyFromDisplayName(_ name: String) -> WorkoutTimesAWeek? {
+        WorkoutTimesAWeek.allCases.first { $0.displayName == name }
+    }
+    
+    private func durationFromDisplayName(_ name: String) -> WorkoutDuration? {
+        WorkoutDuration.allCases.first { $0.displayName == name }
+    }
+    
+    private func intensityFromDisplayName(_ name: String) -> WorkoutIntensity? {
+        WorkoutIntensity.allCases.first { $0.displayName == name }
+    }
+    
+    private func experienceFromDisplayName(_ name: String) -> WorkoutExperience? {
+        WorkoutExperience.allCases.first { $0.displayName == name }
+    }
     
     // MARK: - Computed Property
     var isAllAnswered: Bool {
@@ -109,7 +117,7 @@ struct SurveyWorkoutLevelView: View {
             }
             
             // MARK: - Next Button
-            PrimaryGlassButton(title: "Next", action: onNext)
+            PrimaryGlassButton(title: "Next", action: saveAndNext)
                 .padding(.horizontal)
                 .padding(.vertical)
                 .disabled(!isAllAnswered)
@@ -117,6 +125,37 @@ struct SurveyWorkoutLevelView: View {
             
         }
         .background(Color.white.ignoresSafeArea())
+    }
+}
+
+extension SurveyWorkoutLevelView {
+    private func saveAndNext() {
+        if let freqString = selectedFrequency.first,
+           let frequency = frequencyFromDisplayName(freqString) {
+            surveyManager.updateTempWorkoutTimesAWeek(frequency)
+            print("✅ Frequency saved: \(frequency.rawValue)")
+        }
+                
+        if let durationString = selectedDuration.first,
+           let duration = durationFromDisplayName(durationString) {
+            surveyManager.updateTempWorkoutDuration(duration)
+            print("✅ Duration saved: \(duration.rawValue)")
+        }
+                
+        if let intensityString = selectedIntensity.first,
+           let intensity = intensityFromDisplayName(intensityString) {
+            surveyManager.updateTempWorkoutIntensity(intensity)
+            print("✅ Intensity saved: \(intensity.rawValue) - Display: \(intensity.displayName)")
+        }
+                
+        if let experienceString = selectedExperience.first,
+           let experience = experienceFromDisplayName(experienceString) {
+            surveyManager.updateTempWorkoutExperience(experience)
+            print("✅ Experience saved: \(experience.rawValue) - Display: \(experience.displayName)")
+        }
+        
+        surveyManager.updateTempWorkoutLevel()
+        onNext()
     }
 }
 

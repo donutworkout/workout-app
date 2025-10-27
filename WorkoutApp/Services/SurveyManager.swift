@@ -23,7 +23,7 @@ class SurveyManager : ObservableObject {
     var tempCycleStartDate: Date = Date()
     var tempCycleEndDate: Date = Date()
     var tempCycleLength: Int = 0
-    var tempCycleSymptoms: CycleSymptoms = .none
+    var tempCycleSymptoms: [CycleSymptoms] = []
     var tempCycleEnergy: CycleEnergy = .stable
     var tempCycleMoodAffectsMotivation: CycleMoodAffectsMotivation = .never
     
@@ -85,7 +85,7 @@ class SurveyManager : ObservableObject {
         if let existingCycle = try? modelContext.fetch(cycleDescriptor).first {
             userCycle = existingCycle
             isCycleComplete = true
-     
+            
             // Populate temp data from existing cycle
             tempIsCycleRegular = existingCycle.isCycleRegular
             tempCycleStartDate = existingCycle.cycleStartDate
@@ -223,58 +223,59 @@ class SurveyManager : ObservableObject {
             userWorkout?.workoutDaysPreference = tempWorkoutDaysPreference
         }
         
+        print("UserWorkout finalized")
         isWorkoutComplete = true
         save()
     }
-
+    
     
     func finalizeUserCycle() {
-            if userCycle == nil {
-                // Create new cycle
-                let newCycle = UserCycle(
-                    isCycleRegular: tempIsCycleRegular,
-                    cycleStartDate: tempCycleStartDate,
-                    cycleEndDate: tempCycleEndDate,
-                    cycleLength: tempCycleLength,
-                    cycleSymptoms: tempCycleSymptoms,
-                    cycleEnergy: tempCycleEnergy,
-                    cycleMoodAffectsMotivation: tempCycleMoodAffectsMotivation
-                )
-                newCycle.user = userProfile
-                userCycle = newCycle
-                modelContext.insert(newCycle)
-            } else {
-                // Update existing cycle
-                userCycle?.isCycleRegular = tempIsCycleRegular
-                userCycle?.cycleStartDate = tempCycleStartDate
-                userCycle?.cycleEndDate = tempCycleEndDate
-                userCycle?.cycleLength = tempCycleLength
-                userCycle?.cycleSymptoms = tempCycleSymptoms
-                userCycle?.cycleEnergy = tempCycleEnergy
-                userCycle?.cycleMoodAffectsMotivation = tempCycleMoodAffectsMotivation
-            }
-            
-            isCycleComplete = true
-            save()
+        if userCycle == nil {
+            // Create new cycle
+            let newCycle = UserCycle(
+                isCycleRegular: tempIsCycleRegular,
+                cycleStartDate: tempCycleStartDate,
+                cycleEndDate: tempCycleEndDate,
+                cycleLength: tempCycleLength,
+                cycleSymptoms: tempCycleSymptoms,
+                cycleEnergy: tempCycleEnergy,
+                cycleMoodAffectsMotivation: tempCycleMoodAffectsMotivation
+            )
+            newCycle.user = userProfile
+            userCycle = newCycle
+            modelContext.insert(newCycle)
+        } else {
+            // Update existing cycle
+            userCycle?.isCycleRegular = tempIsCycleRegular
+            userCycle?.cycleStartDate = tempCycleStartDate
+            userCycle?.cycleEndDate = tempCycleEndDate
+            userCycle?.cycleLength = tempCycleLength
+            userCycle?.cycleSymptoms = tempCycleSymptoms
+            userCycle?.cycleEnergy = tempCycleEnergy
+            userCycle?.cycleMoodAffectsMotivation = tempCycleMoodAffectsMotivation
         }
+        
+        isCycleComplete = true
+        save()
+    }
     
     //Profile updates
     func updateTempName(_ name: String) {
         tempName = name
     }
-       
+    
     func updateTempAge(_ age: Int) {
         tempAge = age
     }
-       
+    
     func updateTempWeight(_ weight: Int) {
         tempWeight = weight
     }
-       
+    
     func updateTempHeight(_ height: Int) {
         tempHeight = height
     }
-       
+    
     // Workout updates
     
     func updateTempWorkoutMotivation(_ motivation: WorkoutMotivation) {
@@ -284,46 +285,47 @@ class SurveyManager : ObservableObject {
     func updateTempWorkoutTimesAWeek(_ times: WorkoutTimesAWeek) {
         tempWorkoutTimesAWeek = times
     }
-       
+    
     func updateTempWorkoutDuration(_ duration: WorkoutDuration) {
         tempWorkoutDuration = duration
     }
-       
+    
     func updateTempWorkoutIntensity(_ intensity: WorkoutIntensity) {
         tempWorkoutIntensity = intensity
     }
-       
+    
     func updateTempWorkoutExperience(_ experience: WorkoutExperience) {
         tempWorkoutExperience = experience
     }
-       
-    func updateTempWorkoutLevel(_ level: WorkoutLevel) {
-        tempWorkoutLevel = level
+    
+    func updateTempWorkoutLevel() {
+        tempWorkoutLevel = calculateWorkoutLevel()
+        print("Workout level: \(tempWorkoutLevel)")
     }
-       
+    
     func updateTempWorkoutDaysPreference(_ days: [WorkoutDayPreference]) {
         tempWorkoutDaysPreference = days
     }
-       
+    
     // Cycle updates
     
     func updateTempIsCycleRegular(_ regular: Bool) {
         tempIsCycleRegular = regular
     }
-       
+    
     func updateTempCycleStartDate(_ start_date: Date) {
         tempCycleStartDate = start_date
     }
-       
+    
     func updateTempCycleEndDate(_ end_date: Date) {
         tempCycleEndDate = end_date
     }
-       
+    
     func updateTempCycleLength(_ length: Int) {
         tempCycleLength = length
     }
-       
-    func updateTempCycleSymptoms(_ symptoms: CycleSymptoms) {
+    
+    func updateTempCycleSymptoms(_ symptoms: [CycleSymptoms]) {
         tempCycleSymptoms = symptoms
     }
     
@@ -334,30 +336,154 @@ class SurveyManager : ObservableObject {
     func updateTempCycleMoodAffectsMotivation(_ moodAffectsMotivation: CycleMoodAffectsMotivation) {
         tempCycleMoodAffectsMotivation = moodAffectsMotivation
     }
-       
+    
     // MARK: - Validation Methods (Optional but recommended)
-//       
-//       func isProfileDataValid() -> Bool {
-//           return !tempName.isEmpty && tempAge > 0 && tempWeight > 0 && tempHeight > 0
-//       }
-//       
-//       func isWorkoutDataValid() -> Bool {
-//           return tempWorkoutTimesAWeek > 0 && tempWorkoutDuration > 0
-//       }
-//       
-//       func isCycleDataValid() -> Bool {
-//           return tempCycleLength > 0
-//       }
+    //
+    //       func isProfileDataValid() -> Bool {
+    //           return !tempName.isEmpty && tempAge > 0 && tempWeight > 0 && tempHeight > 0
+    //       }
+    //
+    //       func isWorkoutDataValid() -> Bool {
+    //           return tempWorkoutTimesAWeek > 0 && tempWorkoutDuration > 0
+    //       }
+    //
+    //       func isCycleDataValid() -> Bool {
+    //           return tempCycleLength > 0
+    //       }
     
     // MARK: - Save
     private func save() {
         do {
             try modelContext.save()
-            print("saved successfully")
-            print("\(tempName), \(tempAge), \(tempHeight), \(tempWeight)")
-            print(modelContext.sqliteCommand)
+            verifyLatestData()
         } catch {
             print("Failed to save: \(error)")
+        }
+    }
+    
+    //    private func printData() {
+    //        print("✅ Saved successfully")
+    //        print("📋 Profile: \(tempName), \(tempAge), \(tempHeight)cm, \(tempWeight)kg")
+    //
+    //        // Print Workout data with displayNames
+    //        print("💪 Workout:")
+    //        print("  - Motivation: \(tempWorkoutMotivation.displayName)")
+    //        print("  - Frequency: \(tempWorkoutTimesAWeek.displayName)")
+    //        print("  - Duration: \(tempWorkoutDuration.displayName)")
+    //        print("  - Intensity: \(tempWorkoutIntensity.displayName)")
+    //        print("  - Experience: \(tempWorkoutExperience.displayName)")
+    //        print("  - Level: \(tempWorkoutLevel.displayName)")
+    //
+    //        // Print Workout Days Preference
+    //        if tempWorkoutDaysPreference.isEmpty {
+    //            print("  - Days Preference: None selected")
+    //        } else {
+    //            let daysString = tempWorkoutDaysPreference.map { $0.displayName }.joined(separator: ", ")
+    //            print("  - Days Preference: \(daysString)")
+    //        }
+    //
+    //        print("🌷 Cycle:")
+    //        print("  - Regular Cycle: \(tempIsCycleRegular)")
+    //        print("  - Start Date: \(tempCycleStartDate)")
+    //        print("  - End Date: \(tempCycleEndDate)")
+    //        print("  - Cycle Length: \(tempCycleLength)")
+    //
+    //        if tempCycleSymptoms.isEmpty {
+    //            print("  - Days Preference: None selected")
+    //        } else {
+    //            let symptomsString = tempCycleSymptoms.map { $0.displayName }.joined(separator: ", ")
+    //            print("  - Cycle Symptoms: \(symptomsString)")
+    //        }
+    //
+    //        print("  - Cycle Energy: \(tempCycleEnergy.displayName)")
+    //        print("  - Mood Affects Motivation: \(tempCycleMoodAffectsMotivation.displayName)")
+    //
+    //        print("🗄️ Database: \(modelContext.sqliteCommand)")
+    //    }
+    
+    private func verifyLatestData() {
+        print("\n🗄️ --- SwiftData Latest Data Check ---")
+        
+        do {
+            // 1. Define the sort (assumes you have a 'createdAt' property)
+            let sort = SortDescriptor(\UserProfile.createdAt, order: .reverse)
+            
+            // 2. Create the descriptor (must be a 'var')
+            var descriptor = FetchDescriptor<UserProfile>(sortBy: [sort])
+            
+            // 3. Set the fetchLimit property
+            descriptor.fetchLimit = 1
+            
+            let profiles = try modelContext.fetch(descriptor)
+            
+            if let profile = profiles.first {
+                print("📋 Latest Profile:")
+                print("   • Name: \(profile.name)")
+                print("   • Age: \(profile.age)")
+                print("   • Height: \(profile.height)")
+                print("   • Weight: \(profile.weight)")
+            } else {
+                print("💪 No saved profiles yet.")
+            }
+        } catch {
+            print("❌ Error fetching latest profile: \(error)")
+        }
+        
+        do {
+            // 1. Define the sort (assumes you have a 'createdAt' property)
+            let sort = SortDescriptor(\UserWorkout.createdAt, order: .reverse)
+            
+            // 2. Create the descriptor (must be a 'var')
+            var descriptor = FetchDescriptor<UserWorkout>(sortBy: [sort])
+            
+            // 3. Set the fetchLimit property
+            descriptor.fetchLimit = 1
+            
+            let workouts = try modelContext.fetch(descriptor)
+            
+            if let workout = workouts.first {
+                print("💪 Latest Workout:")
+                print("   • Motivation: \(workout.workoutMotivation.displayName)")
+                print("   • Frequency: \(workout.workoutTimesAWeek.displayName)")
+                print("   • Duration: \(workout.workoutDuration.displayName)")
+                print("   • Intensity: \(workout.workoutIntensity.displayName)")
+                print("   • Level: \(workout.workoutLevel.displayName)")
+                let days = workout.workoutDaysPreference.map { $0.displayName }.joined(separator: ", ")
+                print("   • Days: \(days)")
+            } else {
+                print("💪 No saved workouts yet.")
+            }
+        } catch {
+            print("❌ Error fetching latest workout: \(error)")
+        }
+        
+        do {
+            // 1. Define the sort (assumes you have a 'createdAt' property)
+            let sort = SortDescriptor(\UserCycle.createdAt, order: .reverse)
+            
+            // 2. Create the descriptor (must be a 'var')
+            var descriptor = FetchDescriptor<UserCycle>(sortBy: [sort])
+            
+            // 3. Set the fetchLimit property
+            descriptor.fetchLimit = 1
+            
+            let cycles = try modelContext.fetch(descriptor)
+            
+            if let cycle = cycles.first {
+                print("🌷 Latest Cycle:")
+                print("   • Regular: \(cycle.isCycleRegular)")
+                print("   • Start Date: \(cycle.cycleStartDate)")
+                print("   • End Date: \(cycle.cycleEndDate)")
+                print("   • Length: \(cycle.cycleLength)")
+                let symptoms = cycle.cycleSymptoms.map { $0.displayName }.joined(separator: ", ")
+                print(#"   • Symptoms: \((symptoms.isEmpty ? "None" : symptoms))"#)
+                print("   • Energy: \(cycle.cycleEnergy.displayName)")
+                print("   • Mood Affects Motivation: \(cycle.cycleMoodAffectsMotivation.displayName)")
+            } else {
+                print("💪 No saved workouts yet.")
+            }
+        } catch {
+            print("❌ Error fetching latest workout: \(error)")
         }
     }
 }
@@ -372,3 +498,4 @@ extension ModelContext {
         }
     }
 }
+
