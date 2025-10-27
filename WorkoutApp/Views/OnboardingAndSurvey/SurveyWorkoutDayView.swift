@@ -1,11 +1,35 @@
 import SwiftUI
 
 struct WorkoutDayView: View {
+    @EnvironmentObject var surveyManager: SurveyManager
+    
     var onNext: () -> Void
+    
     @State private var selectedDays: [String] = []
     @State private var showCustomAlert = false
     
-    let days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "Flexible"]
+    let days = WorkoutDayPreference.allCases.map { $0.displayName }
+    
+    var workoutLevel: WorkoutLevel { surveyManager.tempWorkoutLevel }
+    
+    var minimumDays: Int {
+        if workoutLevel == WorkoutLevel.beginner {
+            return 2
+        } else if workoutLevel == WorkoutLevel.intermediate {
+            return 4
+        } else if workoutLevel == WorkoutLevel.advanced {
+            return 5
+        }
+        return 2 // Default value for unexpected cases
+    }
+    
+    private func saveAndNext() {
+        let preferences: [WorkoutDayPreference] = selectedDays.compactMap { WorkoutDayPreference(rawValue: $0) }
+        surveyManager.updateTempWorkoutDaysPreference(preferences)
+        
+        surveyManager.finalizeUserWorkout()
+        onNext()
+    }
     
     var body: some View {
         ZStack {
@@ -64,7 +88,7 @@ struct WorkoutDayView: View {
                     Image(systemName: "info.circle")
                         .foregroundColor(.gray)
                         .font(.system(size: 14))
-                    Text("Pick at least two days to stay active each week")
+                    Text("Pick at least \(String(minimumDays)) days to stay active each week")
                         .font(.system(size: 14))
                         .foregroundColor(.gray)
                 }
@@ -75,11 +99,11 @@ struct WorkoutDayView: View {
                 // MARK: - Next Button
                 PrimaryGlassButton(title: "Next") {
                     if selectedDays.contains("Flexible") {
-                        onNext()
-                    } else if selectedDays.count < 2 {
+                        saveAndNext()
+                    } else if selectedDays.count < minimumDays {
                         showCustomAlert = true
                     } else {
-                        onNext()
+                        saveAndNext()
                     }
                 }
                 .padding(.horizontal)
@@ -106,7 +130,7 @@ struct WorkoutDayView: View {
                         .foregroundColor(.black)
                         .padding(.horizontal)
                     
-                    Text("Pick at least 2 days so we can get that streak going!")
+                    Text("Pick at least \(String(minimumDays)) days so we can get that streak going!")
                         .multilineTextAlignment(.leading)
                         .font(.system(size: 15))
                         .foregroundColor(.black.opacity(0.8))

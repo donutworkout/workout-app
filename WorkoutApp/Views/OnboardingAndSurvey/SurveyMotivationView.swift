@@ -6,12 +6,23 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct SurveyMotivationView: View {
-    var onNext: () -> Void
-    @State private var selectedMotivation: String? = nil
+    @EnvironmentObject var surveyManager: SurveyManager
     
-    let motivations = ["Build Muscle", "Lose Weight", "Keep Fit"]
+    var onNext: () -> Void
+    @State private var selectedMotivation: WorkoutMotivation? = nil
+    
+//    let motivations = ["Build Muscle", "Lose Weight", "Keep Fit"]
+    
+    private func saveAndNext() {
+        if let motivation = selectedMotivation {
+            surveyManager.updateTempWorkoutMotivation(motivation)
+            print("✅ Motivation saved: \(motivation.rawValue)")
+            onNext()
+        }
+    }
     
     var body: some View {
         VStack(spacing: 32) {
@@ -42,9 +53,9 @@ struct SurveyMotivationView: View {
             
             // MARK: - Button Options
             VStack(spacing: 12) {
-                ForEach(motivations, id: \.self) { goal in
+                ForEach(WorkoutMotivation.allCases, id: \.self) { goal in
                     SelectableButton(
-                        title: goal,
+                        title: goal.displayName,
                         isSelected: selectedMotivation == goal
                     ) {
                         // Single selection toggle
@@ -63,7 +74,7 @@ struct SurveyMotivationView: View {
             Spacer()
             
             // MARK: - Next Button
-            PrimaryGlassButton(title: "Next", action: onNext)
+            PrimaryGlassButton(title: "Next", action: saveAndNext)
                 .padding(.horizontal)
                 .padding(.vertical)
                 .disabled(selectedMotivation == nil)

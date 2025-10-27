@@ -11,12 +11,10 @@ import SwiftData
 @main
 struct WorkoutAppApp: App {
     
-    let modelContainer: ModelContainer
-    var iPhoneConnect = iPhoneConnectivityManager.shared
+    @StateObject private var router = Router()
+    @StateObject private var surveyManager = SurveyManager(modelContext: WorkoutAppApp.modelContainer.mainContext)
     
-    init() {
-        HealthKitManager.shared.requestAuthorization()
-
+    static let modelContainer: ModelContainer = {
         do {
             let schema = Schema([
                 UserProfile.self,
@@ -30,22 +28,31 @@ struct WorkoutAppApp: App {
                 cloudKitDatabase: .automatic // This enables CloudKit!
             )
             
-            modelContainer = try ModelContainer(
+            let container = try ModelContainer(
                 for: schema,
                 configurations: [modelConfiguration]
             )
             
-            modelContainer.mainContext.autosaveEnabled = true
+            container.mainContext.autosaveEnabled = true
             
+            return container
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }
+    }()
+    
+    var iPhoneConnect = iPhoneConnectivityManager.shared
+    
+    init() {
+        HealthKitManager.shared.requestAuthorization()
     }
     
     var body: some Scene {
         WindowGroup {
             SurveyView()
+                .environmentObject(router)
+                .environmentObject(surveyManager)
         }
-        .modelContainer(modelContainer)
+        .modelContainer(WorkoutAppApp.modelContainer)
     }
 }

@@ -10,6 +10,9 @@ import SwiftUI
 struct SurveyView: View {
     @EnvironmentObject var router: Router
     @State private var currentPage = 0
+    @EnvironmentObject var surveyManager: SurveyManager
+    @Environment(\.modelContext) private var modelContext
+//    @StateObject private var surveyManager: SurveyManager
     
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -85,6 +88,6 @@ struct SurveyView: View {
     }
 }
 
-#Preview {
-    SurveyView()
-}
+//#Preview {
+//    SurveyView()
+//}
