@@ -204,6 +204,9 @@ struct SurveyCycleView: View {
 
         }
         .background(Color.white.ignoresSafeArea())
+        .onAppear {
+            loadExistingSelections()
+        }
     }
     
     // MARK: - Helper Functions
@@ -301,6 +304,51 @@ struct CalendarDayButton: View {
 }
 
 extension SurveyCycleView {
+    
+    private func loadExistingSelections() {
+        if selectedMenstrualCycle.isEmpty {
+            selectedMenstrualCycle = [surveyManager.tempIsCycleRegular ? "Yes" : "No"]
+        }
+        
+        // 2. Load dates (only if they're not the default Date())
+        if selectedDates.isEmpty && surveyManager.tempCycleLength > 0 {
+            let startDate = surveyManager.tempCycleStartDate
+            let endDate = surveyManager.tempCycleEndDate
+            
+            // Calculate days between start and end
+            let daysBetween = calendar.dateComponents([.day],
+                                                      from: startDate,
+                                                      to: endDate).day ?? 0
+            
+            // Add all dates in the range
+            for i in 0...daysBetween {
+                if let date = calendar.date(byAdding: .day, value: i, to: startDate) {
+                    selectedDates.insert(date)
+                }
+            }
+            
+            // Set current month to the start date's month
+            if !selectedDates.isEmpty {
+                currentMonth = startDate
+            }
+        }
+        
+        // 3. Load symptoms (enum -> String conversion)
+        if selectedPhysicalSymptoms.isEmpty {
+            selectedPhysicalSymptoms = surveyManager.tempCycleSymptoms.map { $0.displayName }
+        }
+        
+        // 4. Load energy level
+        if selectedEnergyLevel.isEmpty {
+            selectedEnergyLevel = [surveyManager.tempCycleEnergy.displayName]
+        }
+        
+        // 5. Load mood
+        if selectedMoodChanges.isEmpty {
+            selectedMoodChanges = [surveyManager.tempCycleMoodAffectsMotivation.displayName]
+        }
+    }
+    
     private func saveAndFinish() {
         // 1. Save regularity
         if let regularityString = selectedMenstrualCycle.first {
@@ -348,6 +396,7 @@ extension SurveyCycleView {
         
         // Finalize cycle data
         surveyManager.finalizeUserCycle()
+        surveyManager.verifyLatestData()
         
         onFinish()
     }
@@ -356,3 +405,4 @@ extension SurveyCycleView {
 #Preview {
     SurveyCycleView(onFinish: {})
 }
+

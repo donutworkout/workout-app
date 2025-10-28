@@ -24,7 +24,9 @@ struct WorkoutDayView: View {
     }
     
     private func saveAndNext() {
-        let preferences: [WorkoutDayPreference] = selectedDays.compactMap { WorkoutDayPreference(rawValue: $0) }
+        let preferences: [WorkoutDayPreference] = selectedDays.compactMap { dayName in
+            WorkoutDayPreference.allCases.first { $0.displayName == dayName }
+        }
         surveyManager.updateTempWorkoutDaysPreference(preferences)
         
         surveyManager.finalizeUserWorkout()
@@ -106,6 +108,16 @@ struct WorkoutDayView: View {
             }
             .animation(.easeInOut, value: selectedDays)
             .background(Color.white.ignoresSafeArea())
+            .onAppear {
+                if selectedDays.isEmpty {
+                    let savedDays = surveyManager.tempWorkoutDaysPreference
+                    
+                    if !savedDays.isEmpty {
+                        selectedDays = savedDays.map { $0.displayName }
+                        print("✅ Loaded existing workout days: \(selectedDays)")
+                    }
+                }
+            }
             
             // MARK: - Custom Alert (HIG Style + Glass Button)
             if showCustomAlert {

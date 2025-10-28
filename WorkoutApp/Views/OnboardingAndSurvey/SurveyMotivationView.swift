@@ -81,6 +81,9 @@ struct SurveyMotivationView: View {
                 .opacity(selectedMotivation == nil ? 0.5 : 1)
             
         }
+        .onAppear {
+            selectedMotivation = surveyManager.tempWorkoutMotivation
+        }
     }
 }
 
