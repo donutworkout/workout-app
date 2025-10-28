@@ -149,12 +149,15 @@ struct SurveyBirthdayView: View {
                 .opacity(isNameFilled ? 1 : 0.5)
         }
         .background(Color.white.ignoresSafeArea())
-//        .onAppear {
-//          if surveyManager == nil {
-//              surveyManager = SurveyManager(modelContext: modelContext)
-//        }
-//          //checkCloudKitStatus()
-//      }
+        .onAppear {
+            if !surveyManager.tempName.isEmpty {
+                name = surveyManager.tempName
+            }
+            if surveyManager.tempAge > 0 {
+                let currentYear = Calendar.current.component(.year, from: Date())
+                selectedYear = currentYear - surveyManager.tempAge
+            }
+        }
     }
 }
 
