@@ -66,6 +66,7 @@ class UserCycle: Identifiable {
   var cycleEnergy: CycleEnergy = CycleEnergy.stable
   var cycleMoodAffectsMotivation: CycleMoodAffectsMotivation = CycleMoodAffectsMotivation.never
   var createdAt: Date = Date()
+
   
   @Relationship(deleteRule: .nullify)
   var user: UserProfile?
