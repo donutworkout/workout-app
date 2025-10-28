@@ -132,22 +132,33 @@ struct SurveyBirthdayView: View {
                     .foregroundColor(Color("pinkTextSecondary"))
                 
                 ZStack {
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(Color("pinkTextSecondary").opacity(0.8))
-                        .frame(height: 30)
-                        .padding(.horizontal, 8)
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.white)
+                        .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
+                    
+                    VStack {
+                        Spacer()
+                        Rectangle()
+                            .fill(Color("pinkTextPrimary").opacity(0.7))
+                            .frame(height: 30)
+                            .frame(width: 350)
+                            .cornerRadius(16)
+                        Spacer()
+                    }
+                    .allowsHitTesting(false)
                     
                     Picker("Year", selection: $selectedYear) {
                         ForEach(years, id: \.self) { year in
-                            Text(String(format: "%d", year))
+                            Text(String(year))
                                 .font(.title2)
+                                .foregroundColor(.black)
                         }
                     }
                     .pickerStyle(.wheel)
-                    .frame(height: 250)
-                    .compositingGroup()
+                    .frame(height: 150)
                     .clipped()
                 }
+                .frame(height: 180)
             }
             .padding(.horizontal)
             .glassEffect(in: .rect(cornerRadius: 25.0))
