@@ -10,6 +10,7 @@ import SwiftUI
 struct AdjustMenuStrengthView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedMenu: StrengthMenuType = .bodyweight
+    var onNext: () -> Void = {}
 
     // Workout data
     let bodyweightWorkouts: [WorkoutItem] = [
@@ -62,7 +63,7 @@ struct AdjustMenuStrengthView: View {
                 
                 // MARK: - Start Button
                 PrimaryGlassButton(title: "Start Now") {
-                    print("Workout started")
+                    onNext() // ✅ panggil router.navigateTo() nanti di RouterView
                 }
                 .padding(.horizontal)
                 .padding(.top, 16)

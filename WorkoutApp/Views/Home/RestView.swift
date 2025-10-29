@@ -9,6 +9,7 @@ import SwiftUI
 
 struct RestView: View {
     @Environment(\.dismiss) private var dismiss
+    var onNext: () -> Void = {}
     
     // MARK: - Props
     var restDuration: TimeInterval = 30
@@ -78,9 +79,9 @@ struct RestView: View {
                 NeutralGlassButton(title: "+10s") {
                     timeRemaining += 10
                 }
-                
+
                 NeutralGlassButton(title: "Next") {
-                    // Handle next action
+                    onNext() // ✅ Panggil closure dari RouterView
                 }
             }
             .padding(.horizontal)
@@ -100,7 +101,7 @@ struct RestView: View {
                 timeRemaining -= 1
             } else if timeRemaining == 0 {
                 timer.invalidate()
-                // Auto transition to next workout
+                onNext()
             }
         }
     }

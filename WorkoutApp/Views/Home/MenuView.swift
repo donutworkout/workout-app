@@ -1,9 +1,9 @@
 import SwiftUI
 
 struct MenuView: View {
+    @EnvironmentObject var router: Router
     @State private var selectedDay: Int = Calendar.current.component(.weekday, from: Date()) - 1
     
-    // Determine current phase (contoh sederhana)
     private var currentPhase: PhaseType {
         switch selectedDay {
         case 0, 2, 4, 6: return .menstrual
@@ -12,79 +12,48 @@ struct MenuView: View {
     }
     
     var body: some View {
-        NavigationStack {
-            ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 20) {
-                    
-                    // MARK: - Header
-                    Text("Menu")
-                        .font(.system(size: 34, weight: .bold))
-                        .foregroundColor(.black)
-                        .padding(.horizontal)
-                        .padding(.top, 16)
-                    
-                    // MARK: - Day Selector
-                    DaySelectorView(selectedDay: $selectedDay)
-                    
-                    // MARK: - Workout Card
-                    WorkoutCardView(phase: currentPhase)
-                    
-                    // MARK: - Today Phase Section
-                    Text("Today Phase")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(.black)
-                        .padding(.horizontal)
-                        .padding(.top, 8)
-                    
-                    PhaseCardView(phase: currentPhase)
-                    
-                    // MARK: - Streak Section
-                    Text("Streak")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(.black)
-                        .padding(.horizontal)
-                        .padding(.top, 8)
-                    
-                    StreakCardView(phase: currentPhase)
-                        .padding(.bottom, 100)
-                }
-            }
-            .background(Color.white.ignoresSafeArea())
-            .toolbar(.hidden, for: .navigationBar)
-        }
-    }
-}
-
-// MARK: - Day Selector
-struct DaySelectorView: View {
-    @Binding var selectedDay: Int
-    
-    var body: some View {
-        HStack(spacing: 8) {
-            ForEach(0..<7) { index in
-                Button {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        selectedDay = index
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 20) {
+                Text("Menu")
+                    .font(.system(size: 34, weight: .bold))
+                    .foregroundColor(.black)
+                    .padding(.horizontal)
+                    .padding(.top, 16)
+                
+                DaySelectorView(selectedDay: $selectedDay)
+                WorkoutCardView(phase: currentPhase, onStartWorkout: {
+                    if currentPhase == .menstrual {
+                        router.navigateTo(.adjustMenuCardio)
+                    } else {
+                        router.navigateTo(.adjustMenuStrength)
                     }
-                } label: {
-                    Circle()
-                        .fill(selectedDay == index ? Color("pinkTextPrimary") : Color("pinkTextTertiary"))
-                        .frame(width: 44, height: 44)
-                        .overlay(
-                            Text(String(Calendar.current.shortWeekdaySymbols[index].prefix(1)))
-                                .font(.system(size: 17, weight: .semibold))
-                                .foregroundColor(.white)
-                        )
-                }
+                })
+                Text("Today Phase")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(.black)
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+                
+                PhaseCardView(phase: currentPhase)
+                
+                Text("Streak")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(.black)
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+                
+                StreakCardView(phase: currentPhase)
+                    .padding(.bottom, 100)
             }
         }
-        .padding(.horizontal)
+        .background(Color.white.ignoresSafeArea())
     }
 }
 
-// MARK: - Workout Card
+// Update WorkoutCardView agar bisa terima callback
 struct WorkoutCardView: View {
     let phase: PhaseType
+    var onStartWorkout: () -> Void
     
     private var workoutInfo: (image: String, title: String, description: String) {
         switch phase {
@@ -116,10 +85,7 @@ struct WorkoutCardView: View {
                 Spacer()
             }
             
-            // ✅ pakai PrimaryGlassButton (no color)
-            PrimaryGlassButton(title: "Start Workout") {
-                print("Start workout tapped")
-            }
+            PrimaryGlassButton(title: "Start Workout", action: onStartWorkout)
         }
         .padding(20)
         .background(
@@ -127,6 +93,34 @@ struct WorkoutCardView: View {
                 .fill(Color.white)
                 .shadow(color: .black.opacity(0.06), radius: 10, x: 0, y: 4)
         )
+        .padding(.horizontal)
+    }
+}
+
+
+// MARK: - Day Selector
+struct DaySelectorView: View {
+    @Binding var selectedDay: Int
+    
+    var body: some View {
+        HStack(spacing: 8) {
+            ForEach(0..<7) { index in
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        selectedDay = index
+                    }
+                } label: {
+                    Circle()
+                        .fill(selectedDay == index ? Color("pinkTextPrimary") : Color("pinkTextTertiary"))
+                        .frame(width: 44, height: 44)
+                        .overlay(
+                            Text(String(Calendar.current.shortWeekdaySymbols[index].prefix(1)))
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundColor(.white)
+                        )
+                }
+            }
+        }
         .padding(.horizontal)
     }
 }

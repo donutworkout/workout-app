@@ -10,7 +10,6 @@ import SwiftData
 
 @main
 struct WorkoutAppApp: App {
-    
     @StateObject private var router = Router()
     @StateObject private var surveyManager = SurveyManager(modelContext: WorkoutAppApp.modelContainer.mainContext)
     
@@ -25,7 +24,7 @@ struct WorkoutAppApp: App {
             let modelConfiguration = ModelConfiguration(
                 schema: schema,
                 isStoredInMemoryOnly: false,
-                cloudKitDatabase: .automatic // This enables CloudKit!
+                cloudKitDatabase: .automatic
             )
             
             let container = try ModelContainer(
@@ -34,22 +33,15 @@ struct WorkoutAppApp: App {
             )
             
             container.mainContext.autosaveEnabled = true
-            
             return container
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }
     }()
     
-    var iPhoneConnect = iPhoneConnectivityManager.shared
-    
-    init() {
-        HealthKitManager.shared.requestAuthorization()
-    }
-    
     var body: some Scene {
         WindowGroup {
-            SurveyView()
+            RouterView()
                 .environmentObject(router)
                 .environmentObject(surveyManager)
         }

@@ -11,6 +11,7 @@ struct AdjustMenuCardioView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedMenu: String? = nil
     @State private var showCustomAlert = false
+    var onNext: () -> Void = {}
 
     // MARK: - Cardio Menu
     private let cardioMenu = [
@@ -58,7 +59,7 @@ struct AdjustMenuCardioView: View {
                     if selectedMenu == nil {
                         showCustomAlert = true
                     } else {
-                        print("Cardio started: \(selectedMenu ?? "")")
+                        onNext() // ✅ navigasi ke halaman berikut
                     }
                 }
                 .padding(.horizontal)

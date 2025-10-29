@@ -34,7 +34,7 @@ struct SurveyView: View {
                         WorkoutDayView(onNext: { currentPage += 1 })
                     case 5:
                         SurveyCycleView(onFinish: {
-                            router.navigateTo(.home)
+                            router.navigateTo(.tabBar)
                         })
                     default:
                         Text("Selesai ✅")
