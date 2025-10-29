@@ -66,19 +66,6 @@ struct ConnectWatchView: View {
                     }
                 }
                 
-                // Send Button (Pink Circle, White Icon)
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: onAllow) {
-                        Image(systemName: "arrow.up")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(width: 36, height: 36)
-                            .background(
-                                Circle()
-                                    .fill(Color("pinkTextPrimary"))
-                            )
-                    }
-                }
             }
         }
     }
