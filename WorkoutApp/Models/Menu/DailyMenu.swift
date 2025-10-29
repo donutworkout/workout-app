@@ -32,8 +32,8 @@ enum StrengthType: String, CaseIterable, Codable {
     case gym
 }
 
-
-struct DailyMenu: Identifiable {
+@Model
+class DailyMenu: Identifiable {
     var id: UUID = UUID()
     var dayNumber: Int //1-7
     var dayName: String
@@ -45,7 +45,6 @@ struct DailyMenu: Identifiable {
     //var restActivities: [RestActivity]?
     
     var isMenuComplete: Bool
-    
     
     var isStrength: Bool { category == .strength }
     var isCardio: Bool { category == .cardio }

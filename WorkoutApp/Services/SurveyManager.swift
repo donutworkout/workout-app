@@ -45,6 +45,31 @@ class SurveyManager : ObservableObject {
     var isWorkoutComplete: Bool = false
     var isCycleComplete: Bool = false
     
+    var currentCyclePhase: MenstrualPhase {
+        return CyclePhaseCalculator.calculateCurrentPhase(
+            lastPeriodStart: tempCycleStartDate,
+            cycleLength: tempCycleLength,
+            menstrualDuration: 5 //bisa diganti pake hasil dari rumus nanti
+        )
+    }
+    
+    var daysUntilNextPeriod: Int? {
+        guard let nextPeriod = CyclePhaseCalculator.predictNextPeriod(
+            lastPeriodStart: tempCycleStartDate,
+            cycleLength: tempCycleLength > 0 ? tempCycleLength : 28
+        ) else { return nil }
+        
+        let calendar = Calendar.current
+        return calendar.dateComponents([.day], from: Date(), to: nextPeriod).day
+    }
+    
+    var currentDayInCycle: Int {
+        let calendar = Calendar.current
+        let daysSinceStart = calendar.dateComponents([.day], from: tempCycleStartDate, to: Date()).day ?? 0
+
+        return (daysSinceStart % tempCycleLength) + 1
+    }
+    
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
         self.loadExistingData()
@@ -361,46 +386,6 @@ class SurveyManager : ObservableObject {
         }
     }
     
-    //    private func printData() {
-    //        print("✅ Saved successfully")
-    //        print("📋 Profile: \(tempName), \(tempAge), \(tempHeight)cm, \(tempWeight)kg")
-    //
-    //        // Print Workout data with displayNames
-    //        print("💪 Workout:")
-    //        print("  - Motivation: \(tempWorkoutMotivation.displayName)")
-    //        print("  - Frequency: \(tempWorkoutTimesAWeek.displayName)")
-    //        print("  - Duration: \(tempWorkoutDuration.displayName)")
-    //        print("  - Intensity: \(tempWorkoutIntensity.displayName)")
-    //        print("  - Experience: \(tempWorkoutExperience.displayName)")
-    //        print("  - Level: \(tempWorkoutLevel.displayName)")
-    //
-    //        // Print Workout Days Preference
-    //        if tempWorkoutDaysPreference.isEmpty {
-    //            print("  - Days Preference: None selected")
-    //        } else {
-    //            let daysString = tempWorkoutDaysPreference.map { $0.displayName }.joined(separator: ", ")
-    //            print("  - Days Preference: \(daysString)")
-    //        }
-    //
-    //        print("🌷 Cycle:")
-    //        print("  - Regular Cycle: \(tempIsCycleRegular)")
-    //        print("  - Start Date: \(tempCycleStartDate)")
-    //        print("  - End Date: \(tempCycleEndDate)")
-    //        print("  - Cycle Length: \(tempCycleLength)")
-    //
-    //        if tempCycleSymptoms.isEmpty {
-    //            print("  - Days Preference: None selected")
-    //        } else {
-    //            let symptomsString = tempCycleSymptoms.map { $0.displayName }.joined(separator: ", ")
-    //            print("  - Cycle Symptoms: \(symptomsString)")
-    //        }
-    //
-    //        print("  - Cycle Energy: \(tempCycleEnergy.displayName)")
-    //        print("  - Mood Affects Motivation: \(tempCycleMoodAffectsMotivation.displayName)")
-    //
-    //        print("🗄️ Database: \(modelContext.sqliteCommand)")
-    //    }
-    
     private func verifyLatestData() {
         print("\n🗄️ --- SwiftData Latest Data Check ---")
         
@@ -479,6 +464,7 @@ class SurveyManager : ObservableObject {
                 print(#"   • Symptoms: \((symptoms.isEmpty ? "None" : symptoms))"#)
                 print("   • Energy: \(cycle.cycleEnergy.displayName)")
                 print("   • Mood Affects Motivation: \(cycle.cycleMoodAffectsMotivation.displayName)")
+                print("   • Current Phase: \(currentCyclePhase)")
             } else {
                 print("💪 No saved workouts yet.")
             }
