@@ -25,6 +25,14 @@ enum CardioOptions: String, CaseIterable, Codable {
     case tennis
     case padel
     case soccer
+    
+    var displayName: String {
+        switch self {
+        case .outdoorWalk: return "Outdoor Walk"
+        case .indoorWalk: return "Indoor Walk"
+        default : return self.rawValue.capitalized
+        }
+    }
 }
 
 enum StrengthType: String, CaseIterable, Codable {
