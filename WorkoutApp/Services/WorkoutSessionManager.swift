@@ -172,45 +172,15 @@ func typesToRead(for activity: HKWorkoutActivityType) -> Set<HKObjectType> {
         HKQuantityType.quantityType(forIdentifier: .heartRate)!,
         HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)!,
         HKQuantityType.quantityType(forIdentifier: .appleExerciseTime)!,
-        HKQuantityType.quantityType(forIdentifier: .basalEnergyBurned)!
+        HKQuantityType.quantityType(forIdentifier: .basalEnergyBurned)!,
+        HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning)!,
+        HKQuantityType.quantityType(forIdentifier: .stepCount)!,
+        HKQuantityType.quantityType(forIdentifier: .distanceCycling)!,
+        HKQuantityType.quantityType(forIdentifier: .distanceSwimming)!,
+        HKQuantityType.quantityType(forIdentifier: .swimmingStrokeCount)!
+        
+        
     ]
-
-    switch activity {
-    case .running, .walking:
-        readTypes.insert(
-            HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning)!
-        )
-        readTypes.insert(
-            HKQuantityType.quantityType(forIdentifier: .stepCount)!
-        )
-
-    case .cycling:
-        readTypes.insert(
-            HKQuantityType.quantityType(forIdentifier: .distanceCycling)!
-        )
-
-    case .swimming:
-        readTypes.insert(
-            HKQuantityType.quantityType(forIdentifier: .distanceSwimming)!
-        )
-        readTypes.insert(
-            HKQuantityType.quantityType(forIdentifier: .swimmingStrokeCount)!
-        )
-
-    case .badminton, .basketball, .tennis, .volleyball, .soccer:
-        readTypes.insert(HKQuantityType.quantityType(forIdentifier: .vo2Max)!)
-
-    case .pilates, .coreTraining, .highIntensityIntervalTraining,
-        .traditionalStrengthTraining, .flexibility, .yoga, .martialArts:
-        readTypes.insert(
-            HKQuantityType.quantityType(
-                forIdentifier: .heartRateVariabilitySDNN
-            )!
-        )
-
-    default:
-        break
-    }
 
     return readTypes
 }

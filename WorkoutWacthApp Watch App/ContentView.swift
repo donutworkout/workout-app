@@ -8,17 +8,15 @@
 import SwiftUI
 
 struct ContentView: View {
+    @Environment(WatchConnectivityManager.self) private var connectivity
+    @Environment(WorkoutSessionManager.self) private var sessionManager
+
     var body: some View {
-        VStack {
-            Text("Watch App")
-            Button("Send Ping") {
-                WatchConnectivityManager.shared.sendMessage(["event": "ping"])
-            }
+        if connectivity.isReachable && connectivity.todayCategory != nil {
+            WatchWorkoutListView(sessionManager: _sessionManager, connectivity: _connectivity)
+        } else {
+            WatchNotConnectedView(connectivity: _connectivity)
         }
     }
 }
 
-
-#Preview {
-    ContentView()
-}

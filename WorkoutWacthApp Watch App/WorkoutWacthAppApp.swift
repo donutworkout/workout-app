@@ -14,9 +14,14 @@ struct WorkoutWacthApp_Watch_AppApp: App {
          HealthKitManager.shared.requestAuthorization()
      }
     
-    var body: some Scene {
-        WindowGroup {
-            WatchWorkoutListView()
+    @State private var sessionManager = WorkoutSessionManager()
+    @State private var connectivity = WatchConnectivityManager.shared
+        
+        var body: some Scene {
+            WindowGroup {
+                ContentView()
+                    .environment(sessionManager)
+                    .environment(connectivity)
+            }
         }
-    }
 }
