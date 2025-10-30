@@ -19,12 +19,10 @@ struct WatchActiveWorkoutView: View {
     
     var body: some View {
         VStack(spacing: 20) {
-            // Workout Type
             Text(workoutName)
                 .font(.headline)
                 .foregroundColor(.orange)
             
-            // Metrics - Using real data from WorkoutSessionManager
             VStack(spacing: 12) {
                 MetricView(
                     icon: "heart.fill",
@@ -56,7 +54,6 @@ struct WatchActiveWorkoutView: View {
             // Controls
             HStack(spacing: 20) {
                 Button {
-                    // Pause/Resume functionality can be added to WorkoutSessionManager
                 } label: {
                     Image(systemName: sessionManager.isRunning ? "pause.fill" : "play.fill")
                         .font(.title2)

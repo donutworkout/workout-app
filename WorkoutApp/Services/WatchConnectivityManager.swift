@@ -13,6 +13,7 @@ enum WorkoutCategory: String {
     case cardio
     case strength
 }
+
 @Observable
 class WatchConnectivityManager: NSObject {
     static let shared = WatchConnectivityManager()

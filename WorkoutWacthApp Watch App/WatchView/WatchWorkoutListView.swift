@@ -26,8 +26,8 @@ struct WatchWorkoutListView: View {
     ]
 
     let strengthWorkouts: [(String, HKWorkoutActivityType)] = [
-        ("Core Training", .coreTraining),
-        ("High Intensity Interval Training", .highIntensityIntervalTraining),
+//        ("Core Training", .coreTraining),
+//        ("High Intensity Interval Training", .highIntensityIntervalTraining),
         ("Traditional Strength Training", .traditionalStrengthTraining),
         ("Functional Strength Training", .functionalStrengthTraining),
 
