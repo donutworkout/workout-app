@@ -418,11 +418,8 @@ class SurveyManager : ObservableObject {
         }
     }
     
-<<<<<<< HEAD
+
     private func verifyLatestData() {
-=======
-    func verifyLatestData() {
->>>>>>> origin/develop
         print("\n🗄️ --- SwiftData Latest Data Check ---")
         
         do {
