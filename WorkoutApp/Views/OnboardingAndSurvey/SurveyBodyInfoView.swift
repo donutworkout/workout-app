@@ -55,10 +55,10 @@ struct SurveyBodyInfoView: View {
         VStack(spacing: 32) {
             
             // MARK: - Header
-            Text("Survey")
-                .font(.headline)
-                .foregroundColor(.black)
-                .padding(.top, 20)
+//            Text("Survey")
+//                .font(.headline)
+//                .foregroundColor(.black)
+//                .padding(.top, 20)
             
             // MARK: - Title & Character
             VStack(spacing: 16) {
@@ -147,11 +147,15 @@ struct SurveyBodyInfoView: View {
                 selection: $selectedWeight
             )
         }
-//        .onAppear {
-//            if surveyManager == nil {
-//                surveyManager = SurveyManager(modelContext: modelContext)
-//            }
-//        }
+        .onAppear {
+            if surveyManager.tempHeight > 0 {
+                selectedHeight = surveyManager.tempHeight
+            }
+            
+            if surveyManager.tempWeight > 0 {
+                selectedWeight = surveyManager.tempWeight
+            }
+        }
     }
 }
 

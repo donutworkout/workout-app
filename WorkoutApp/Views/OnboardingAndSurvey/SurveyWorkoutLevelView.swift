@@ -55,10 +55,10 @@ struct SurveyWorkoutLevelView: View {
                 VStack(spacing: 32) {
                     
                     // MARK: - Header
-                    Text("Survey")
-                        .font(.headline)
-                        .foregroundColor(.black)
-                        .padding(.top, 20)
+//                    Text("Survey")
+//                        .font(.headline)
+//                        .foregroundColor(.black)
+//                        .padding(.top, 20)
                     
                     // MARK: - Title & Character
                     HStack(alignment: .top) {
@@ -125,6 +125,13 @@ struct SurveyWorkoutLevelView: View {
             
         }
         .background(Color.white.ignoresSafeArea())
+        .onAppear {
+            // Initialize selections from surveyManager, converting to display-name arrays
+            selectedFrequency = [surveyManager.tempWorkoutTimesAWeek.displayName]
+            selectedDuration = [surveyManager.tempWorkoutDuration.displayName]
+            selectedIntensity = [surveyManager.tempWorkoutIntensity.displayName]
+            selectedExperience = [surveyManager.tempWorkoutExperience.displayName]
+        }
     }
 }
 
