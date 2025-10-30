@@ -16,7 +16,7 @@ class UserProfile: Identifiable {
   var weight: Int = 0
   var height: Int = 0
   var createdAt: Date = Date()
-    
+
   @Relationship(deleteRule: .cascade, inverse: \UserWorkout.user)
   var userWorkouts: [UserWorkout]?
   

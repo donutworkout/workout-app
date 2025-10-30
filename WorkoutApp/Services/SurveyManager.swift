@@ -76,52 +76,85 @@ class SurveyManager : ObservableObject {
     }
     
     private func loadExistingData() {
-        // Load UserProfile if exists
-        let profileDescriptor = FetchDescriptor<UserProfile>()
-        if let existingProfile = try? modelContext.fetch(profileDescriptor).first {
-            userProfile = existingProfile
+        // MARK: - UserProfile
+        var profileDescriptor = FetchDescriptor<UserProfile>(sortBy: [SortDescriptor(\.createdAt, order: .reverse)])
+        if let profiles = try? modelContext.fetch(profileDescriptor), !profiles.isEmpty {
+            userProfile = profiles.first
             isProfileComplete = true
             
-            // Populate temp data from existing profile
-            tempName = existingProfile.name
-            tempAge = existingProfile.age
-            tempWeight = existingProfile.weight
-            tempHeight = existingProfile.height
+            // Delete extras
+            if profiles.count > 1 {
+                for extra in profiles.dropFirst() {
+                    modelContext.delete(extra)
+                }
+                try? modelContext.save()
+                print("🧹 Deleted duplicate UserProfiles (\(profiles.count - 1))")
+            }
+            
+            // Populate temp data
+            if let existingProfile = userProfile {
+                tempName = existingProfile.name
+                tempAge = existingProfile.age
+                tempWeight = existingProfile.weight
+                tempHeight = existingProfile.height
+            }
         }
-        
-        // Load UserWorkout if exists
-        let workoutDescriptor = FetchDescriptor<UserWorkout>()
-        if let existingWorkout = try? modelContext.fetch(workoutDescriptor).first {
-            userWorkout = existingWorkout
+
+        // MARK: - UserWorkout
+        var workoutDescriptor = FetchDescriptor<UserWorkout>(sortBy: [SortDescriptor(\.createdAt, order: .reverse)])
+        if let workouts = try? modelContext.fetch(workoutDescriptor), !workouts.isEmpty {
+            userWorkout = workouts.first
             isWorkoutComplete = true
             
-            // Populate temp data from existing workout
-            tempWorkoutMotivation = existingWorkout.workoutMotivation
-            tempWorkoutTimesAWeek = existingWorkout.workoutTimesAWeek
-            tempWorkoutDuration = existingWorkout.workoutDuration
-            tempWorkoutIntensity = existingWorkout.workoutIntensity
-            tempWorkoutExperience = existingWorkout.workoutExperience
-            tempWorkoutLevel = existingWorkout.workoutLevel
-            tempWorkoutDaysPreference = existingWorkout.workoutDaysPreference
+            // Delete extras
+            if workouts.count > 1 {
+                for extra in workouts.dropFirst() {
+                    modelContext.delete(extra)
+                }
+                try? modelContext.save()
+                print("🧹 Deleted duplicate UserWorkouts (\(workouts.count - 1))")
+            }
+            
+            // Populate temp data
+            if let existingWorkout = userWorkout {
+                tempWorkoutMotivation = existingWorkout.workoutMotivation
+                tempWorkoutTimesAWeek = existingWorkout.workoutTimesAWeek
+                tempWorkoutDuration = existingWorkout.workoutDuration
+                tempWorkoutIntensity = existingWorkout.workoutIntensity
+                tempWorkoutExperience = existingWorkout.workoutExperience
+                tempWorkoutLevel = existingWorkout.workoutLevel
+                tempWorkoutDaysPreference = existingWorkout.workoutDaysPreference
+            }
         }
-        
-        // Load UserCycle if exists
-        let cycleDescriptor = FetchDescriptor<UserCycle>()
-        if let existingCycle = try? modelContext.fetch(cycleDescriptor).first {
-            userCycle = existingCycle
+
+        // MARK: - UserCycle
+        var cycleDescriptor = FetchDescriptor<UserCycle>(sortBy: [SortDescriptor(\.createdAt, order: .reverse)])
+        if let cycles = try? modelContext.fetch(cycleDescriptor), !cycles.isEmpty {
+            userCycle = cycles.first
             isCycleComplete = true
             
-            // Populate temp data from existing cycle
-            tempIsCycleRegular = existingCycle.isCycleRegular
-            tempCycleStartDate = existingCycle.cycleStartDate
-            tempCycleEndDate = existingCycle.cycleEndDate
-            tempCycleLength = existingCycle.cycleLength
-            tempCycleSymptoms = existingCycle.cycleSymptoms
-            tempCycleEnergy = existingCycle.cycleEnergy
-            tempCycleMoodAffectsMotivation = existingCycle.cycleMoodAffectsMotivation
+            // Delete extras
+            if cycles.count > 1 {
+                for extra in cycles.dropFirst() {
+                    modelContext.delete(extra)
+                }
+                try? modelContext.save()
+                print("🧹 Deleted duplicate UserCycles (\(cycles.count - 1))")
+            }
+            
+            // Populate temp data
+            if let existingCycle = userCycle {
+                tempIsCycleRegular = existingCycle.isCycleRegular
+                tempCycleStartDate = existingCycle.cycleStartDate
+                tempCycleEndDate = existingCycle.cycleEndDate
+                tempCycleLength = existingCycle.cycleLength
+                tempCycleSymptoms = existingCycle.cycleSymptoms
+                tempCycleEnergy = existingCycle.cycleEnergy
+                tempCycleMoodAffectsMotivation = existingCycle.cycleMoodAffectsMotivation
+            }
         }
-        
     }
+
     
     func calculateWorkoutLevel() -> WorkoutLevel {
         // Extract values from temp variables
@@ -380,13 +413,16 @@ class SurveyManager : ObservableObject {
     private func save() {
         do {
             try modelContext.save()
-            verifyLatestData()
         } catch {
             print("Failed to save: \(error)")
         }
     }
     
+<<<<<<< HEAD
     private func verifyLatestData() {
+=======
+    func verifyLatestData() {
+>>>>>>> origin/develop
         print("\n🗄️ --- SwiftData Latest Data Check ---")
         
         do {

@@ -27,10 +27,10 @@ struct SurveyMotivationView: View {
     var body: some View {
         VStack(spacing: 32) {
             // MARK: - Header
-            Text("Survey")
-                .font(.headline)
-                .foregroundColor(.black)
-                .padding(.top, 20)
+//            Text("Survey")
+//                .font(.headline)
+//                .foregroundColor(.black)
+//                .padding(.top, 20)
             
             // MARK: - Title & Character
             VStack(spacing: 16) {
@@ -80,6 +80,9 @@ struct SurveyMotivationView: View {
                 .disabled(selectedMotivation == nil)
                 .opacity(selectedMotivation == nil ? 0.5 : 1)
             
+        }
+        .onAppear {
+            selectedMotivation = surveyManager.tempWorkoutMotivation
         }
     }
 }
