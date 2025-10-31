@@ -60,7 +60,7 @@ struct ConnectWatchView: View {
             .toolbar {
                 // Close Button (X)
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(action: { router.navigateTo(.menu) }) {
+                    Button(action: { router.navigateTo(.onboarding) }) {
                         Image(systemName: "xmark")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.black)
