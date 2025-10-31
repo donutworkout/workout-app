@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import HealthKit
 
 struct AdjustMenuStrengthView: View {
     @Environment(\.dismiss) private var dismiss
@@ -50,6 +51,16 @@ struct AdjustMenuStrengthView: View {
                 .pickerStyle(.segmented)
                 .padding(.horizontal)
                 .padding(.top, 8)
+                .onChange(of: selectedMenu) { _, newValue in
+                    let workoutType: HKWorkoutActivityType
+                    switch newValue {
+                    case .bodyweight:
+                        workoutType = .functionalStrengthTraining
+                    case .gym:
+                        workoutType = .traditionalStrengthTraining
+                    }
+                    iPhoneConnectivityManager.shared.sendSelectedWorkout(workoutType)
+                }
                 
                 // MARK: - Workout Cards
                 VStack(spacing: 16) {

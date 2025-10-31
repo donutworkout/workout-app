@@ -17,6 +17,8 @@ func mapActivityToHKType(_ activity: String) -> HKWorkoutActivityType {
     case "Volleyball": return .volleyball
     case "Tennis", "Padel": return .tennis
     case "Soccer": return .soccer
+    case "Bodyweight": return .functionalStrengthTraining
+    case "Gym": return .traditionalStrengthTraining
     default: return .other
     }
 }
@@ -32,6 +34,8 @@ extension HKWorkoutActivityType {
         case .volleyball: return "Volleyball"
         case .tennis: return "Tennis"
         case .soccer: return "Soccer"
+        case .functionalStrengthTraining: return "Bodyweight"
+        case .traditionalStrengthTraining: return "Gym"
         default: return "Workout"
         }
     }

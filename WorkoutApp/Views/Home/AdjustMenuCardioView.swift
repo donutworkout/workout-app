@@ -135,8 +135,6 @@ struct AdjustMenuCardioView: View {
             let type = mapActivityToHKType(activity)
             
             iPhoneConnectivityManager.shared.sendSelectedWorkout(type)
-            //print("📲 User picked: \(activity) — mapped to \(type.displayName)")
-            
         }
     }
 
