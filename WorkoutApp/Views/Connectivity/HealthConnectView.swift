@@ -9,6 +9,7 @@ import SwiftUI
 
 struct HealthConnectView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var router: Router
     
     var onAllow: () -> Void = {}
     var onSkip: () -> Void = {}
@@ -70,7 +71,7 @@ struct HealthConnectView: View {
             .toolbar {
                 // Default Close Button (X)
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(action: { dismiss() }) {
+                    Button(action: { router.navigateTo(.onboarding) }) {
                         Image(systemName: "xmark")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.black)

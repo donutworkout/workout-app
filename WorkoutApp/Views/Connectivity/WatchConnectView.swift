@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ConnectWatchView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var router: Router
     
     var onAllow: () -> Void = {}
     var onSkip: () -> Void = {}
@@ -59,7 +60,7 @@ struct ConnectWatchView: View {
             .toolbar {
                 // Close Button (X)
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(action: { dismiss() }) {
+                    Button(action: { router.navigateTo(.menu) }) {
                         Image(systemName: "xmark")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.black)

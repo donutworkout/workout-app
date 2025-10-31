@@ -11,7 +11,8 @@ import HealthKit
 struct AdjustMenuStrengthView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedMenu: StrengthMenuType = .bodyweight
-    var onNext: () -> Void = {}
+    @EnvironmentObject var router: Router
+    var onNext: (() -> Void)? = nil
 
     // Workout data
     let bodyweightWorkouts: [WorkoutItem] = [
@@ -74,7 +75,8 @@ struct AdjustMenuStrengthView: View {
                 
                 // MARK: - Start Button
                 PrimaryGlassButton(title: "Start Now") {
-                    onNext() // ✅ panggil router.navigateTo() nanti di RouterView
+                    router.lastWorkoutSource = .adjustMenuStrength
+                    router.navigateTo(.countdownView)
                 }
                 .padding(.horizontal)
                 .padding(.top, 16)
@@ -86,7 +88,8 @@ struct AdjustMenuStrengthView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Button(action: { dismiss() }) {
+                Button(action: {
+                    router.navigateTo(.menu) }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.black)

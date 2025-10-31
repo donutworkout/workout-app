@@ -68,6 +68,7 @@ struct SurveyBirthdayView: View {
                         
                         TextField("Answer", text: $name)
                             .textInputAutocapitalization(.words)
+                            .foregroundStyle(.black)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 12)
                             .background(
@@ -143,3 +144,4 @@ struct SurveyBirthdayView: View {
     SurveyBirthdayView(onNext: {})
         .environmentObject(SurveyManager(modelContext: ModelContext(try! ModelContainer(for: UserProfile.self))))
 }
+

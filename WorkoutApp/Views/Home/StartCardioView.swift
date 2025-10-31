@@ -9,6 +9,7 @@ import SwiftUI
 
 struct StartCardioView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var router: Router
     
     // MARK: - Props
     var activityName: String = "Indoor Walk"
@@ -70,8 +71,8 @@ struct StartCardioView: View {
                 }
                 
                 PrimaryGlassButton(title: "Done") {
+                    router.navigateTo(.menu)
                     timer?.invalidate()
-                    dismiss()
                 }
             }
             .padding(.horizontal)
@@ -84,7 +85,7 @@ struct StartCardioView: View {
             ToolbarItem(placement: .topBarLeading) {
                 Button(action: {
                     timer?.invalidate()
-                    dismiss()
+                    router.navigateTo(.menu)
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .semibold))
