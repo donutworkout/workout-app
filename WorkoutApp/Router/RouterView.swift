@@ -3,12 +3,12 @@ import SwiftUI
 struct RouterView: View {
     @EnvironmentObject var router: Router
     @EnvironmentObject var surveyManager: SurveyManager
-
+    
     var body: some View {
         NavigationStack {
             switch router.currentRoute {
                 
-            // MARK: - Onboarding & Setup Flow
+                // MARK: - Onboarding & Setup Flow
             case .onboarding:
                 OnboardingView()
                     .environmentObject(router)
@@ -32,7 +32,7 @@ struct RouterView: View {
                     .environmentObject(router)
                     .environmentObject(surveyManager)
                 
-            // MARK: - Main App Flow
+                // MARK: - Main App Flow
             case .tabBar:
                 TabBarView()
                     .environmentObject(router)
@@ -43,11 +43,11 @@ struct RouterView: View {
                     .environmentObject(router)
                     .environmentObject(surveyManager)
                 
-            // MARK: - Workout Flow
+                // MARK: - Workout Flow
             case .adjustMenuCardio:
                 AdjustMenuCardioView()
                     .environmentObject(router)
-
+                
             case .adjustMenuStrength:
                 AdjustMenuStrengthView()
                     .environmentObject(router)
@@ -66,14 +66,18 @@ struct RouterView: View {
                 })
                 .environmentObject(router)
                 
-            // MARK: - Profile Section Routes
-            case .surveyBodyInfo:
-                SurveyBodyInfoView(onNext: {})
-                    .environmentObject(surveyManager)
+                // MARK: - Profile Section Routes
+            case .profile:
+                ProfileView()
+                    .environmentObject(router)
                 
-            case .surveyMotivation:
-                SurveyMotivationView(onNext: {})
-                    .environmentObject(surveyManager)
+            case .editBodyInfo:
+                EditBodyInfoView()
+                    .environmentObject(router)
+                
+            case .editMotivation:
+                EditMotivationView()
+                    .environmentObject(router)
                 
             case .editProfile:
                 EditProfileView()
@@ -91,6 +95,20 @@ struct RouterView: View {
                     AdjustMenuStrengthView()
                         .environmentObject(router)
                 }
+            case .countdownView:
+                CountdownView(onCountdownComplete: {
+                    if let last = router.lastWorkoutSource {
+                        switch last {
+                        case .adjustMenuCardio:
+                            router.navigateTo(.startCardio)
+                        case .adjustMenuStrength:
+                            router.navigateTo(.startStrength)
+                        default:
+                            router.navigateTo(.menu)
+                        }
+                    }
+                })
+                .environmentObject(router)
             }
         }
     }

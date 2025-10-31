@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct EditProfileView: View {
+    @EnvironmentObject var router: Router
     @State private var name: String = "Si Jamety"
     @State private var yearOfBirth: String = "2003"
     @State private var height: String = "155 cm"
@@ -15,24 +16,29 @@ struct EditProfileView: View {
     @State private var goal: String = "Lose weight"
     @State private var workout: String = "Bodyweight"
     @State private var isEditing: Bool = false
-    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         VStack(spacing: 20) {
             
-            // MARK: - Header (pakai HeaderButton)
+            // ✅ Pakai HeaderButton bawaan
             HeaderButton(
                 title: "Edit Profile",
                 isEditing: isEditing,
-                onClose: { dismiss() },
+                onClose: {
+                    router.navigateTo(.profile) // ❌ back ke profile
+                },
                 onEditToggle: {
                     withAnimation {
-                        isEditing.toggle()
+                        if isEditing {
+                            // Simpan perubahan
+                            print("Profile saved ✅")
+                            router.navigateTo(.profile) // ✅ setelah finish juga balik ke profile
+                        } else {
+                            isEditing = true
+                        }
                     }
                 }
             )
-            .padding(.horizontal)
-            .padding(.top, 8)
             
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
@@ -47,15 +53,17 @@ struct EditProfileView: View {
                                 .frame(width: 100, height: 100)
                                 .clipShape(Circle())
                             
-                            Circle()
-                                .fill(Color("pinkTextSecondary"))
-                                .frame(width: 36, height: 36)
-                                .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
-                                .overlay(
-                                    Image(systemName: "camera.fill")
-                                        .foregroundColor(.white)
-                                        .font(.system(size: 16, weight: .semibold))
-                                )
+                            if isEditing {
+                                Circle()
+                                    .fill(Color("pinkTextSecondary"))
+                                    .frame(width: 36, height: 36)
+                                    .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
+                                    .overlay(
+                                        Image(systemName: "camera.fill")
+                                            .foregroundColor(.white)
+                                            .font(.system(size: 16, weight: .semibold))
+                                    )
+                            }
                         }
                         .padding(.top, 10)
                         
@@ -66,7 +74,7 @@ struct EditProfileView: View {
                             ProfileTextField(title: "Height", text: $height, isEditing: isEditing)
                             ProfileTextField(title: "Weight", text: $weight, isEditing: isEditing)
                             ProfileTextField(title: "Goal", text: $goal, isEditing: isEditing)
-                            ProfileTextField(title: "Preferenced Workout", text: $workout, isEditing: isEditing)
+                            ProfileTextField(title: "Preferred Workout", text: $workout, isEditing: isEditing)
                         }
                     }
                     .padding()
@@ -77,12 +85,16 @@ struct EditProfileView: View {
                     )
                     .padding(.horizontal)
                     
-                    PrimaryGlassButton(title: "Done") {
-                        print("Profile saved ✅")
+                    // Optional: manual Save button
+                    if isEditing {
+                        PrimaryGlassButton(title: "Save Changes") {
+                            print("Profile saved ✅")
+                            router.navigateTo(.profile)
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 4)
+                        .padding(.bottom, 40)
                     }
-                    .padding(.horizontal)
-                    .padding(.top, 4)
-                    .padding(.bottom, 40)
                 }
             }
         }
@@ -117,4 +129,5 @@ struct ProfileTextField: View {
 
 #Preview {
     EditProfileView()
+        .environmentObject(Router())
 }

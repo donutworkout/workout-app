@@ -35,22 +35,22 @@ struct ProfileView: View {
             // MARK: - Personalize Section
             Text("PERSONALIZE")
                 .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(.grayTextPrimary)
+                .foregroundColor(.gray)
                 .padding(.horizontal)
                 .padding(.bottom, -20)
             
             VStack(spacing: 0) {
-                // Body Measurement → SurveyBodyInfo
+                // Body Measurement → Edit Body Info
                 Button {
-                    router.navigateTo(.surveyBodyInfo)
+                    router.navigateTo(.editBodyInfo)
                 } label: {
                     ProfileRow(icon: "figure.arms.open", title: "Body Measurement")
                 }
                 Divider().padding(.leading, 52)
-                
-                // Change Goal → SurveyMotivation
+
+                // Change Goal → Edit Motivation
                 Button {
-                    router.navigateTo(.surveyMotivation)
+                    router.navigateTo(.editMotivation)
                 } label: {
                     ProfileRow(icon: "face.smiling", title: "Change Goal")
                 }
@@ -73,7 +73,7 @@ struct ProfileView: View {
             // MARK: - Menstrual Cycle Section
             Text("MENSTRUAL CYCLE")
                 .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(.grayTextPrimary)
+                .foregroundColor(.gray)
                 .padding(.horizontal)
                 .padding(.bottom, -20)
             
@@ -82,18 +82,18 @@ struct ProfileView: View {
             } label: {
                 HStack {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("You’re on Day 14 - Ovulation phase")
+                        Text("You're on Day 14 - Ovulation phase")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.black)
                         Text("Next period predicted: 25 October 2025")
                             .font(.system(size: 14))
-                            .foregroundColor(.grayTextPrimary)
+                            .foregroundColor(.gray)
                     }
                     
                     Spacer()
                     Image(systemName: "chevron.right")
                         .font(.system(size: 14))
-                        .foregroundColor(.grayTextPrimary)
+                        .foregroundColor(.gray)
                 }
                 .padding()
                 .background(
@@ -113,5 +113,5 @@ struct ProfileView: View {
 
 #Preview {
     ProfileView()
-        .environmentObject(Router()) // biar preview-nya jalan
+        .environmentObject(Router())
 }
