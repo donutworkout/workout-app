@@ -11,6 +11,8 @@ struct AdjustMenuCardioView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedMenu: String? = nil
     @State private var showCustomAlert = false
+    var onNext: () -> Void = {}
+    @EnvironmentObject var router: Router
 
     // MARK: - Cardio Menu
     private let cardioMenu = [
@@ -58,7 +60,8 @@ struct AdjustMenuCardioView: View {
                     if selectedMenu == nil {
                         showCustomAlert = true
                     } else {
-                        print("Cardio started: \(selectedMenu ?? "")")
+                        router.lastWorkoutSource = .adjustMenuCardio
+                        router.navigateTo(.countdownView)
                     }
                 }
                 .padding(.horizontal)
@@ -116,7 +119,7 @@ struct AdjustMenuCardioView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Button(action: { dismiss() }) {
+                Button(action: { router.navigateTo(.menu) }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.black)

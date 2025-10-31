@@ -6,11 +6,9 @@
 //
 
 import SwiftUI
-import CloudKit
 import SwiftData
 
 struct SurveyBirthdayView: View {
-    //@Environment(\.modelContext) private var modelContext
     @EnvironmentObject var surveyManager: SurveyManager
   
     @State private var selectedYear: Int = 2003
@@ -32,132 +30,102 @@ struct SurveyBirthdayView: View {
     private func saveAndNext() {
         surveyManager.updateTempName(name.trimmingCharacters(in: .whitespaces))
         surveyManager.updateTempAge(calculateAge)
-      
-        print("na saved, \(name), \(calculateAge)")
+        print("✅ Saved: \(name), \(calculateAge)")
         onNext()
     }
-    
-//    
-//    func checkCloudKitStatus() {
-//      CKContainer.default().accountStatus { status, error in
-//          switch status {
-//          case .available:
-//              print("✅ iCloud available")
-//          case .noAccount:
-//              print("❌ No iCloud account")
-//          case .restricted:
-//              print("❌ iCloud restricted")
-//          case .couldNotDetermine:
-//              print("⚠️ Could not determine iCloud status")
-//          case .temporarilyUnavailable:
-//              print("⚠️ iCloud temporarily unavailable")
-//          @unknown default:
-//              print("⚠️ Unknown iCloud status")
-//          }
-//          
-//          if let error = error {
-//              print("❌ CloudKit error: \(error.localizedDescription)")
-//          }
-//      }
-//    }
-  
+
     var body: some View {
-        VStack(spacing: 32) {
-            
-            // MARK: - Header
-//            Text("Survey")
-//                .font(.headline)
-//                .foregroundColor(.black)
-//                .padding(.top, 20)
-            
-            // MARK: - Title & Character
-            VStack(spacing: 16) {
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        SurveyProgressText(currentPage: 1, totalPages: 6)
-                        
-                        Text("Get to know you more!")
-                            .font(.system(.title, weight: .semibold))
-                            .foregroundColor(Color("pinkTextPrimary"))
-                            .lineLimit(nil) // memastikan tidak terpotong
-                            .fixedSize(horizontal: false, vertical: true) // biar wrap teks
-                    }
-                    Spacer()
-                    Image("characterSurvey")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 120)
-                }
-            }
-            .padding(.top, 10)
-            .padding(.horizontal)
-            
-            // MARK: - Name
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Name")
-                    .font(.title3)
-                    .bold()
-                    .foregroundColor(Color("pinkTextSecondary"))
-                
-                TextField("Answer", text: $name)
-                    .textInputAutocapitalization(.words)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.white)
-                            .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
-                    )
-            }
-            .padding(.horizontal)
-            
-            // MARK: - Year Picker
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Year of Birth")
-                    .font(.title3)
-                    .bold()
-                    .foregroundColor(Color("pinkTextSecondary"))
-                
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.white)
-                        .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
+        VStack {
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 32) {
                     
-                    VStack {
-                        Spacer()
-                        Rectangle()
-                            .fill(Color("pinkTextPrimary").opacity(0.7))
-                            .frame(height: 30)
-                            .frame(width: 350)
-                            .cornerRadius(16)
-                        Spacer()
-                    }
-                    .allowsHitTesting(false)
-                    
-                    Picker("Year", selection: $selectedYear) {
-                        ForEach(years, id: \.self) { year in
-                            Text(String(year))
-                                .font(.title2)
-                                .foregroundColor(.black)
+                    // MARK: - Header & Title (tanpa garis)
+                    HStack(alignment: .top) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            SurveyProgressText(currentPage: 1, totalPages: 6)
+                            
+                            Text("Get to know you more!")
+                                .font(.system(.title, weight: .semibold))
+                                .foregroundColor(Color("pinkTextPrimary"))
+                                .lineLimit(nil)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
+                        Spacer()
+                        Image("characterSurvey")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 120)
                     }
-                    .pickerStyle(.wheel)
-                    .frame(height: 150)
-                    .clipped()
+                    .padding(.horizontal)
+                    .padding(.top, 10)
+                    
+                    // MARK: - Name Input
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Name")
+                            .font(.title3)
+                            .bold()
+                            .foregroundColor(Color("pinkTextSecondary"))
+                        
+                        TextField("Answer", text: $name)
+                            .textInputAutocapitalization(.words)
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.white)
+                                    .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
+                            )
+                    }
+                    .padding(.horizontal)
+                    
+                    // MARK: - Year Picker
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Year of Birth")
+                            .font(.title3)
+                            .bold()
+                            .foregroundColor(Color("pinkTextSecondary"))
+                        
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.white)
+                                .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
+                            
+                            VStack {
+                                Spacer()
+                                Rectangle()
+                                    .fill(Color("pinkTextPrimary").opacity(0.7))
+                                    .frame(height: 30)
+                                    .frame(width: 350)
+                                    .cornerRadius(16)
+                                Spacer()
+                            }
+                            .allowsHitTesting(false)
+                            
+                            Picker("Year", selection: $selectedYear) {
+                                ForEach(years, id: \.self) { year in
+                                    Text(String(year))
+                                        .font(.title2)
+                                        .foregroundColor(.black)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                            .frame(height: 150)
+                            .clipped()
+                        }
+                        .frame(height: 180)
+                    }
+                    .padding(.horizontal)
+                    
+                    // MARK: - Next Button
+                    PrimaryGlassButton(title: "Next", action: saveAndNext)
+                        .padding(.horizontal)
+                        .padding(.bottom, 40)
+                        .disabled(!isNameFilled)
+                        .opacity(isNameFilled ? 1 : 0.5)
                 }
-                .frame(height: 180)
+                .padding(.bottom, 100)
             }
-            .padding(.horizontal)
-            .glassEffect(in: .rect(cornerRadius: 25.0))
-            
-            Spacer()
-            
-            // MARK: - Next Button (disabled kalau nama kosong)
-            PrimaryGlassButton(title: "Next", action: saveAndNext)
-                .padding(.horizontal)
-                .padding(.vertical)
-                .disabled(!isNameFilled)
-                .opacity(isNameFilled ? 1 : 0.5)
         }
         .background(Color.white.ignoresSafeArea())
         .onAppear {
@@ -174,4 +142,6 @@ struct SurveyBirthdayView: View {
 
 #Preview {
     SurveyBirthdayView(onNext: {})
+        .environmentObject(SurveyManager(modelContext: ModelContext(try! ModelContainer(for: UserProfile.self))))
 }
+

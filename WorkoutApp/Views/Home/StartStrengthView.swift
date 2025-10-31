@@ -9,6 +9,7 @@ import SwiftUI
 
 struct StartStrengthView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var router: Router
     
     var workoutName: String = "Bridge"
     var reps: String = "3 x 12"
@@ -48,7 +49,7 @@ struct StartStrengthView: View {
                 
                 NeutralGlassButton(title: "Next") {
                     timer?.invalidate()
-                    dismiss()
+                    router.navigateTo(.menu)
                 }
             }
             .padding(.bottom, 40)
@@ -61,7 +62,7 @@ struct StartStrengthView: View {
             ToolbarItem(placement: .topBarLeading) {
                 Button(action: {
                     timer?.invalidate()
-                    dismiss()
+                    router.navigateTo(.menu)
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .semibold))
