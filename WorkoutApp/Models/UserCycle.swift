@@ -17,7 +17,7 @@ enum CycleSymptoms: String, Codable, CaseIterable {
     
     var displayName: String {
         switch self {
-        case .cramps: return "Cramps"
+        case .cramps: return "Crampss"
         case .backPain: return "Back Pain"
         case .fatigue: return "Fatigue / Low Energy"
         case .moodSwing: return "Mood Swing"

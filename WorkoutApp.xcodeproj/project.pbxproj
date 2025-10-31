@@ -545,6 +545,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WorkoutApp/Info.plist;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "We need your permission for this app to read Health data";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "We need your permission for this app to write Health data";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -578,6 +579,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WorkoutApp/Info.plist;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "We need your permission for this app to read Health data";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "We need your permission for this app to write Health data";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
