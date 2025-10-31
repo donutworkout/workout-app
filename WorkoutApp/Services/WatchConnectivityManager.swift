@@ -8,6 +8,7 @@
 import WatchConnectivity
 import Foundation
 import Combine
+import HealthKit
 
 enum WorkoutCategory: String {
     case cardio
@@ -19,7 +20,7 @@ class WatchConnectivityManager: NSObject {
     static let shared = WatchConnectivityManager()
 
     private let session = WCSession.default
-    var todayCategory: WorkoutCategory? = nil
+    var selectedWorkoutType: HKWorkoutActivityType? = nil
     
     var phoneReady = false
     var shouldStartWorkout = false
@@ -44,23 +45,19 @@ class WatchConnectivityManager: NSObject {
         session.sendMessage(message, replyHandler: nil, errorHandler: nil)
     }
     
-    func requestTodayWorkout() {
-            guard session.isReachable else {
-                isReachable = false
-                return
+    func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
+        print("📩 Received message: \(message)")
+    DispatchQueue.main.async {
+            if let typeWorkout = message["selectedWorkout"] as? UInt,
+               let type = HKWorkoutActivityType(rawValue: typeWorkout) {
+                self.selectedWorkoutType = type
+                print("✅ Updated selectedWorkoutType: \(type.displayName)")
+                
             }
-            
-            let message = ["request": "todayWorkout"]
-            WCSession.default.sendMessage(message, replyHandler: { reply in
-                if let category = reply["category"] as? String {
-                    DispatchQueue.main.async {
-                        self.todayCategory = WorkoutCategory(rawValue: category)
-                    }
-                }
-            }, errorHandler: { error in
-                print("Error requesting workout: \(error)")
-            })
+           
         }
+    }
+    
 }
 
 // MARK: - WCSessionDelegate
@@ -74,7 +71,7 @@ extension WatchConnectivityManager: WCSessionDelegate {
         DispatchQueue.main.async {
                     self.isReachable = session.isReachable
                     if self.isReachable {
-                        self.requestTodayWorkout()
+                        //self.requestTodayWorkout()
                     }
                 }
     }
@@ -83,26 +80,12 @@ extension WatchConnectivityManager: WCSessionDelegate {
         DispatchQueue.main.async {
             self.isReachable = session.isReachable
             if self.isReachable {
-                self.requestTodayWorkout()
+                //self.requestTodayWorkout()
             }
         }
     }
 
-    func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
-        print("Received message: \(message)")
-        
-        DispatchQueue.main.async {
-            if message["phoneReady"] as? Bool == true {
-                self.phoneReady = true
-                print("Watch Ready")
-            }
-            
-            if message["startWorkout"] as? Bool == true {
-                self.shouldStartWorkout = true
-                print("Start Workout")
-            }
-        }
-    }
+
 
 #if os(iOS)
     func sessionDidBecomeInactive(_ session: WCSession) {}

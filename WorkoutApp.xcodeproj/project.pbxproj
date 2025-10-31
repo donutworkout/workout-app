@@ -81,6 +81,7 @@
 			membershipExceptions = (
 				Services/HealthKitManager.swift,
 				Services/WatchConnectivityManager.swift,
+				Services/WorkoutMapping.swift,
 				Services/WorkoutSessionManager.swift,
 			);
 			target = E194451D2E9E54EC000187BC /* WorkoutWacthApp Watch App */;

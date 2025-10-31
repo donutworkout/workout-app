@@ -32,6 +32,8 @@ struct WatchWorkoutListView: View {
         ("Functional Strength Training", .functionalStrengthTraining),
 
     ]
+    
+    let workoutType: HKWorkoutActivityType
 
     //    let workouts: [(String, HKWorkoutActivityType)] = [
     //        ("Running", .running),
@@ -54,27 +56,37 @@ struct WatchWorkoutListView: View {
     //    ]
     
     var body: some View {
-            NavigationStack {
-                List {
-                    if connectivity.todayCategory == .cardio {
-                        Section("Today: Cardio") {
-                            ForEach(cardioWorkouts, id: \.0) { workout in
-                                NavigationLink(destination: WatchActiveWorkoutView(sessionManager: _sessionManager, workoutType: workout.1, workoutName: workout.0)) {
-                                    Text(workout.0)
-                                }
-                            }
-                        }
-                    } else if connectivity.todayCategory == .strength {
-                        Section("Today: Strength") {
-                            ForEach(strengthWorkouts, id: \.0) { workout in
-                                NavigationLink(destination: WatchActiveWorkoutView(sessionManager: _sessionManager, workoutType: workout.1, workoutName: workout.0)) {
-                                    Text(workout.0)
-                                }
-                            }
-                        }
-                    }
-                }
-                .navigationTitle("Workouts")
-            }
+        VStack {
+            Image(systemName: "figure.run")
+                .font(.system(size: 50))
+                .foregroundStyle(Color(.pink))
+            Text("WorkoutName:\(workoutType.displayName)")
+                .font(.largeTitle)
+//            Button("Start Workout") {
+//                self.connectivity.sendMessage(["startWorkout": true])
+        
+        }
+//            NavigationStack {
+//                List {
+//                    if connectivity.todayCategory == .cardio {
+//                        Section("Today: Cardio") {
+//                            ForEach(cardioWorkouts, id: \.0) { workout in
+//                                NavigationLink(destination: WatchActiveWorkoutView(sessionManager: _sessionManager, workoutType: workout.1, workoutName: workout.0)) {
+//                                    Text(workout.0)
+//                                }
+//                            }
+//                        }
+//                    } else if connectivity.todayCategory == .strength {
+//                        Section("Today: Strength") {
+//                            ForEach(strengthWorkouts, id: \.0) { workout in
+//                                NavigationLink(destination: WatchActiveWorkoutView(sessionManager: _sessionManager, workoutType: workout.1, workoutName: workout.0)) {
+//                                    Text(workout.0)
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//                .navigationTitle("Workouts")
+//            }
         }
 }

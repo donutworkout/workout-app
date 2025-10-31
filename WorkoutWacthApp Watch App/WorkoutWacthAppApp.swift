@@ -15,7 +15,7 @@ struct WorkoutWacthApp_Watch_AppApp: App {
      }
     
     @State private var sessionManager = WorkoutSessionManager()
-    @State private var connectivity = WatchConnectivityManager.shared
+    @State private var connectivity = WatchConnectivityManager()
         
         var body: some Scene {
             WindowGroup {

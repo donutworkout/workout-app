@@ -7,6 +7,7 @@
 
 import Foundation
 import WatchConnectivity
+import HealthKit
 
 final class iPhoneConnectivityManager: NSObject, ObservableObject {
     static let shared = iPhoneConnectivityManager()
@@ -62,5 +63,22 @@ extension iPhoneConnectivityManager {
         session.sendMessage(data, replyHandler: nil) { error in
             print("❌ Error sending message: \(error.localizedDescription)")
         }
+    }
+    
+    func sendSelectedWorkout(_ type: HKWorkoutActivityType) {
+        guard session.activationState == .activated else {
+            print("⚠️ WCSession not activated.")
+            return
+        }
+        guard session.isReachable else {
+            print("⚠️ Watch not reachable.")
+            return
+        }
+
+        let message: [String: Any] = ["selectedWorkout": type.rawValue]
+        session.sendMessage(message, replyHandler: nil) { error in
+            print("❌ Failed to send workout type: \(error.localizedDescription)")
+        }
+        print("📤 Sent selected workout: \(String(describing: type))")
     }
 }
