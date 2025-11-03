@@ -16,7 +16,7 @@ struct WorkoutWacthApp_Watch_AppApp: App {
     
     var body: some Scene {
         WindowGroup {
-            WatchWorkoutListView()
+            StartView(workoutType: .running)
         }
     }
 }
