@@ -38,7 +38,21 @@ enum CardioOptions: String, CaseIterable, Codable {
 enum StrengthType: String, CaseIterable, Codable {
     case bodyWeight
     case gym
+    
+    var displayName: String {
+        switch self {
+        case .bodyWeight: return "Body Weight"
+        case .gym: return "Gym"
+        }
+    }
 }
+
+enum RestActivities: String, CaseIterable, Codable {
+    case stretching
+    case yoga
+    case deepBreathing
+    case meditation
+} //testing
 
 @Model
 class DailyMenu: Identifiable {
@@ -49,8 +63,15 @@ class DailyMenu: Identifiable {
     
     var category: MenuCategory
     var cardioExercisesOption: [CardioOptions]?
-    var strengthExercises: [StrengthType]?
-    //var restActivities: [RestActivity]?
+    
+    var strengthType: StrengthType?
+    //var strengthExercises: [Exercise]?
+    @Relationship(deleteRule: .cascade) var strengthExercises: [Exercise]?
+
+    var intensity: String?
+    var estimatedDuration: Int?
+    
+    var restActivities: [RestActivities]?
     
     var isMenuComplete: Bool
     
@@ -64,17 +85,59 @@ class DailyMenu: Identifiable {
         date: Date? = nil,
         category: MenuCategory,
         cardioExercisesOption: [CardioOptions]? = nil,
-        strengthExercises: [StrengthType]? = nil,
-        isMenuComplete: Bool,
-        isStrength: Bool,
-        isCardio: Bool,
-        isRest: Bool) {
+        strengthExercises: [Exercise]? = nil,
+        restActivities: [RestActivities]? = nil,
+        intensity: String? = nil, // New
+        estimatedDuration: Int? = nil, // New
+        isMenuComplete: Bool = false
+    ){
             self.dayNumber = dayNumber
             self.dayName = dayName
             self.date = date
             self.category = category
             self.cardioExercisesOption = cardioExercisesOption
             self.strengthExercises = strengthExercises
+            self.restActivities = restActivities
+            self.intensity = intensity // New
+            self.estimatedDuration = estimatedDuration // New
             self.isMenuComplete = isMenuComplete
+    }
+    
+    static func cardioDay(dayNumber: Int, dayName: String, date: Date? = nil, cardioExercisesOption: [CardioOptions]? = nil, isMenuComplete: Bool = false) -> DailyMenu {
+        return DailyMenu(
+            dayNumber: dayNumber,
+            dayName: dayName,
+            date: date,
+            category: .cardio,
+            cardioExercisesOption: cardioExercisesOption,
+            intensity: "Low",
+            estimatedDuration: 30,
+            isMenuComplete: isMenuComplete
+            )
+    }
+    
+    static func strengthDay(dayNumber: Int, dayName: String, date: Date? = nil, strengthType: StrengthType, strengthExercises: [Exercise]? = nil, isMenuComplete: Bool = false) -> DailyMenu {
+        return DailyMenu(
+            dayNumber: dayNumber,
+            dayName: dayName,
+            date: date,
+            category: .strength,
+            strengthExercises: strengthExercises,
+            intensity: "Moderate",
+            estimatedDuration: 45,
+            isMenuComplete: isMenuComplete
+            )
+    }
+    
+    static func restDay(dayNumber: Int, dayName: String, restActivities: [RestActivities]? = nil) -> DailyMenu {
+        return DailyMenu(
+            dayNumber: dayNumber,
+            dayName: dayName,
+            category: .rest,
+            restActivities: restActivities,
+            intensity: "None",
+            estimatedDuration: 15,
+            isMenuComplete: false
+        )
     }
 }

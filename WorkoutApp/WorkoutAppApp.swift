@@ -19,7 +19,8 @@ struct WorkoutAppApp: App {
             let schema = Schema([
                 UserProfile.self,
                 UserWorkout.self,
-                UserCycle.self
+                UserCycle.self,
+                Exercise.self
             ])
             
             let modelConfiguration = ModelConfiguration(
@@ -49,9 +50,10 @@ struct WorkoutAppApp: App {
     
     var body: some Scene {
         WindowGroup {
-            SurveyView()
-                .environmentObject(router)
-                .environmentObject(surveyManager)
+            TestMenuGeneratorView()
+//            SurveyView()
+//                .environmentObject(router)
+//                .environmentObject(surveyManager)
         }
         .modelContainer(WorkoutAppApp.modelContainer)
     }

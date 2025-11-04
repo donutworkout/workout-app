@@ -14,8 +14,8 @@ class WeeklyMenu: Identifiable {
     var id: UUID = UUID()
     var createdAt: Date
     var weekStartDate: Date
-    
-    var workoutDays: [DailyMenu]
+            
+    @Relationship(deleteRule: .cascade) var workoutDays: [DailyMenu]
     //var generatedFor:
     var completedDays: Set<Int>
     

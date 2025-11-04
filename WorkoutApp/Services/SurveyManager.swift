@@ -8,7 +8,8 @@
 import SwiftUI
 import SwiftData
 
-//@Observable
+@MainActor
+@Observable
 class SurveyManager : ObservableObject {
     var modelContext: ModelContext
     
@@ -419,7 +420,7 @@ class SurveyManager : ObservableObject {
     }
     
 
-    private func verifyLatestData() {
+    func verifyLatestData() {
         print("\n🗄️ --- SwiftData Latest Data Check ---")
         
         do {
