@@ -48,37 +48,37 @@ class WatchConnectivityManager: NSObject {
     
     func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
         print("📩 Received message: \(message)")
-    DispatchQueue.main.async {
+
+        DispatchQueue.main.async {
             if let typeWorkout = message["selectedWorkout"] as? UInt,
                let type = HKWorkoutActivityType(rawValue: typeWorkout) {
                 self.selectedWorkoutType = type
                 print("✅ Updated selectedWorkoutType: \(type.displayName)")
-                
-                if let cmdRaw = message["cmd"] as? String,
-                   let cmd = WorkoutCommand(rawValue: cmdRaw) {
-
-                    switch cmd {
-                    case .start:
-                        if let typeRaw = message["workoutType"] as? UInt,
-                           let type = HKWorkoutActivityType(rawValue: typeRaw) {
-                            self.workoutManager.startWorkout(of: type)
-                        }
-
-                    case .pause:
-                        self.workoutManager.pauseWorkout()
-
-                    case .resume:
-                        self.workoutManager.resumeWorkout()
-
-                    case .stop:
-                        self.workoutManager.stopWorkout()
-                    }
-                }
-
             }
-           
+            if let cmdRaw = message["cmd"] as? String,
+               let cmd = WorkoutCommand(rawValue: cmdRaw) {
+
+                switch cmd {
+
+                case .start:
+                    if let typeRaw = message["workoutType"] as? UInt,
+                       let type = HKWorkoutActivityType(rawValue: typeRaw) {
+                        self.workoutManager.startWorkout(of: type)
+                    }
+
+                case .pause:
+                    self.workoutManager.pauseWorkout()
+
+                case .resume:
+                    self.workoutManager.resumeWorkout()
+
+                case .stop:
+                    self.workoutManager.stopWorkout()
+                }
+            }
         }
     }
+
     
 }
 
