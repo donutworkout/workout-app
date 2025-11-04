@@ -16,6 +16,10 @@ struct WatchActiveWorkoutView: View {
     
     @State private var elapsedTime: TimeInterval = 0
     @State private var timer: Timer?
+    @State private var currentTime = ""
+    @State private var currentTab = 0
+    
+    let clockTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
     var body: some View {
         VStack(spacing: 20) {
@@ -53,6 +57,27 @@ struct WatchActiveWorkoutView: View {
         .onDisappear { stopTimer() }
     }
     
+    // MARK: - Helper Functions
+    private func getWorkoutIcon() -> String {
+        switch workoutType {
+        case .running: return "figure.run"
+        case .cycling: return "figure.outdoor.cycle"
+        case .walking: return "figure.walk"
+        case .swimming: return "figure.pool.swim"
+        case .basketball: return "figure.basketball"
+        case .tennis: return "figure.tennis"
+        case .yoga: return "figure.yoga"
+        case .traditionalStrengthTraining: return "figure.strengthtraining.traditional"
+        default: return "figure.walk"
+        }
+    }
+    
+    private func updateCurrentTime() {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        currentTime = formatter.string(from: Date())
+    }
+    
     private func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
             if sessionManager.isRunning {
@@ -66,9 +91,10 @@ struct WatchActiveWorkoutView: View {
         timer = nil
     }
     
-    private func formatTime(_ time: TimeInterval) -> String {
-        let minutes = Int(time) / 60
+    private func formatTimeDisplay(_ time: TimeInterval) -> String {
+        let hours = Int(time) / 3600
+        let minutes = Int(time) / 60 % 60
         let seconds = Int(time) % 60
-        return String(format: "%02d:%02d", minutes, seconds)
+        return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
 }
