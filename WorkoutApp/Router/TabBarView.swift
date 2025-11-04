@@ -2,58 +2,50 @@
 //  TabBarView.swift
 //  WorkoutApp
 //
-//  Created by Valencia Melita Christy on 17/10/25.
+//  Created by Jennifer Evelyn on 29/10/25.
 //
 
 import SwiftUI
 
 struct TabBarView: View {
     @EnvironmentObject var router: Router
-    @State private var previousTab: Int = 0
+    @State private var selectedTab = 0
     
     var body: some View {
-        TabView(selection: $router.selectedTab) {
-            //View()
-            //.tag(0)
-            //.tabItem { Label("Home", systemImage: "") }
+        TabView(selection: $selectedTab) {
             
-            //View()
-            //.tag(1)
-            //.tabItem { Label("Summary", systemImage: "") }
-            
-            //View()
-            //.tag(2)
-            //.tabItem { Label("History", systemImage: "") }
-    }
-        .accentColor(Color.blue)
-        .onChange(of: router.selectedTab) {_, newTab in
-            if previousTab != newTab {
-                let route: Route
-                switch newTab {
-                case 0:
-                    route = .home
-                case 1:
-                    route = .summary
-                case 2:
-                    route = .profile
-                default:
-                    route = .home
+            // MARK: - Menu Tab
+            MenuView()
+                .tabItem {
+                    Label("Menu", systemImage: "house.fill")
                 }
-                router.setCurrentRoute(route)
-                previousTab = newTab
-            }
+                .tag(0)
+            
+            // MARK: - Summary Tab
+            SummaryView()
+                .tabItem {
+                    Label("Summary", systemImage: "chart.bar.fill")
+                }
+                .tag(1)
+            
+            // MARK: - Profile Tab
+            ProfileView()
+                .tabItem {
+                    Label("Profile", systemImage: "person.fill")
+                }
+                .tag(2)
         }
+        .accentColor(Color("pinkTextPrimary")) // warna pink kamu
         .onAppear {
-            router.setCurrentRoute(.home)
-            previousTab = router.selectedTab
+            router.selectedTab = selectedTab
+        }
+        .onChange(of: selectedTab) { newValue in
+            router.selectedTab = newValue
         }
     }
 }
 
 #Preview {
-    NavigationStack {
-        TabBarView()
-            .environmentObject(Router())
-    }
+    TabBarView()
+        .environmentObject(Router())
 }
-

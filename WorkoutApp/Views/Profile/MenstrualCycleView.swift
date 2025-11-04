@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct MenstrualCycleView: View {
+    @EnvironmentObject var router: Router
     @State private var isEditing: Bool = false
     @State private var tempMenstrualDates: Set<Date> = []
     @State private var menstrualDates: Set<Date> = []
@@ -19,24 +20,21 @@ struct MenstrualCycleView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            
-            // Use HeaderButton
             HeaderButton(
                 title: "Menstrual Cycle",
                 isEditing: isEditing,
                 onClose: {
-                    print("Closed MenstrualCycleView")
+                    router.navigateTo(.profile) // ❌ Back ke ProfileView
                 },
                 onEditToggle: {
                     withAnimation(.spring()) {
                         if isEditing {
-                            // Save
+                            // ✅ Simpan perubahan lalu balik ke Profile
                             menstrualDates = tempMenstrualDates
                             calculateOvulationDates()
-                            isEditing = false
-                            isFirstClick = true
+                            router.navigateTo(.profile)
                         } else {
-                            // Edit
+                            // Masuk mode edit
                             tempMenstrualDates = menstrualDates
                             isEditing = true
                             isFirstClick = true
@@ -188,6 +186,7 @@ struct MenstrualCycleView: View {
         }
     }
     
+    // MARK: - Calendar helpers
     private var monthYearString: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMMM yyyy"
@@ -202,18 +201,15 @@ struct MenstrualCycleView: View {
             return days
         }
         
-        // Add empty days for alignment (Sunday = 1)
         for _ in 1..<firstWeekday {
             days.append(nil)
         }
         
-        // Add days of the month
         var currentDate = monthInterval.start
         while currentDate < monthInterval.end {
             days.append(currentDate)
             currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate)!
         }
-        
         return days
     }
     
@@ -230,13 +226,9 @@ struct MenstrualCycleView: View {
         if !isEditing { return }
         
         if let existingDate = tempMenstrualDates.first(where: { calendar.isDate($0, inSameDayAs: date) }) {
-            // Unselect this date
             tempMenstrualDates.remove(existingDate)
         } else {
-            // Select this date
             tempMenstrualDates.insert(date)
-            
-            // Only auto-select 5 days on first click
             if isFirstClick {
                 for i in 1...4 {
                     if let nextDay = calendar.date(byAdding: .day, value: i, to: date) {
@@ -249,7 +241,6 @@ struct MenstrualCycleView: View {
     }
     
     private func initializeDates() {
-        // Initialize with some default menstrual dates
         if let date1 = createDate(year: 2025, month: 4, day: 1),
            let date2 = createDate(year: 2025, month: 4, day: 2),
            let date3 = createDate(year: 2025, month: 4, day: 3),
@@ -258,7 +249,6 @@ struct MenstrualCycleView: View {
            let date6 = createDate(year: 2025, month: 4, day: 6) {
             menstrualDates = [date1, date2, date3, date4, date5, date6]
         }
-        
         calculateOvulationDates()
     }
     
@@ -272,15 +262,9 @@ struct MenstrualCycleView: View {
     
     private func calculateOvulationDates() {
         ovulationDates.removeAll()
-        
         guard !menstrualDates.isEmpty else { return }
-        
-        // Find the last menstrual date
         let lastMenstrualDate = menstrualDates.sorted().last!
-        
-        // Ovulation starts 7 days after the last menstrual date
         if let ovulationStart = calendar.date(byAdding: .day, value: 7, to: lastMenstrualDate) {
-            // Add 14 days of ovulation
             for i in 0..<14 {
                 if let ovulationDay = calendar.date(byAdding: .day, value: i, to: ovulationStart) {
                     ovulationDates.insert(ovulationDay)
@@ -308,33 +292,28 @@ struct DayCell: View {
     var body: some View {
         Button(action: onTap) {
             ZStack {
-                // Background Circle for Menstrual days
                 if isMenstrual {
                     Circle()
                         .fill(Color("pinkTextPrimary").opacity(0.3))
                         .frame(width: 44, height: 44)
                 }
                 
-                // Today background (only when not menstrual)
                 if isToday && !isMenstrual {
                     Circle()
                         .fill(Color.blue.opacity(0.2))
                         .frame(width: 44, height: 44)
                 }
                 
-                // Ovulation Circle
                 if isOvulation && !isMenstrual {
                     Circle()
                         .stroke(Color.blue, lineWidth: 2)
                         .frame(width: 44, height: 44)
                 }
                 
-                // Day Number
                 Text(dayNumber)
                     .font(.system(size: 17, weight: .medium))
                     .foregroundColor((isToday && !isMenstrual) ? .blue : .black)
                 
-                // Edit Mode Overlay
                 if isEditing {
                     Circle()
                         .stroke(Color.gray.opacity(0.3), lineWidth: 1.5)
@@ -344,7 +323,6 @@ struct DayCell: View {
                         Circle()
                             .fill(Color("pinkTextPrimary"))
                             .frame(width: 44, height: 44)
-                        
                         Image(systemName: "checkmark")
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(.white)
@@ -359,4 +337,5 @@ struct DayCell: View {
 
 #Preview {
     MenstrualCycleView()
+        .environmentObject(Router())
 }

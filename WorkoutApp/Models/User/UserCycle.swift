@@ -19,7 +19,7 @@ enum CycleSymptoms: String, Codable, CaseIterable {
         switch self {
         case .cramps: return "Cramps"
         case .backPain: return "Back Pain"
-        case .fatigue: return "Fatigue / Low Energy"
+        case .fatigue: return "Fatigue/Low Energy"
         case .moodSwing: return "Mood Swing"
         case .none: return "None of the above"
         }
@@ -65,13 +65,14 @@ class UserCycle: Identifiable {
   var cycleSymptoms: [CycleSymptoms] = []
   var cycleEnergy: CycleEnergy = CycleEnergy.stable
   var cycleMoodAffectsMotivation: CycleMoodAffectsMotivation = CycleMoodAffectsMotivation.never
+  var hasCrampsToday: Bool = false
   var createdAt: Date = Date()
 
   
   @Relationship(deleteRule: .nullify)
   var user: UserProfile?
   
-    init(isCycleRegular: Bool, cycleStartDate: Date, cycleEndDate: Date, cycleLength: Int, cycleSymptoms: [CycleSymptoms], cycleEnergy: CycleEnergy, cycleMoodAffectsMotivation: CycleMoodAffectsMotivation, createdAt: Date = .now) {
+    init(isCycleRegular: Bool, cycleStartDate: Date, cycleEndDate: Date, cycleLength: Int, cycleSymptoms: [CycleSymptoms], cycleEnergy: CycleEnergy, cycleMoodAffectsMotivation: CycleMoodAffectsMotivation, hasCrampsToday: Bool = false, createdAt: Date = .now) {
     self.isCycleRegular = isCycleRegular
     self.cycleStartDate = cycleStartDate
     self.cycleEndDate = cycleEndDate
@@ -79,6 +80,7 @@ class UserCycle: Identifiable {
     self.cycleSymptoms = cycleSymptoms
     self.cycleEnergy = cycleEnergy
     self.cycleMoodAffectsMotivation = cycleMoodAffectsMotivation
+    self.hasCrampsToday = hasCrampsToday
     self.createdAt = createdAt
   }
 }

@@ -17,6 +17,7 @@ struct OnboardingView: View {
             VStack(spacing: 24) {
                 Spacer()
                 
+                // MARK: - Title
                 VStack(spacing: 8) {
                     Text("Welcome to the Arena")
                         .font(.largeTitle.bold())
@@ -30,6 +31,7 @@ struct OnboardingView: View {
                         .padding(.horizontal)
                 }
                 
+                // MARK: - Mascot Image
                 Image("character")
                     .resizable()
                     .scaledToFit()
@@ -39,21 +41,37 @@ struct OnboardingView: View {
                 
                 Spacer()
                 
+                // MARK: - Next Button (tanpa login)
+                PrimaryGlassButton(title: "Next") {
+                    withAnimation(.easeInOut) {
+                        router.navigateTo(.healthConnect)
+                    }
+                }
+                .padding(.horizontal)
+                
+                // MARK: - OR Divider
+                HStack {
+                    Rectangle()
+                        .frame(height: 1)
+                        .foregroundColor(.gray.opacity(0.3))
+                    Text("or")
+                        .font(.system(size: 14))
+                        .foregroundColor(.gray)
+                    Rectangle()
+                        .frame(height: 1)
+                        .foregroundColor(.gray.opacity(0.3))
+                }
+                .padding(.horizontal, 40)
+                
+                // MARK: - Sign in with Apple
                 SignInWithAppleButton(.signIn) { request in
                     request.requestedScopes = [.fullName, .email]
                 } onCompletion: { result in
                     switch result {
-                    case .success(let authResults):
-                        if let credential = authResults.credential as? ASAuthorizationAppleIDCredential {
-                            let userID = credential.user
-                            let identityToken = credential.identityToken.flatMap { String(data: $0, encoding: .utf8) }
-                            let authorizationCode = credential.authorizationCode.flatMap { String(data: $0, encoding: .utf8) }
-                            print("✅ Apple Sign-In success: user=\(userID), token=\(identityToken ?? "nil"), code=\(authorizationCode ?? "nil")")
-                        }
+                    case .success:
                         withAnimation(.easeInOut) {
-                            router.navigateTo(.survey)
+                            router.navigateTo(.healthConnect)
                         }
-                        
                     case .failure(let error):
                         print("❌ Apple Sign-In failed: \(error.localizedDescription)")
                     }
@@ -62,10 +80,9 @@ struct OnboardingView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 24))
                 .padding(.horizontal)
                 .padding(.bottom, 40)
-                
             }
             .padding()
-            .background(Color(.systemBackground))
+            .background(Color.white.ignoresSafeArea())
             .navigationBarBackButtonHidden(true)
         }
     }
@@ -73,4 +90,5 @@ struct OnboardingView: View {
 
 #Preview {
     OnboardingView()
+        .environmentObject(Router())
 }
