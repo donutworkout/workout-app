@@ -6,10 +6,13 @@
 //
 
 import SwiftUI
+import HealthKit
 
 struct AdjustMenuStrengthView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedMenu: StrengthMenuType = .bodyweight
+    @EnvironmentObject var router: Router
+    var onNext: (() -> Void)? = nil
 
     // Workout data
     let bodyweightWorkouts: [WorkoutItem] = [
@@ -50,6 +53,16 @@ struct AdjustMenuStrengthView: View {
                 .pickerStyle(.segmented)
                 .padding(.horizontal)
                 .padding(.top, 8)
+                .onChange(of: selectedMenu) { _, newValue in
+                    let workoutType: HKWorkoutActivityType
+                    switch newValue {
+                    case .bodyweight:
+                        workoutType = .functionalStrengthTraining
+                    case .gym:
+                        workoutType = .traditionalStrengthTraining
+                    }
+                    iPhoneConnectivityManager.shared.sendSelectedWorkout(workoutType)
+                }
                 
                 // MARK: - Workout Cards
                 VStack(spacing: 16) {
@@ -62,7 +75,8 @@ struct AdjustMenuStrengthView: View {
                 
                 // MARK: - Start Button
                 PrimaryGlassButton(title: "Start Now") {
-                    print("Workout started")
+                    router.lastWorkoutSource = .adjustMenuStrength
+                    router.navigateTo(.countdownView)
                 }
                 .padding(.horizontal)
                 .padding(.top, 16)
@@ -74,7 +88,8 @@ struct AdjustMenuStrengthView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Button(action: { dismiss() }) {
+                Button(action: {
+                    router.navigateTo(.menu) }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.black)
