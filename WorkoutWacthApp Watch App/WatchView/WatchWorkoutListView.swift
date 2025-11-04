@@ -5,88 +5,111 @@
 //  Created by Valencia Melita Christy on 18/10/25.
 //
 
-import HealthKit
 import SwiftUI
+import HealthKit
 
 struct WatchWorkoutListView: View {
-
+    
     @Environment var sessionManager: WorkoutSessionManager
     @Environment var connectivity: WatchConnectivityManager
-
-    let cardioWorkouts: [(String, HKWorkoutActivityType)] = [
-        ("Running", .running),
-        ("Cycling", .cycling),
-        ("Walking", .walking),
-        ("Swimming", .swimming),
-        ("Badminton", .badminton),
-        ("Basketball", .basketball),
-        ("Tennis", .tennis),
-        ("Volleyball", .volleyball),
-        ("Soccer", .soccer),
-    ]
-
-    let strengthWorkouts: [(String, HKWorkoutActivityType)] = [
-//        ("Core Training", .coreTraining),
-//        ("High Intensity Interval Training", .highIntensityIntervalTraining),
-        ("Traditional Strength Training", .traditionalStrengthTraining),
-        ("Functional Strength Training", .functionalStrengthTraining),
-
-    ]
     
-    let workoutType: HKWorkoutActivityType
-
-    //    let workouts: [(String, HKWorkoutActivityType)] = [
-    //        ("Running", .running),
-    //        ("Cycling", .cycling),
-    //        ("Walking", .walking),
-    //        ("Swimming", .swimming),
-    //        ("Badminton", .badminton),
-    //        ("Basketball", .basketball),
-    //        ("Tennis", .tennis),
-    //        ("Volleyball", .volleyball),
-    //        ("Soccer", .soccer),
-    //        ("Pilates", .pilates),
-    //        ("Yoga", .yoga),
-    //        ("Core Training", .coreTraining),
-    //        ("High Intensity Interval Training", .highIntensityIntervalTraining),
-    //        ("Traditional Strength Training", .traditionalStrengthTraining),
-    //        ("Functional Strength Training", .functionalStrengthTraining),
-    //        ("Martial Arts", .martialArts),
-    //
-    //    ]
+    // MARK: - Workout Data (contoh tetap statis dulu)
+    let workoutName = "Cardio"
+    let workoutIcon = "figure.run"
     
     var body: some View {
-        VStack {
-            Image(systemName: "figure.run")
-                .font(.system(size: 50))
-                .foregroundStyle(Color(.pink))
-            Text("WorkoutName:\(workoutType.displayName)")
-                .font(.largeTitle)
-//            Button("Start Workout") {
-//                self.connectivity.sendMessage(["startWorkout": true])
-        
+        ZStack(alignment: .bottom) {
+            // MARK: - Background
+            Color("grayBackground")
+                .ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                // MARK: - Content Area (Scrollable/Flexible)
+                VStack(spacing: 16) {
+                    Spacer()
+                    
+                    // MARK: - Workout Category
+                    Text(workoutName)
+                        .font(.system(size: 22, weight: .semibold))
+                        .foregroundColor(.white)
+                    
+                    // MARK: - Icon
+                    Image(systemName: workoutIcon)
+                        .font(.system(size: 50, weight: .regular))
+                        .foregroundColor(Color("pinkTextPrimary"))
+                    
+                    // MARK: - Workout Name
+                    Text("Tennis")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(Color("pinkTextPrimary"))
+                    
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                
+                // MARK: - Fixed Bottom Button
+                Button(action: {
+                    
+                }) {
+                    Text("START")
+                        .font(.system(.headline, design: .rounded))
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(
+                            Capsule()
+                                .fill(Color("grayTextPrimary"))
+                        )
+                }
+                .buttonStyle(PlainButtonStyle())
+                .padding(.horizontal, 20)
+                .padding(.bottom, 10)
+            }
         }
-//            NavigationStack {
-//                List {
-//                    if connectivity.todayCategory == .cardio {
-//                        Section("Today: Cardio") {
-//                            ForEach(cardioWorkouts, id: \.0) { workout in
-//                                NavigationLink(destination: WatchActiveWorkoutView(sessionManager: _sessionManager, workoutType: workout.1, workoutName: workout.0)) {
-//                                    Text(workout.0)
-//                                }
-//                            }
-//                        }
-//                    } else if connectivity.todayCategory == .strength {
-//                        Section("Today: Strength") {
-//                            ForEach(strengthWorkouts, id: \.0) { workout in
-//                                NavigationLink(destination: WatchActiveWorkoutView(sessionManager: _sessionManager, workoutType: workout.1, workoutName: workout.0)) {
-//                                    Text(workout.0)
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//                .navigationTitle("Workouts")
-//            }
-        }
+    }
 }
+
+    // MARK: - Helper
+//    private var categoryName: String {
+//        switch connectivity.todayCategory {
+//        case .cardio:
+//            return "Cardio"
+//        case .strength:
+//            return "Strength"
+//        default:
+//            return "Workout"
+//        }
+//    }
+//    
+//    private var categoryIcon: String {
+//        switch connectivity.todayCategory {
+//        case .cardio:
+//            return "figure.run"
+//        case .strength:
+//            return "figure.strengthtraining.traditional"
+//        default:
+//            return "figure.mixed.cardio"
+//        }
+//    }
+//    
+//    private var currentWorkouts: [(String, HKWorkoutActivityType)] {
+//        switch connectivity.todayCategory {
+//        case .cardio:
+//            return cardioWorkouts
+//        case .strength:
+//            return strengthWorkouts
+//        default:
+//            return cardioWorkouts
+//        }
+//    }
+
+//#Preview {
+//    let mockSession = WorkoutSessionManager()
+//    let mockConnectivity = WatchConnectivityManager()
+//    mockConnectivity.todayCategory = .cardio
+//    
+//    return WatchWorkoutListView()
+//        .environmentObject(mockSession)
+//        .environmentObject(mockConnectivity)
+//}

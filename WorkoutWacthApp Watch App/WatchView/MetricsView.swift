@@ -24,3 +24,7 @@ struct MetricView: View {
         }
     }
 }
+
+#Preview {
+    MetricView(icon: "heart.fill", value: "132", unit: "bpm")
+}
