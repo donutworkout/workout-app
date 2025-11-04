@@ -50,10 +50,10 @@ struct WorkoutAppApp: App {
     
     var body: some Scene {
         WindowGroup {
-            TestMenuGeneratorView()
-//            SurveyView()
-//                .environmentObject(router)
-//                .environmentObject(surveyManager)
+//            TestMenuGeneratorView()
+            SurveyView()
+                .environmentObject(router)
+                .environmentObject(surveyManager)
         }
         .modelContainer(WorkoutAppApp.modelContainer)
     }
