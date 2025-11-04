@@ -7,12 +7,26 @@
 
 import WatchConnectivity
 import Foundation
+import Combine
+import HealthKit
 
-final class WatchConnectivityManager: NSObject, ObservableObject {
+enum WorkoutCategory: String {
+    case cardio
+    case strength
+}
+
+@Observable
+class WatchConnectivityManager: NSObject {
     static let shared = WatchConnectivityManager()
-    private let session = WCSession.default
 
-    override private init() {
+    private let session = WCSession.default
+    var selectedWorkoutType: HKWorkoutActivityType? = nil
+    
+    var phoneReady = false
+    var shouldStartWorkout = false
+    var isReachable: Bool = false
+
+    override init() {
         super.init()
         setupSession()
     }
@@ -22,10 +36,28 @@ final class WatchConnectivityManager: NSObject, ObservableObject {
             print("gak support")
             return
         }
-        
         session.delegate = self
         session.activate()
+        isReachable = session.isReachable
     }
+    
+    func sendMessage(_ message: [String: Any]) {
+        session.sendMessage(message, replyHandler: nil, errorHandler: nil)
+    }
+    
+    func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
+        print("📩 Received message: \(message)")
+    DispatchQueue.main.async {
+            if let typeWorkout = message["selectedWorkout"] as? UInt,
+               let type = HKWorkoutActivityType(rawValue: typeWorkout) {
+                self.selectedWorkoutType = type
+                print("✅ Updated selectedWorkoutType: \(type.displayName)")
+                
+            }
+           
+        }
+    }
+    
 }
 
 // MARK: - WCSessionDelegate
@@ -36,16 +68,24 @@ extension WatchConnectivityManager: WCSessionDelegate {
         activationDidCompleteWith activationState: WCSessionActivationState,
         error: Error?
     ) {
-        if let error = error {
-            print("WCSession activation failed: \(error.localizedDescription)")
-        } else {
-            print("WCSession activated with state: \(activationState.rawValue)")
+        DispatchQueue.main.async {
+                    self.isReachable = session.isReachable
+                    if self.isReachable {
+                        //self.requestTodayWorkout()
+                    }
+                }
+    }
+    
+    func sessionReachabilityDidChange(_ session: WCSession) {
+        DispatchQueue.main.async {
+            self.isReachable = session.isReachable
+            if self.isReachable {
+                //self.requestTodayWorkout()
+            }
         }
     }
 
-    func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
-        print("Received message: \(message)")
-    }
+
 
 #if os(iOS)
     func sessionDidBecomeInactive(_ session: WCSession) {}
@@ -54,31 +94,5 @@ extension WatchConnectivityManager: WCSessionDelegate {
         session.activate()
     }
 #endif
-
-    func sessionReachabilityDidChange(_ session: WCSession) {
-        print("Reachability changed: \(session.isReachable)")
-    }
 }
 
-// MARK: - Message Sending
-
-extension WatchConnectivityManager {
-        func sendMessage(_ data: [String: Any]) {
-            // Pastikan WCSession sudah aktif
-            guard session.activationState == .activated else {
-                print("WCSession belum aktif — tunggu dulu sebelum kirim pesan.")
-                return
-            }
-
-            // Pastikan perangkat lain reachable
-            guard session.isReachable else {
-                print("Session belum reachable (cek Watch app terbuka & terhubung).")
-                return
-            }
-
-            // Kirim pesan
-            session.sendMessage(data, replyHandler: nil) { error in
-                print("Error sending message: \(error.localizedDescription)")
-            }
-        }
-}
