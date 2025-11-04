@@ -131,9 +131,7 @@ struct AdjustMenuCardioView: View {
             selectedMenu = nil
         } else {
             selectedMenu = activity
-            
             let type = mapActivityToHKType(activity)
-            
             iPhoneConnectivityManager.shared.sendSelectedWorkout(type)
         }
     }

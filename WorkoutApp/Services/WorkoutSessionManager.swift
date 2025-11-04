@@ -8,6 +8,13 @@
 import Foundation
 import HealthKit
 
+enum WorkoutCommand: String {
+    case start
+    case stop
+    case pause
+    case resume
+}
+
 @Observable
 class WorkoutSessionManager: NSObject {
 
@@ -108,6 +115,15 @@ class WorkoutSessionManager: NSObject {
 
         }
     }
+    
+    func pauseWorkout() {
+        workoutSession?.pause()
+    }
+
+    func resumeWorkout() {
+        workoutSession?.resume()
+    }
+
 
 }
 
@@ -168,7 +184,7 @@ extension WorkoutSessionManager: HKLiveWorkoutBuilderDelegate {
 }
 
 func typesToRead(for activity: HKWorkoutActivityType) -> Set<HKObjectType> {
-    var readTypes: Set<HKObjectType> = [
+    let readTypes: Set<HKObjectType> = [
         HKQuantityType.quantityType(forIdentifier: .heartRate)!,
         HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)!,
         HKQuantityType.quantityType(forIdentifier: .appleExerciseTime)!,

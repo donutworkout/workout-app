@@ -18,6 +18,7 @@ enum WorkoutCategory: String {
 @Observable
 class WatchConnectivityManager: NSObject {
     static let shared = WatchConnectivityManager()
+    private let workoutManager = WorkoutSessionManager()
 
     private let session = WCSession.default
     var selectedWorkoutType: HKWorkoutActivityType? = nil
@@ -53,6 +54,27 @@ class WatchConnectivityManager: NSObject {
                 self.selectedWorkoutType = type
                 print("✅ Updated selectedWorkoutType: \(type.displayName)")
                 
+                if let cmdRaw = message["cmd"] as? String,
+                   let cmd = WorkoutCommand(rawValue: cmdRaw) {
+
+                    switch cmd {
+                    case .start:
+                        if let typeRaw = message["workoutType"] as? UInt,
+                           let type = HKWorkoutActivityType(rawValue: typeRaw) {
+                            self.workoutManager.startWorkout(of: type)
+                        }
+
+                    case .pause:
+                        self.workoutManager.pauseWorkout()
+
+                    case .resume:
+                        self.workoutManager.resumeWorkout()
+
+                    case .stop:
+                        self.workoutManager.stopWorkout()
+                    }
+                }
+
             }
            
         }

@@ -19,7 +19,7 @@ struct ContentView: View {
 
                           } else if let type = connectivity.selectedWorkoutType {
                               if sessionManager.isRunning {
-                                  WatchActiveWorkoutView(
+                                  WatchSessionPagingView(
                                       sessionManager: _sessionManager,
                                       workoutType: type,
                                       workoutName: type.displayName

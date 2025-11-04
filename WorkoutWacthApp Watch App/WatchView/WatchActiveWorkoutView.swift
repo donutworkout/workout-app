@@ -48,41 +48,9 @@ struct WatchActiveWorkoutView: View {
                     unit: ""
                 )
             }
-            
-            Spacer()
-            
-            // Controls
-            HStack(spacing: 20) {
-                Button {
-                } label: {
-                    Image(systemName: sessionManager.isRunning ? "pause.fill" : "play.fill")
-                        .font(.title2)
-                }
-                .buttonStyle(.bordered)
-                
-                Button {
-                    // Stop the workout session
-                    sessionManager.stopWorkout()
-                    // Navigate back
-                    dismiss()
-                } label: {
-                    Image(systemName: "stop.fill")
-                        .font(.title2)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.red)
-            }
         }
-        .padding()
-        .navigationBarBackButtonHidden(true)
-        .onAppear {
-            // Start workout when view appears
-            sessionManager.startWorkout(of: workoutType)
-            startTimer()
-        }
-        .onDisappear {
-            stopTimer()
-        }
+        .onAppear { startTimer() }
+        .onDisappear { stopTimer() }
     }
     
     private func startTimer() {

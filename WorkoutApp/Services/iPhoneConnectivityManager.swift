@@ -10,6 +10,7 @@ import WatchConnectivity
 import HealthKit
 
 final class iPhoneConnectivityManager: NSObject, ObservableObject {
+    private let workoutManager = WorkoutSessionManager()
     static let shared = iPhoneConnectivityManager()
     private let session = WCSession.default
     
@@ -44,7 +45,30 @@ extension iPhoneConnectivityManager: WCSessionDelegate {
     }
     
     func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
-        print("iphone received: \(message)")
+        DispatchQueue.main.async {
+            print("iphone received: \(message)")
+            
+            if let cmdRaw = message["cmd"] as? String,
+               let cmd = WorkoutCommand(rawValue: cmdRaw) {
+                
+                switch cmd {
+                case .start:
+                    if let typeRaw = message["workoutType"] as? UInt,
+                       let type = HKWorkoutActivityType(rawValue: typeRaw) {
+                        self.workoutManager.startWorkout(of: type)
+                    }
+
+                case .pause:
+                    self.workoutManager.pauseWorkout()
+
+                case .resume:
+                    self.workoutManager.resumeWorkout()
+
+                case .stop:
+                    self.workoutManager.stopWorkout()
+                }
+            }
+        }
     }
     
 }
