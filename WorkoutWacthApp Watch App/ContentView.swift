@@ -12,14 +12,21 @@ struct ContentView: View {
     @Environment(WatchConnectivityManager.self) private var connectivity
     @Environment(WorkoutSessionManager.self) private var sessionManager
 
+    @State private var showCountdown = false
+    @State private var countdownValue = 3
+    @State private var workoutStarted = false
+    
     var body: some View {
            Group {
                if !connectivity.isReachable {
                               WatchNotConnectedView(connectivity: _connectivity)
 
                           } else if let type = connectivity.selectedWorkoutType {
+                              if showCountdown {
+                                  
+                              }
                               if sessionManager.isRunning {
-                                  WatchActiveWorkoutView(
+                                  WatchSessionPagingView(
                                       sessionManager: _sessionManager,
                                       workoutType: type,
                                       workoutName: type.displayName

@@ -44,16 +44,12 @@ struct WorkoutAppApp: App {
     
     var iPhoneConnect = iPhoneConnectivityManager.shared
     
-    init() {
-        HealthKitManager.shared.requestAuthorization()
-    }
-    
     var body: some Scene {
         WindowGroup {
-            TestMenuGeneratorView()
-//            SurveyView()
-//                .environmentObject(router)
-//                .environmentObject(surveyManager)
+//        TestMenuGeneratorView()
+            RouterView()
+                .environmentObject(router)
+                .environmentObject(surveyManager)
         }
         .modelContainer(WorkoutAppApp.modelContainer)
     }
