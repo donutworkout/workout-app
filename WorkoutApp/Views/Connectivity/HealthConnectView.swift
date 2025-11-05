@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import HealthKit
 
 struct HealthConnectView: View {
     @Environment(\.dismiss) private var dismiss
@@ -51,6 +52,7 @@ struct HealthConnectView: View {
                 
                 // MARK: - Allow Button
                 PrimaryGlassButton(title: "Allow") {
+                    HealthKitManager.shared.requestAuthorization()
                     onAllow()
                 }
                 .padding(.horizontal)
