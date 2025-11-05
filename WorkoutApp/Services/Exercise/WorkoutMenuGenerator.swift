@@ -37,7 +37,7 @@ class WorkoutMenuGenerator {
         
         let currentPhase = CyclePhaseCalculator.calculateCurrentPhase(
             lastPeriodStart: userCycle.cycleStartDate,
-            menstrualDuration: userCycle.cycleLength
+            menstrualDuration: userCycle.menstrualDuration
         )
         
         print("Current Phase: \(currentPhase.rawValue)")
@@ -157,10 +157,8 @@ class WorkoutMenuGenerator {
             return .strengthDay(
                 dayNumber: dayNumber,
                 dayName: dayName,
-                strengthType: strengthType
-//                exercises: exercises,
-//                intensity: intensity,
-//                duration: duration
+                strengthType: strengthType,
+                strengthExercises: exercises
             )
         }
 }

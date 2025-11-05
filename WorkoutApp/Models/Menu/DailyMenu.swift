@@ -66,7 +66,8 @@ class DailyMenu: Identifiable {
     
     var strengthType: StrengthType?
     //var strengthExercises: [Exercise]?
-    @Relationship(deleteRule: .cascade) var strengthExercises: [Exercise]?
+//    @Relationship(deleteRule: .cascade)
+    var strengthExercises: [Exercise]?
 
     var intensity: String?
     var estimatedDuration: Int?
