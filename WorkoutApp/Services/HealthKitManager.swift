@@ -26,7 +26,9 @@ final class HealthKitManager {
                 HKObjectType.quantityType(forIdentifier: .appleExerciseTime)!,
                 HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning)!,
                 HKObjectType.quantityType(forIdentifier: .stepCount)!,
-                HKObjectType.workoutType()
+                HKObjectType.workoutType(),
+                
+                HKObjectType.categoryType(forIdentifier: .menstrualFlow)!,
             ]
             
             static let toShare: Set<HKSampleType> = [
