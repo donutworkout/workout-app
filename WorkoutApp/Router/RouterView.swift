@@ -3,6 +3,8 @@ import SwiftUI
 struct RouterView: View {
     @EnvironmentObject var router: Router
     @EnvironmentObject var surveyManager: SurveyManager
+    @Environment(iPhoneConnectivityManager.self) private var connectivity
+
     
     var body: some View {
         NavigationStack {
@@ -47,10 +49,12 @@ struct RouterView: View {
             case .adjustMenuCardio:
                 AdjustMenuCardioView()
                     .environmentObject(router)
+                    .environment(connectivity)
                 
             case .adjustMenuStrength:
                 AdjustMenuStrengthView()
                     .environmentObject(router)
+                    .environment(connectivity)
                 
             case .startCardio:
                 StartCardioView()

@@ -10,6 +10,7 @@ import SwiftUI
 struct StartCardioView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var router: Router
+    private let phoneConnectivity = iPhoneConnectivityManager.shared
     
     // MARK: - Props
     var activityName: String = "Indoor Walk"
@@ -62,7 +63,17 @@ struct StartCardioView: View {
             
             // MARK: - Buttons
             HStack(spacing: 16) {
-                Button(action: toggleTimer) {
+                Button(action: {
+                    if isPaused {
+                        // resume
+                        phoneConnectivity.resumeWorkoutFromPhone()
+                        isPaused = false
+                    } else {
+                        // pause
+                        phoneConnectivity.pauseWorkoutFromPhone()
+                        isPaused = true
+                    }
+                }) {
                     Image(systemName: isPaused ? "play.fill" : "pause.fill")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.black)
@@ -71,6 +82,7 @@ struct StartCardioView: View {
                 }
                 
                 PrimaryGlassButton(title: "Done") {
+                    phoneConnectivity.stopWorkoutFromPhone()
                     router.navigateTo(.menu)
                     timer?.invalidate()
                 }
@@ -112,10 +124,6 @@ struct StartCardioView: View {
             }
         }
     }
-    
-    private func toggleTimer() {
-        isPaused.toggle()
-    }
 }
 
 #Preview {
@@ -123,3 +131,4 @@ struct StartCardioView: View {
         StartCardioView()
     }
 }
+

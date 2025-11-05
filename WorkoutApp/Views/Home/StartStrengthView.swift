@@ -10,6 +10,7 @@ import SwiftUI
 struct StartStrengthView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var router: Router
+    private let phoneConnectivity = iPhoneConnectivityManager.shared
     
     var workoutName: String = "Bridge"
     var reps: String = "3 x 12"
@@ -44,10 +45,17 @@ struct StartStrengthView: View {
             
             HStack(spacing: 16) {
                 NeutralGlassButton(title: isPaused ? "Resume" : "Pause") {
-                    toggleTimer()
+                    if isPaused {
+                        phoneConnectivity.resumeWorkoutFromPhone()
+                        isPaused = false
+                    } else {
+                        phoneConnectivity.pauseWorkoutFromPhone()
+                        isPaused = true
+                    }
                 }
                 
                 NeutralGlassButton(title: "Next") {
+                    phoneConnectivity.stopWorkoutFromPhone()
                     timer?.invalidate()
                     router.navigateTo(.menu)
                 }

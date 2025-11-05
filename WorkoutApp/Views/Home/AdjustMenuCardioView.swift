@@ -5,14 +5,18 @@
 //  Created by Jennifer Evelyn on 24/10/25.
 //
 
+import HealthKit
 import SwiftUI
 
 struct AdjustMenuCardioView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var router: Router
+    
+    @Environment(iPhoneConnectivityManager.self) private var connectivity
+
     @State private var selectedMenu: String? = nil
     @State private var showCustomAlert = false
     var onNext: () -> Void = {}
-    @EnvironmentObject var router: Router
 
     // MARK: - Cardio Menu
     private let cardioMenu = [
@@ -20,7 +24,7 @@ struct AdjustMenuCardioView: View {
         "Cycling", "Swimming",
         "Badminton", "Basketball",
         "Volleyball", "Tennis",
-        "Padel", "Soccer"
+        "Padel", "Soccer",
     ]
 
     var body: some View {
@@ -28,7 +32,9 @@ struct AdjustMenuCardioView: View {
             VStack(spacing: 32) {
                 // MARK: - Menu Grid
                 VStack(spacing: 12) {
-                    let gridItems = [GridItem(.flexible()), GridItem(.flexible())]
+                    let gridItems = [
+                        GridItem(.flexible()), GridItem(.flexible()),
+                    ]
                     LazyVGrid(columns: gridItems, spacing: 16) {
                         ForEach(cardioMenu, id: \.self) { activity in
                             Button(action: {
@@ -36,17 +42,32 @@ struct AdjustMenuCardioView: View {
                             }) {
                                 Text(activity)
                                     .font(.system(size: 16, weight: .semibold))
-                                    .foregroundColor(selectedMenu == activity ? .white : .black)
+                                    .foregroundColor(
+                                        selectedMenu == activity
+                                            ? .white : .black
+                                    )
                                     .frame(maxWidth: .infinity)
                                     .frame(height: 70)
                                     .background(
                                         RoundedRectangle(cornerRadius: 20)
-                                            .fill(selectedMenu == activity ? Color("pinkTextPrimary") : Color.white)
-                                            .shadow(color: .gray.opacity(0.15), radius: 5, x: 0, y: 3)
+                                            .fill(
+                                                selectedMenu == activity
+                                                    ? Color("pinkTextPrimary")
+                                                    : Color.white
+                                            )
+                                            .shadow(
+                                                color: .gray.opacity(0.15),
+                                                radius: 5,
+                                                x: 0,
+                                                y: 3
+                                            )
                                     )
                             }
-                            .buttonStyle(ScaleButtonStyle()) // efek ditekan kecil
-                            .animation(.easeInOut(duration: 0.2), value: selectedMenu)
+                            .buttonStyle(ScaleButtonStyle())  // efek ditekan kecil
+                            .animation(
+                                .easeInOut(duration: 0.2),
+                                value: selectedMenu
+                            )
                         }
                     }
                 }
@@ -67,7 +88,7 @@ struct AdjustMenuCardioView: View {
                 .padding(.horizontal)
                 .padding(.vertical)
                 .opacity(isButtonEnabled ? 1 : 0.5)
-                .disabled(!isButtonEnabled) // 🔒 disable kalau belum pilih
+                .disabled(!isButtonEnabled)  // 🔒 disable kalau belum pilih
             }
             .animation(.easeInOut, value: selectedMenu)
             .background(Color.white.ignoresSafeArea())
@@ -114,6 +135,36 @@ struct AdjustMenuCardioView: View {
                 .transition(.scale.combined(with: .opacity))
             }
         }
+        .onChange(of: connectivity.isWorkoutActive) { _, active in
+            if active {
+                print("🏋️ Watch started workout → go to countdown/start")
+                router.lastWorkoutSource = .adjustMenuCardio
+                router.navigateTo(.countdownView)
+            } else {
+                print("🏁 Workout stopped → back to menu")
+                router.navigateTo(.menu)
+            }
+    }
+
+//        .onChange(of: connectivity.isWorkoutPaused) { _, paused in
+//            if router.currentRoute == .adjustMenuCardio ||
+//               router.currentRoute == .startCardio {
+//                if paused {
+//                    print("⏸️ Watch paused → show rest screen")
+//                    router.navigateTo(.restView)
+//                } else if connectivity.isWorkoutActive {
+//                    print("▶️ Watch resumed → back to active workout")
+//                    router.navigateTo(.startCardio)
+//                }
+//            }
+//        }
+//            .onChange(of: connectivity.isWorkoutPaused) { _, paused in
+//                if paused {
+//                    router.navigateTo(.restView)
+//                } else if connectivity.isWorkoutActive {
+//                    router.navigateTo(.startCardio)
+//                }
+//            }
         // MARK: - Native Navigation Title
         .navigationTitle("Today’s Cardio Menu!")
         .navigationBarTitleDisplayMode(.inline)
@@ -126,7 +177,13 @@ struct AdjustMenuCardioView: View {
                 }
             }
         }
+        .onAppear {
+            print("appear stop iphone")
+            iPhoneConnectivityManager.shared.stopWorkoutFromPhone()
+            
+        }
     }
+    
 
     // MARK: - Logic
     private func handleSelection(for activity: String) {
@@ -135,6 +192,7 @@ struct AdjustMenuCardioView: View {
         } else {
             selectedMenu = activity
             let type = mapActivityToHKType(activity)
+            router.selectedWorkoutType = type
             iPhoneConnectivityManager.shared.sendSelectedWorkout(type)
         }
     }
@@ -149,7 +207,10 @@ struct ScaleButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
-            .animation(.spring(response: 0.25, dampingFraction: 0.6), value: configuration.isPressed)
+            .animation(
+                .spring(response: 0.25, dampingFraction: 0.6),
+                value: configuration.isPressed
+            )
     }
 }
 
@@ -158,5 +219,3 @@ struct ScaleButtonStyle: ButtonStyle {
         AdjustMenuCardioView()
     }
 }
-
-
