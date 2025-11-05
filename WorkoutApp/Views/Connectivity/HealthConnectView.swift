@@ -9,6 +9,7 @@ import SwiftUI
 
 struct HealthConnectView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var router: Router
     
     var onAllow: () -> Void = {}
     var onSkip: () -> Void = {}
@@ -70,26 +71,14 @@ struct HealthConnectView: View {
             .toolbar {
                 // Default Close Button (X)
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(action: { dismiss() }) {
+                    Button(action: { router.navigateTo(.onboarding) }) {
                         Image(systemName: "xmark")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.black)
                     }
                 }
                 
-                // Default Send Button
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: onAllow) {
-                        Image(systemName: "arrow.up")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(width: 36, height: 36)
-                            .background(
-                                Circle()
-                                    .fill(Color("pinkTextPrimary"))
-                            )
-                    }
-                }
+               
             }
         }
     }

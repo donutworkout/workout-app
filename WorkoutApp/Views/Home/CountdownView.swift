@@ -9,16 +9,24 @@ import SwiftUI
 
 struct CountdownView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var router: Router
     
     // MARK: - Props
     var workoutName: String = "Jumping Jack"
     var reps: String = "12X"
     var imageName: String = "jumpingJack"
-    var currentSet: Int = 3
+    var currentSet: Int = 1
     var totalSets: Int = 7
+    var onCountdownComplete: () -> Void = {}
     
     @State private var countdown: Int = 3
     @State private var isPaused: Bool = false
+    @State private var timer: Timer? = nil
+    
+    init(onCountdownComplete: @escaping () -> Void = {}) {
+        self.onCountdownComplete = onCountdownComplete
+    }
+
     
     var body: some View {
         ZStack {
@@ -57,25 +65,31 @@ struct CountdownView: View {
                 
                 Spacer()
                 
-                // MARK: - Bottom Buttons
-                HStack(spacing: 16) {
-                    NeutralGlassButton(title: isPaused ? "Resume" : "Pause") {
-                        isPaused.toggle()
+                // MARK: - Bottom Buttons (hidden during countdown)
+                if countdown == 0 {
+                    HStack(spacing: 16) {
+                        NeutralGlassButton(title: isPaused ? "Resume" : "Pause") {
+                            isPaused.toggle()
+                        }
+                        
+                        NeutralGlassButton(title: "Start") {
+                            timer?.invalidate()
+                            onCountdownComplete()
+                        }
                     }
-                    
-                    NeutralGlassButton(title: "Next") {
-                        // Handle next action
-                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 40)
                 }
-                .padding(.horizontal)
-                .padding(.bottom, 40)
             }
             .background(Color.white.ignoresSafeArea())
             .navigationTitle("Workout")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(action: { dismiss() }) {
+                    Button(action: {
+                        timer?.invalidate()
+                        router.navigateTo(.menu)
+                    }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.black)
@@ -99,16 +113,32 @@ struct CountdownView: View {
         .onAppear {
             startCountdown()
         }
+        .onDisappear {
+            timer?.invalidate()
+        }
     }
     
     // MARK: - Countdown Logic
     private func startCountdown() {
-        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
             if !isPaused && countdown > 0 {
                 countdown -= 1
             } else if countdown == 0 {
-                timer.invalidate()
-                // Transition ke workout berikutnya bisa kamu tambahkan di sini
+                t.invalidate()
+                // Auto-transition setelah hitung selesai
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    // ✅ arahkan ke view sesuai asalnya
+                    if let last = router.lastWorkoutSource {
+                        switch last {
+                        case .adjustMenuCardio:
+                            router.navigateTo(.startCardio)
+                        case .adjustMenuStrength:
+                            router.navigateTo(.startStrength)
+                        default:
+                            break
+                        }
+                    }
+                }
             }
         }
     }
