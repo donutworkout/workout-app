@@ -45,7 +45,6 @@ struct MenuView: View {
     }
 }
 
-// MARK: - Combined Phase + Workout Card
 struct CombinedWorkoutCardView: View {
     let phase: PhaseType
     var onStartWorkout: () -> Void
@@ -61,7 +60,8 @@ struct CombinedWorkoutCardView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Phase Header
+            
+            // MARK: - Phase Header
             Text(phase.rawValue)
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundColor(.black)
@@ -79,30 +79,55 @@ struct CombinedWorkoutCardView: View {
                     .fill(Color("pinkTextTertiary"))
                 )
             
-            // Workout Content
-            VStack(alignment: .leading, spacing: 16) {
-                HStack(spacing: 16) {
-                    Image(cardInfo.image)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 90, height: 90)
-                    
-                    VStack(alignment: .leading, spacing: 6) {
+            // MARK: - Abu-abu dan Gambar
+            ZStack {
+                // Abu-abu full kiri-kanan
+                Color.gray.opacity(0.15)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 180)
+                    .clipShape(Rectangle())
+                
+                // Gambar di tengah
+                Image(cardInfo.image)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 150)
+            }
+            
+            // MARK: - Konten bawah (judul, deskripsi, tombol)
+            VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .center) {
                         Text(cardInfo.workoutTitle)
                             .font(.system(size: 17, weight: .bold))
                             .foregroundColor(.black)
+                            .lineLimit(1)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         
-                        Text(cardInfo.phaseDesc)
-                            .font(.system(size: 14))
+                        // Capsule waktu (posisi stabil)
+                        Text("30 min")
+                            .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(.black.opacity(0.7))
-                            .lineSpacing(3)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(
+                                Capsule()
+                                    .fill(Color.gray.opacity(0.2))
+                            )
+                            .fixedSize()
                     }
-                    Spacer()
+                    
+                    Text(cardInfo.phaseDesc)
+                        .font(.system(size: 14))
+                        .foregroundColor(.black.opacity(0.7))
+                        .lineSpacing(3)
                 }
                 
+                // Tombol
                 PrimaryGlassButton(title: "Start Workout", action: onStartWorkout)
             }
-            .padding(20)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 20)
         }
         .background(
             RoundedRectangle(cornerRadius: 20)
