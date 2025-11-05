@@ -51,7 +51,7 @@ struct WorkoutAppApp: App {
     var body: some Scene {
         WindowGroup {
 //            TestMenuGeneratorView()
-            SurveyView()
+            RouterView()
                 .environmentObject(router)
                 .environmentObject(surveyManager)
         }

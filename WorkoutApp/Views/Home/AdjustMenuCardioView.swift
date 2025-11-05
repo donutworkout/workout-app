@@ -61,7 +61,7 @@ struct AdjustMenuCardioView: View {
                         showCustomAlert = true
                     } else {
                         router.lastWorkoutSource = .adjustMenuCardio
-                        router.navigateTo(.countdownView)
+                        router.navigateTo(.startCardio)
                     }
                 }
                 .padding(.horizontal)
