@@ -14,13 +14,13 @@ struct WorkoutDayView: View {
     
     var minimumDays: Int {
         if workoutLevel == WorkoutLevel.beginner {
-            return 2
+            return 3
         } else if workoutLevel == WorkoutLevel.intermediate {
             return 4
         } else if workoutLevel == WorkoutLevel.advanced {
             return 5
         }
-        return 2 // Default value for unexpected cases
+        return 3 // Default value for unexpected cases
     }
     
     private func saveAndNext() {

@@ -32,7 +32,6 @@ class WorkoutMenuGenerator {
             chosenDays: chosenDays,
             level: level,
             userCycle: userCycle,
-            //hasCramps: userCycle.hasCrampsToday
         )
         
         let currentPhase = CyclePhaseCalculator.calculateCurrentPhase(
@@ -43,19 +42,52 @@ class WorkoutMenuGenerator {
         print("Current Phase: \(currentPhase.rawValue)")
         
         var weeklyMenus: [DailyMenu] = []
+        var strengthDayCounter: Int = 0
+        var cardioDayCounter: Int = 0
         
         for day in 1...7 {
             let dayName = generator.getDayName(day)
             let category = schedule[day] ?? .rest
             
-            let menu = generateDailyMenu(
-                dayNumber: day,
-                dayName: dayName,
-                category: category,
-                level: level,
-                phase: currentPhase,
-                strengthType: strengthType
-            )
+            let menu: DailyMenu
+            
+            if category == .strength {
+                menu = generateDailyMenu(
+                    dayNumber: day,
+                    dayName: dayName,
+                    category: category,
+                    level: level,
+                    phase: currentPhase,
+                    strengthType: strengthType,
+                    strengthDayIndex: strengthDayCounter,
+                    cardioDayIndex: 0
+                )
+                strengthDayCounter += 1
+            } else if category == .cardio {
+                menu = generateDailyMenu(
+                    dayNumber: day,
+                    dayName: dayName,
+                    category: category,
+                    level: level,
+                    phase: currentPhase,
+                    strengthType: strengthType,
+                    strengthDayIndex: 0,
+                    cardioDayIndex: cardioDayCounter
+                )
+                cardioDayCounter += 1
+            } else {
+                menu = generateDailyMenu(
+                    dayNumber: day,
+                    dayName: dayName,
+                    category: category,
+                    level: level,
+                    phase: currentPhase,
+                    strengthType: strengthType,
+                    strengthDayIndex: 0,
+                    cardioDayIndex: 0
+                )
+            }
+            
             
             weeklyMenus.append(menu)
         }
@@ -71,7 +103,9 @@ class WorkoutMenuGenerator {
         category: MenuCategory,
         level: WorkoutLevel,
         phase: MenstrualPhase,
-        strengthType: StrengthType
+        strengthType: StrengthType,
+        strengthDayIndex: Int,
+        cardioDayIndex: Int
     ) -> DailyMenu {
         
         switch category {
@@ -79,38 +113,44 @@ class WorkoutMenuGenerator {
             return generateCardioMenu(
                 dayNumber: dayNumber,
                 dayName: dayName,
-                phase: phase
+                level: level,
+                phase: phase,
+                cardioDayIndex: cardioDayIndex
             )
             
-        case .strength:
+        case .strength: //generate both bodyweight and gym, not based on level
             return generateStrengthMenu(
                 dayNumber: dayNumber,
                 dayName: dayName,
                 level: level,
                 phase: phase,
                 strengthType: strengthType,
-            )
+                strengthDayIndex: strengthDayIndex
+        )
             
         case .rest:
-            return .restDay(dayNumber: dayNumber, dayName: dayName)
+            return .restDay(
+                dayNumber: dayNumber,
+                dayName: dayName
+            )
         }
     }
-    
-    // MARK: - Generate Cardio Menu
-    private func generateCardioMenu(
+
+    private func generateCardioMenu( //sesuai list, nambah duration aja per level
         dayNumber: Int,
         dayName: String,
-        phase: MenstrualPhase
+        level: WorkoutLevel,
+        phase: MenstrualPhase,
+        cardioDayIndex: Int
     ) -> DailyMenu {
         
-        // Adjust intensity based on phase
-        //let (intensity, duration) = getCardioIntensity(for: phase)
+        let cardioDetails = getCardioDetails(for: level, phase: phase)
         
         return .cardioDay(
             dayNumber: dayNumber,
-            dayName: dayName
-//            intensity: intensity,
-//            duration: duration
+            dayName: dayName,
+            intensity: cardioDetails.intensityLabel,
+            estimatedDuration: cardioDetails.vigorousDuration
         )
     }
     
@@ -119,18 +159,17 @@ class WorkoutMenuGenerator {
             dayName: String,
             level: WorkoutLevel,
             phase: MenstrualPhase,
-            strengthType: StrengthType
+            strengthType: StrengthType,
+            strengthDayIndex: Int
         ) -> DailyMenu {
             
             print("\n💪 Generating strength workout for \(dayName)...")
             
             // Step 1: Determine body part focus (rotate throughout week)
-            let bodyPartFocus = determineBodyPartFocus(dayNumber: dayNumber)
-            //print("  Body Part: \(bodyPartFocus?.displayName ?? "Any")")
-            
-            // Step 2: Get exercise types for Keep Fit goal
-            let exerciseTypes = getExerciseTypesForKeepFit(phase: phase)
-            print("  Types: \(exerciseTypes.map { $0.rawValue }.joined(separator: ", "))")
+            let bodyPartFocus = determineBodyPartFocus(
+                level: level,
+                strengthDayIndex: strengthDayIndex
+            )
             
             // Step 3: Calculate exercise count
             let exerciseCount = getExerciseCount(for: level, phase: phase)
@@ -141,111 +180,167 @@ class WorkoutMenuGenerator {
                 forLevel: level,
                 phase: phase,
                 bodyPart: bodyPartFocus,
-                exerciseTypes: exerciseTypes,
                 count: exerciseCount
             )
             
             // Step 5: Adjust sets/reps based on phase
-            exercises = adjustExercisesForPhase(exercises, phase: phase)
-            
-            // Step 6: Calculate duration
-            let duration = calculateWorkoutDuration(exercises: exercises)
+            exercises = adjustExercisesForPhase(exercises, level: level, phase: phase)
             
             // Step 7: Get intensity
+            let duration = calculateWorkoutDuration(exercises: exercises)
             let intensity = getIntensity(for: phase)
             
             return .strengthDay(
                 dayNumber: dayNumber,
                 dayName: dayName,
                 strengthType: strengthType,
-                strengthExercises: exercises
+                strengthExercises: exercises,
+                intensity: intensity,
+                estimatedDuration: duration
             )
         }
 }
 
 extension WorkoutMenuGenerator {
-    private func determineBodyPartFocus(dayNumber: Int) -> BodyPart? {
-           // For Keep Fit: rotate through body parts
-           // Mon = Upper, Wed = Lower, Fri = Core, Sat = Upper, etc.
-           let cycle = dayNumber % 3
-           switch cycle {
-           case 1: return .upper
-           case 2: return .lower
-           case 0: return .core
-           default: return nil
-           }
-       }
+    
+    private func determineBodyPartFocus(level: WorkoutLevel, strengthDayIndex: Int) -> BodyPart? {
+        switch level {
+            case .advanced :
+                return strengthDayIndex % 2 == 0 ? .lower : .upper
+            default : return .fullBody
+        }
+    }
        
-       // MARK: - Get Exercise Types for Keep Fit
-       private func getExerciseTypesForKeepFit(phase: MenstrualPhase) -> [ExerciseType] {
-           // During menstruation: only gentle
-           if phase == .menstruation {
-               return [.mobility, .stability, .stretch, .lightStrength]
-           }
-           
-           // Keep Fit: balanced mix of strength and stability
-           return [.strength, .stability, .compound, .control]
-       }
+    private func getExerciseCount(for level: WorkoutLevel, phase: MenstrualPhase) -> Int {
+        switch level {
+        case .beginner: return 4
+        case .intermediate: return 5
+        case .advanced: return 6
+        }
+    }
+    
+    private func getCardioDetails(for level: WorkoutLevel, phase: MenstrualPhase) -> CardioDetails {
+        switch (level, phase) {
+            // BEGINNER
+        case (.beginner, .menstruation):
+            return CardioDetails(
+                vigorousDuration: 50,
+                moderateDuration: 100,
+                targetHeartRate: "70-80% max HR",
+                intensityLabel: "Low"
+            )
+        case (.beginner, .follicular), (.beginner, .ovulation):
+            return CardioDetails(
+                vigorousDuration: 75,
+                moderateDuration: 150,
+                targetHeartRate: "70-80% max HR",
+                intensityLabel: "High"
+            )
+        case (.beginner, .luteal):
+            return CardioDetails(
+                vigorousDuration: 90,
+                moderateDuration: 180,
+                targetHeartRate: "70-80% max HR",
+                intensityLabel: "Moderate"
+            )
+            
+            // INTERMEDIATE
+        case (.intermediate, .menstruation):
+            return CardioDetails(
+                vigorousDuration: 50,
+                moderateDuration: 100,
+                targetHeartRate: "70-80% max HR",
+                intensityLabel: "Low"
+            )
+        case (.intermediate, .follicular), (.intermediate, .ovulation):
+            return CardioDetails(
+                vigorousDuration: 75,
+                moderateDuration: 150,
+                targetHeartRate: "70-80% max HR",
+                intensityLabel: "High"
+            )
+        case (.intermediate, .luteal):
+            return CardioDetails(
+                vigorousDuration: 90,
+                moderateDuration: 180,
+                targetHeartRate: "70-80% max HR",
+                intensityLabel: "Moderate"
+            )
+            
+            // ADVANCED
+        case (.advanced, .menstruation):
+            return CardioDetails(
+                vigorousDuration: 80,
+                moderateDuration: 160,
+                targetHeartRate: "70-80% max HR",
+                intensityLabel: "Low"
+            )
+        case (.advanced, .follicular), (.advanced, .ovulation):
+            return CardioDetails(
+                vigorousDuration: 115,
+                moderateDuration: 230,
+                targetHeartRate: "70-80% max HR",
+                intensityLabel: "High"
+            )
+        case (.advanced, .luteal):
+            return CardioDetails(
+                vigorousDuration: 135,
+                moderateDuration: 270,
+                targetHeartRate: "70-80% max HR",
+                intensityLabel: "Moderate"
+            )
+        }
+    }
+    
+    private func getStrengthSpecs(for level: WorkoutLevel, phase: MenstrualPhase) -> StrengthSpecs {
+        switch (level, phase) {
+        // BEGINNER
+        case (.beginner, .menstruation):
+            return StrengthSpecs(sets: 2, reps: 8) // 1-2 sets, using 2
+        case (.beginner, .follicular), (.beginner, .ovulation):
+            return StrengthSpecs(sets: 4, reps: 10)
+        case (.beginner, .luteal):
+            return StrengthSpecs(sets: 3, reps: 10)
+            
+        // INTERMEDIATE
+        case (.intermediate, .menstruation):
+            return StrengthSpecs(sets: 3, reps: 10) // 2-3 sets, using 3
+        case (.intermediate, .follicular), (.intermediate, .ovulation):
+            return StrengthSpecs(sets: 4, reps: 12) // 3-4 sets, using 4
+        case (.intermediate, .luteal):
+            return StrengthSpecs(sets: 3, reps: 12)
+            
+        // ADVANCED
+        case (.advanced, .menstruation):
+            return StrengthSpecs(sets: 3, reps: 10)
+        case (.advanced, .follicular), (.advanced, .ovulation):
+            return StrengthSpecs(sets: 6, reps: 12) // 5-6 sets, using 6
+        case (.advanced, .luteal):
+            return StrengthSpecs(sets: 5, reps: 12) // 4-5 sets, using 5
+        }
+    }
        
-       // MARK: - Get Exercise Count
-       private func getExerciseCount(for level: WorkoutLevel, phase: MenstrualPhase) -> Int {
-           // Reduce during menstruation
-           if phase == .menstruation {
-               return 3
-           }
-           
-           switch level {
-           case .beginner: return 4
-           case .intermediate: return 5
-           case .advanced: return 6
-           }
-       }
+    private func adjustExercisesForPhase(_ exercises: [Exercise], level: WorkoutLevel, phase: MenstrualPhase) -> [Exercise] {
+        
+        let specs = getStrengthSpecs(for: level, phase: phase)
+        
+        print("  Applying: \(specs.sets) sets × \(specs.reps) reps")
+        
+        return exercises.map { exercise in
+            var adjusted = exercise
+            adjusted.sets = specs.sets
+            adjusted.reps = specs.reps
+            return adjusted
+        }
+    }
        
-       // MARK: - Adjust Exercises for Phase
-       private func adjustExercisesForPhase(_ exercises: [Exercise], phase: MenstrualPhase) -> [Exercise] {
-           return exercises.map { exercise in
-               var adjusted = exercise
-               
-               switch phase {
-               case .menstruation:
-                   // Reduce volume by 30-40%
-                   adjusted.sets = max(2, exercise.sets ?? 0 - 1)
-                   if let reps = exercise.reps {
-                       adjusted.reps = max(5, Int(Double(reps) * 0.7))
-                   }
-                   
-               case .follicular, .ovulation:
-                   // Peak performance - increase slightly
-                   adjusted.sets = min(5, exercise.sets ?? 0 + 1)
-                   
-               case .luteal:
-                   // Maintain as-is
-                   break
-               }
-               
-               return adjusted
-           }
-       }
-       
-       // MARK: - Get Intensity for Phase
-       private func getIntensity(for phase: MenstrualPhase) -> String {
-           switch phase {
-           case .menstruation: return "Low"
-           case .follicular: return "High"
-           case .ovulation: return "Peak"
-           case .luteal: return "Moderate"
-           }
-       }
-       
-       // MARK: - Get Cardio Intensity
-       private func getCardioIntensity(for phase: MenstrualPhase) -> (String, Int) {
-           switch phase {
-           case .menstruation: return ("Low", 20)
-           case .follicular: return ("High", 40)
-           case .ovulation: return ("High", 45)
-           case .luteal: return ("Moderate", 30)
-           }
-       }
+    private func getIntensity(for phase: MenstrualPhase) -> String {
+        switch phase {
+        case .menstruation: return "Low"
+        case .follicular, .ovulation: return "High"
+        case .luteal: return "Moderate"
+        }
+    }
        
        // MARK: - Calculate Workout Duration
        private func calculateWorkoutDuration(exercises: [Exercise]) -> Int {
