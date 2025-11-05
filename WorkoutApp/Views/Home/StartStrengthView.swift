@@ -12,48 +12,84 @@ struct StartStrengthView: View {
     @EnvironmentObject var router: Router
     
     var workoutName: String = "Bridge"
-    var reps: String = "3 x 12"
     var imageName: String = "bridge"
+    var duration: TimeInterval = 60
     
-    @State private var timeElapsed: TimeInterval = 0
+    // Misal latihan ke-2 dari 5
+    var currentPage: Int = 2
+    var totalPages: Int = 5
+    
+    @State private var timeRemaining: TimeInterval = 60
     @State private var isPaused: Bool = false
     @State private var timer: Timer? = nil
+    @State private var calories: Int = 0
+    @State private var bpm: Int = 90
     
     var body: some View {
-        VStack(spacing: 20) {
-            Image(imageName)
-                .resizable()
-                .scaledToFit()
-                .frame(height: 320)
-                .padding(.top, 40)
-            
-            Spacer()
-            
-            VStack(spacing: 12) {
+        VStack(spacing: 0) {
+            // MARK: - Page Control + Title + Image
+            VStack(spacing: 16) {
+                // MARK: Page Control (bulatan)
+                HStack(spacing: 6) {
+                    ForEach(1...totalPages, id: \.self) { index in
+                        Circle()
+                            .fill(index == currentPage ? Color("pinkTextPrimary") : Color.gray.opacity(0.3))
+                            .frame(width: 8, height: 8)
+                    }
+                }
+                .padding(.top, 24)
+                
+                // MARK: Workout Title
                 Text(workoutName)
-                    .font(.system(size: 34, weight: .semibold))
+                    .font(.system(size: 28, weight: .semibold))
                     .foregroundColor(Color("pinkTextPrimary"))
                 
-                Text(formattedTime)
-                    .font(.system(size: 40, weight: .bold))
-                    .foregroundColor(Color("pinkTextPrimary"))
+                // MARK: Image
+                Image(imageName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 320)
                     .padding(.top, 8)
             }
             
             Spacer()
             
+            // MARK: - Timer
+            HStack(spacing: 8) {
+                Image(systemName: "timer")
+                    .font(.system(size: 32, weight: .medium))
+                    .foregroundColor(Color("pinkTextPrimary"))
+                
+                Text(formattedTime)
+                    .font(.system(size: 48, weight: .bold))
+                    .foregroundColor(Color("pinkTextPrimary"))
+                    .monospacedDigit()
+            }
+            .padding(.bottom, 32)
+            
+            // MARK: - Stats Cards
+            HStack(spacing: 12) {
+                StatCardItem(icon: "flame.fill", value: "\(calories)", label: "KCAL")
+                StatCardItem(icon: "heart.fill", value: "\(bpm)", label: "BPM")
+            }
+            .padding(.horizontal)
+            .padding(.bottom, 32)
+            
+            Spacer()
+            
+            // MARK: - Buttons
             HStack(spacing: 16) {
-                NeutralGlassButton(title: isPaused ? "Resume" : "Pause") {
+                PrimaryGlassButton(title: isPaused ? "Resume" : "Pause") {
                     toggleTimer()
                 }
                 
                 NeutralGlassButton(title: "Next") {
                     timer?.invalidate()
-                    router.navigateTo(.menu)
+                    router.navigateTo(.restView)
                 }
             }
-            .padding(.bottom, 40)
             .padding(.horizontal)
+            .padding(.bottom, 40)
         }
         .background(Color.white.ignoresSafeArea())
         .navigationTitle("Workout")
@@ -74,16 +110,26 @@ struct StartStrengthView: View {
         .onDisappear { timer?.invalidate() }
     }
     
+    // MARK: - Formatters
     private var formattedTime: String {
-        let minutes = Int(timeElapsed) / 60
-        let seconds = Int(timeElapsed) % 60
+        let minutes = Int(timeRemaining) / 60
+        let seconds = Int(timeRemaining) % 60
         return String(format: "%02d:%02d", minutes, seconds)
     }
     
+    // MARK: - Timer Logic
     private func startTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+        timeRemaining = duration
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
             if !isPaused {
-                timeElapsed += 1
+                if timeRemaining > 0 {
+                    timeRemaining -= 1
+                    calories = Int((duration - timeRemaining) / 6)
+                    bpm = 90 + Int.random(in: -4...6)
+                } else {
+                    t.invalidate()
+                    handleTimerComplete()
+                }
             }
         }
     }
@@ -91,11 +137,16 @@ struct StartStrengthView: View {
     private func toggleTimer() {
         isPaused.toggle()
     }
+    
+    private func handleTimerComplete() {
+        router.navigateTo(.restView)
+    }
 }
 
 
 #Preview {
     NavigationStack {
         StartStrengthView()
+            .environmentObject(Router())
     }
 }
