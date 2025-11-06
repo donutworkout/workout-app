@@ -10,6 +10,7 @@ import SwiftUI
 struct StartCardioView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var router: Router
+    private let phoneConnectivity = iPhoneConnectivityManager.shared
     
     // MARK: - Props
     var activityName: String = "Indoor Walk"
@@ -34,36 +35,53 @@ struct StartCardioView: View {
                     .frame(height: 380)
                     .padding(.top, 20)
                 
-                Spacer()
-                
-                // MARK: - Timer with Icon
-                HStack(spacing: 8) {
-                    Image(systemName: "timer")
-                        .font(.system(size: 32, weight: .medium))
-                        .foregroundColor(Color("pinkTextPrimary"))
-                    
-                    Text(formattedTime)
-                        .font(.system(size: 48, weight: .bold))
-                        .foregroundColor(Color("pinkTextPrimary"))
-                        .monospacedDigit()
+                Text(formattedTime)
+                    .font(.system(size: 36, weight: .bold))
+                    .foregroundColor(Color("pinkTextPrimary"))
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 20)
+            .background(
+                RoundedRectangle(cornerRadius: 24)
+                    .fill(Color.white)
+                    .shadow(color: .gray.opacity(0.15), radius: 6, x: 0, y: 3)
+            )
+            .padding(.horizontal)
+            
+            // MARK: - Stats
+            HStack(spacing: 16) {
+                StatCard(title: "\(calories) KCAL", color: Color("pinkTextPrimary").opacity(0.25))
+                StatCard(title: "❤️ \(bpm) BPM", color: Color("pinkTextPrimary").opacity(0.25))
+            }
+            .padding(.horizontal)
+            
+            Spacer()
+            
+            // MARK: - Buttons
+            HStack(spacing: 16) {
+                Button(action: {
+                    if isPaused {
+                        // resume
+                        phoneConnectivity.resumeWorkoutFromPhone()
+                        isPaused = false
+                    } else {
+                        // pause
+                        phoneConnectivity.pauseWorkoutFromPhone()
+                        isPaused = true
+                    }
+                }) {
+                    Image(systemName: isPaused ? "play.fill" : "pause.fill")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.black)
+                        .frame(width: 44, height: 44)
+                        .background(Circle().fill(.ultraThinMaterial))
                 }
                 .padding(.bottom, 32)
                 
-                // MARK: - Stats Cards
-                HStack(spacing: 12) {
-                    StatCardItem(icon: "flame.fill", value: "\(calories)", label: "KCAL")
-                    StatCardItem(icon: "figure.walk", value: String(format: "%.1f", distance), label: "KILOMETERS")
-                    StatCardItem(icon: "heart.fill", value: "\(bpm)", label: "BPM")
-                }
-                .padding(.horizontal)
-                .padding(.bottom, 32)
-                
-                Spacer()
-                
-                // MARK: - Pause Button
-                PrimaryGlassButton(title: "Pause") {
-                    isPaused = true
-                    showPausePopup = true
+                PrimaryGlassButton(title: "Done") {
+                    phoneConnectivity.stopWorkoutFromPhone()
+                    router.navigateTo(.menu)
+                    timer?.invalidate()
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 40)
@@ -190,3 +208,4 @@ struct WorkoutPausePopup: View {
             .environmentObject(Router())
     }
 }
+

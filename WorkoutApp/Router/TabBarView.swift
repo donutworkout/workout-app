@@ -39,7 +39,7 @@ struct TabBarView: View {
         .onAppear {
             router.selectedTab = selectedTab
         }
-        .onChange(of: selectedTab) { newValue in
+        .onChange(of: selectedTab) { _, newValue in
             router.selectedTab = newValue
         }
     }

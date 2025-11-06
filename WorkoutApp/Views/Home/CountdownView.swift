@@ -10,13 +10,13 @@ import SwiftUI
 struct CountdownView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var router: Router
-    
+
     // MARK: - Props
     var workoutName: String = "Bridge"
     var reps: String = "3 x 12"
     var imageName: String = "bridge"
     var onCountdownComplete: () -> Void = {}
-    
+
     @State private var countdown: Int = 3
     @State private var showCountdown: Bool = true
     @State private var timeElapsed: TimeInterval = 0
@@ -49,12 +49,29 @@ struct CountdownView: View {
                         .foregroundColor(Color("pinkTextPrimary"))
                         .padding(.top, 8)
                 }
-                
+                .padding(.top, 20)
+
+                // MARK: - Image
+                Image(imageName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 400)
+                    .padding(.vertical, 20)
+
                 Spacer()
-                
-                HStack(spacing: 16) {
-                    NeutralGlassButton(title: isPaused ? "Resume" : "Pause") {
-                        toggleTimer()
+
+                // MARK: - Bottom Buttons (hidden during countdown)
+                if countdown == 0 {
+                    HStack(spacing: 16) {
+                        NeutralGlassButton(title: isPaused ? "Resume" : "Pause")
+                        {
+                            isPaused.toggle()
+                        }
+
+                        NeutralGlassButton(title: "Start") {
+                            timer?.invalidate()
+                            onCountdownComplete()
+                        }
                     }
                     
                     NeutralGlassButton(title: "Next") {
@@ -122,6 +139,25 @@ struct CountdownView: View {
                 countdown -= 1
             } else {
                 t.invalidate()
+
+                // Start workout on countdown completion using the exact selected type
+                if let type = router.selectedWorkoutType {
+                    iPhoneConnectivityManager.shared.startWorkoutFromPhone(type: type)
+                } else {
+                    print("⚠️ No selectedWorkoutType set in Router; not starting workout")
+                }
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    if let last = router.lastWorkoutSource {
+                        switch last {
+                        case .adjustMenuCardio:
+                            router.navigateTo(.startCardio)
+                        case .adjustMenuStrength:
+                            router.navigateTo(.startStrength)
+                        default:
+                            break
+                        }
+                    }
                 withAnimation(.easeOut(duration: 0.3)) {
                     showCountdown = false
                 }
@@ -158,3 +194,4 @@ struct CountdownView: View {
             .environmentObject(Router())
     }
 }
+
