@@ -4,7 +4,7 @@ struct RouterView: View {
     @EnvironmentObject var router: Router
     @EnvironmentObject var surveyManager: SurveyManager
     @Environment(iPhoneConnectivityManager.self) private var connectivity
-
+    @Environment(\.modelContext) private var modelContext
     
     var body: some View {
         NavigationStack {
@@ -41,7 +41,7 @@ struct RouterView: View {
                     .environmentObject(surveyManager)
                 
             case .menu:
-                MenuView()
+                MenuView(modelContext: modelContext)
                     .environmentObject(router)
                     .environmentObject(surveyManager)
                 

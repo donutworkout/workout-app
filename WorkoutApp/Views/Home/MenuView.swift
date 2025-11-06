@@ -5,15 +5,38 @@ struct MenuView: View {
     @EnvironmentObject var router: Router
     
     @Query private var userCycles: [UserCycle]
+    @Query private var userProfiles: [UserProfile]
+    @Query private var userWorkouts: [UserWorkout]
     
     @StateObject var cycleViewModel: CycleViewModel
+    @StateObject var menuViewModel: MenuViewModel
     @State private var selectedDay: Int = Calendar.current.component(.weekday, from: Date()) - 1
     
     private var userCycle: UserCycle? {
         userCycles.first
     }
     
-    init() {
+    private var userProfile: UserProfile? {
+        userProfiles.first
+    }
+    
+    private var userWorkout: UserWorkout? {
+        userWorkouts.first
+    }
+    
+    private var selectedPhase: MenstrualPhase {
+        cycleViewModel.phase(for: cycleViewModel.selectedDayIndex) ?? .menstruation
+    }
+        
+    private var selectedDate: Date {
+        cycleViewModel.dateForSelectedDay()
+    }
+        
+    private var selectedDayMenu: DailyMenu? {
+        menuViewModel.getMenuForDate(selectedDate)
+    }
+    
+    init(modelContext: ModelContext) {
         // Create placeholder ViewModel (will be replaced)
         let placeholder = UserCycle(
             isCycleRegular: true,
@@ -26,6 +49,7 @@ struct MenuView: View {
             cycleMoodAffectsMotivation: .never
         )
         _cycleViewModel = StateObject(wrappedValue: CycleViewModel(userCycle: placeholder))
+        _menuViewModel = StateObject(wrappedValue: MenuViewModel(modelContext: modelContext))
     }
     
     private var currentPhase: MenstrualPhase {
@@ -42,12 +66,27 @@ struct MenuView: View {
                     .padding(.top, 16)
                 
                 DaySelectorView(selectedDay: $cycleViewModel.selectedDayIndex)
-                CombinedWorkoutCardView(phase: currentPhase, onStartWorkout: {
-                    if currentPhase == .menstruation {
-                        router.navigateTo(.adjustMenuCardio)
-                    } else {
-                        router.navigateTo(.adjustMenuStrength)
-                    }
+                
+                CombinedWorkoutCardView(
+                    phase: selectedPhase,
+                    menu: selectedDayMenu,
+                    onStartWorkout: {
+                        
+                        if let menu = selectedDayMenu {
+                           if menu.isCardio {
+                               router.navigateTo(.adjustMenuCardio)
+                           } else if menu.isStrength {
+                               router.navigateTo(.adjustMenuStrength)
+                           }
+                        } else {
+                            // Fallback based on phase
+                            if selectedPhase == .menstruation {
+                                router.navigateTo(.adjustMenuCardio)
+                            } else {
+                                router.navigateTo(.adjustMenuStrength)
+                            }
+                        }
+                        
                 })
                 
                 Text("Streak")
@@ -61,25 +100,65 @@ struct MenuView: View {
             }
         }
         .background(Color.white.ignoresSafeArea())
+        .onAppear {
+            if let cycle = userCycle {
+                cycleViewModel.updateCycle(cycle) // Update with real data
+                loadWeeklyMenu()
+            }
+        }
+        .onChange(of: userCycle) { _, newCycle in
+            if let cycle = newCycle {
+                cycleViewModel.updateCycle(cycle)
+                loadWeeklyMenu()
+            }
+        }
     }
 }
 
-// Update WorkoutCardView agar bisa terima callback
 struct CombinedWorkoutCardView: View {
     let phase: MenstrualPhase
-
+    let menu: DailyMenu?
     var onStartWorkout: () -> Void
     
-    private var cardInfo: (image: String, workoutTitle: String, phaseDesc: String) {
-        switch phase {
-        case .menstruation:
-            return ("buttercup", "Today's Cardio Menu!", "Don’t worry about being perfect! just move and let your body wake up!")
-        case .follicular:
-            return ("bubbles", "Today's Strength Menu!", "Let's wake up those muscles just good vibes and sweat!")
-        case .luteal:
-            return ("bubbles", "Today's Strength Menu!", "Let's wake up those muscles just good vibes and sweat!")
-        case .ovulation:
-            return ("bubbles", "Today's Strength Menu!", "Let's wake up those muscles just good vibes and sweat!")
+    private var cardInfo: (image: String, workoutTitle: String, phaseDesc: String, duration: String) {
+        // Get workout type from menu, fallback to phase
+        let isCardioDay: Bool
+        let isStrengthDay: Bool
+        
+        if let menu = menu {
+            isCardioDay = menu.isCardio
+            isStrengthDay = menu.isStrength
+        } else {
+            // Fallback based on phase: menstruation -> cardio, others -> strength
+            isCardioDay = (phase == .menstruation)
+            isStrengthDay = !isCardioDay
+        }
+        
+        // Get duration from menu (default to 30 min for now)
+        let duration: String = "30 min"
+        
+        // Determine card content
+        if isCardioDay {
+            return (
+                "buttercup",
+                "Today's Cardio Menu!",
+                "Don't worry about being perfect! just move and let your body wake up!",
+                duration
+            )
+        } else if isStrengthDay {
+            return (
+                "bubbles",
+                "Today's Strength Menu!",
+                "Let's wake up those muscles just good vibes and sweat!",
+                duration
+            )
+        } else {
+            return (
+                "bubbles",
+                "Time to rest",
+                "Take your time to relax and enjoy the day!",
+                duration
+            )
         }
     }
     
@@ -87,7 +166,7 @@ struct CombinedWorkoutCardView: View {
         VStack(alignment: .leading, spacing: 0) {
             
             // MARK: - Phase Header
-            Text(phase.rawValue)
+            Text("\(phase.rawValue.capitalized) Phase")
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundColor(.black)
                 .padding(.horizontal, 20)
@@ -129,17 +208,18 @@ struct CombinedWorkoutCardView: View {
                             .lineLimit(1)
                             .frame(maxWidth: .infinity, alignment: .leading)
                         
-                        // Capsule waktu (posisi stabil)
-                        Text("30 min")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(.black.opacity(0.7))
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 4)
-                            .background(
-                                Capsule()
-                                    .fill(Color.gray.opacity(0.2))
-                            )
-                            .fixedSize()
+                        if (menu?.isCardio ?? false) || (menu?.isStrength ?? false) {
+                            Text(cardInfo.duration)
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundColor(.black.opacity(0.7))
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 4)
+                                .background(
+                                    Capsule()
+                                        .fill(Color.gray.opacity(0.2))
+                                )
+                                .fixedSize()
+                        }
                     }
                     
                     Text(cardInfo.phaseDesc)
@@ -148,8 +228,10 @@ struct CombinedWorkoutCardView: View {
                         .lineSpacing(3)
                 }
                 
-                // Tombol
-                PrimaryGlassButton(title: "Start Workout", action: onStartWorkout)
+                
+                if (menu?.isCardio ?? false) || (menu?.isStrength ?? false) {
+                    PrimaryGlassButton(title: "Start Workout", action: onStartWorkout)
+                }
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 20)
@@ -300,7 +382,26 @@ enum PhaseType: String {
     case follicular = "Follicular Phase"
 }
 
-#Preview {
-    MenuView()
-        .environmentObject(Router())
+extension MenuView {
+    private func loadWeeklyMenu() {
+        guard let cycle = userCycle, let profile = userWorkout else { return }
+        
+        // Get user's chosen days (you need to fetch this from somewhere)
+        let chosenDays: [WorkoutDayPreference] = profile.workoutDaysPreference // TODO: Get from profile
+        print("Chosen days: \(chosenDays.map { $0.rawValue })")
+        
+        Task {
+            await menuViewModel.generateWeeklyMenu(
+                userCycle: cycle,
+                userLevel: profile.workoutLevel,
+                chosenDays: chosenDays
+            )
+        }
+    }
 }
+
+//#Preview {
+//    MenuView(modelContext: ModelContext)
+//        .environmentObject(Router())
+//}
+

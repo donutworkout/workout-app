@@ -10,12 +10,13 @@ import SwiftUI
 struct TabBarView: View {
     @EnvironmentObject var router: Router
     @State private var selectedTab = 0
+    @Environment(\.modelContext) private var modelContext
     
     var body: some View {
         TabView(selection: $selectedTab) {
             
             // MARK: - Menu Tab
-            MenuView()
+            MenuView(modelContext: modelContext)
                 .tabItem {
                     Label("Menu", systemImage: "menucard.fill")
                 }
