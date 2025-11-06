@@ -17,9 +17,10 @@ struct TestMenuGeneratorView: View {
     // Test cycle data - FIXED to match your UserCycle
     @State private var testCycle = UserCycle(
         isCycleRegular: true,
-        cycleStartDate: Date().addingTimeInterval(-3 * 24 * 60 * 60), // 3 days ago
+        cycleStartDate: Date().addingTimeInterval(-15 * 24 * 60 * 60), // 3 days ago
         cycleEndDate: Date(),
         cycleLength: 28, // IMPORTANT: This should be your full cycle (not period duration)
+        menstrualDuration: 5,
         cycleSymptoms: [.cramps], // User has cramps
         cycleEnergy: .stable,
         cycleMoodAffectsMotivation: .never
@@ -217,15 +218,6 @@ struct DailyMenuCard: View {
                     .foregroundStyle(.secondary)
             }
             
-            // Footer
-//            HStack {
-//                Label(menu.intensity, systemImage: "flame.fill")
-//                    .font(.caption)
-//                Spacer()
-//                Label("\(menu.estimatedDuration) min", systemImage: "clock.fill")
-//                    .font(.caption)
-//            }
-//            .foregroundStyle(.secondary)
         }
         .padding()
         .background(categoryColor.opacity(0.1))

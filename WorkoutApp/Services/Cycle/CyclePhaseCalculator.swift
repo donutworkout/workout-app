@@ -21,8 +21,11 @@ class CyclePhaseCalculator {
         let startOfLastPeriod = calendar.startOfDay(for: lastPeriodStart)
 
         let daysSinceStart = calendar.dateComponents([.day], from: startOfLastPeriod, to: startOfToday).day ?? 0
-        let currentDayInCycle = daysSinceStart + 1
-
+        
+        let currentDayInCycle = (daysSinceStart % cycleLength) + 1
+        
+        print("🩸 Days since last period: \(daysSinceStart) → current cycle day: \(currentDayInCycle)")
+        
         return phaseForDay(currentDayInCycle, cycleLength: cycleLength, periodDuration: menstrualDuration)
     }
     
@@ -47,6 +50,7 @@ class CyclePhaseCalculator {
         
         // Luteal: After ovulation until next period
         return .luteal
+
     }
     
     /// Calculate next phase change date

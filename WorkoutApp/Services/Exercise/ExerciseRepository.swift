@@ -40,24 +40,30 @@ class ExerciseRepository {
         // MANUAL FILTERING (this works perfectly with enums!)
         var filtered = allExercises
         
-        // Filter by level
-        filtered = filtered.filter { exercise in
-            exercise.level == level || exercise.level == .beginner
-        }
-        print("  ✓ After level filter: \(filtered.count)")
-        
-        // Filter by phase
-        filtered = filtered.filter { exercise in
-            exercise.phase == phase || isExerciseSuitableForPhase(exercise, targetPhase: phase)
-        }
-        print("  ✓ After phase filter: \(filtered.count)")
-        
-        // Filter by body part
-        if let bodyPart = bodyPart {
-            filtered = filtered.filter { exercise in
-                exercise.bodyPart == bodyPart || exercise.bodyPart == .fullBody
+        //  Filter by level + bodyPart
+        switch level {
+        case .beginner:
+            // Beginners only get full-body exercises
+            filtered = filtered.filter { $0.bodyPart == .fullBody }
+            print("  🟢 Beginner filter: \(filtered.count)")
+            
+        case .intermediate:
+            // Intermediates: target part but allow full-body fallback
+            if let bodyPart = bodyPart {
+                filtered = filtered.filter { exercise in
+                    exercise.bodyPart == bodyPart || exercise.bodyPart == .fullBody
+                }
+                print("  🟡 Intermediate \(bodyPart.rawValue) filter: \(filtered.count)")
             }
-            print("  ✓ After body part filter: \(filtered.count)")
+            
+        case .advanced:
+            // Advanced: isolate specific muscle group (strict)
+            if let bodyPart = bodyPart {
+                filtered = filtered.filter { exercise in
+                    exercise.bodyPart == bodyPart
+                }
+                print("  🔴 Advanced strict \(bodyPart.rawValue) filter: \(filtered.count)")
+            }
         }
         
         // Filter by exercise types
