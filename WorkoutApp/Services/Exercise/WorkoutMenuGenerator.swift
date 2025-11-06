@@ -136,7 +136,7 @@ class WorkoutMenuGenerator {
         }
     }
 
-    private func generateCardioMenu( //sesuai list, nambah duration aja per level
+    func generateCardioMenu( //sesuai list, nambah duration aja per level
         dayNumber: Int,
         dayName: String,
         level: WorkoutLevel,
@@ -154,7 +154,7 @@ class WorkoutMenuGenerator {
         )
     }
     
-    private func generateStrengthMenu(
+    func generateStrengthMenu(
             dayNumber: Int,
             dayName: String,
             level: WorkoutLevel,
