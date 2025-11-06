@@ -34,7 +34,8 @@ struct ContentView: View {
                               } else {
                                   WatchWorkoutListView(
                                       sessionManager: _sessionManager,
-                                      connectivity: _connectivity
+                                      connectivity: _connectivity,
+                                      workoutType: type
                                   )
                               }
 

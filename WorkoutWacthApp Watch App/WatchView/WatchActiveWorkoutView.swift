@@ -48,7 +48,7 @@ struct WatchActiveWorkoutView: View {
                 
                 MetricView(
                     icon: "timer",
-                    value: formatTime(elapsedTime),
+                    value: formatTimeDisplay(elapsedTime),
                     unit: ""
                 )
             }
