@@ -22,11 +22,11 @@ struct CountdownView: View {
     @State private var timeElapsed: TimeInterval = 0
     @State private var isPaused: Bool = false
     @State private var timer: Timer? = nil
-
+    
     init(onCountdownComplete: @escaping () -> Void = {}) {
         self.onCountdownComplete = onCountdownComplete
     }
-
+    
     var body: some View {
         ZStack {
             // MARK: - Base Workout View (StartStrengthView content)
@@ -49,21 +49,38 @@ struct CountdownView: View {
                         .foregroundColor(Color("pinkTextPrimary"))
                         .padding(.top, 8)
                 }
+                .padding(.top, 20)
+                
+                // MARK: - Image
+                Image(imageName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 400)
+                    .padding(.vertical, 20)
                 
                 Spacer()
                 
-                HStack(spacing: 16) {
-                    NeutralGlassButton(title: isPaused ? "Resume" : "Pause") {
-                        toggleTimer()
+                // MARK: - Bottom Buttons (hidden during countdown)
+                if countdown == 0 {
+                    HStack(spacing: 16) {
+                        NeutralGlassButton(title: isPaused ? "Resume" : "Pause")
+                        {
+                            isPaused.toggle()
+                        }
+                        
+                        NeutralGlassButton(title: "Start") {
+                            timer?.invalidate()
+                            onCountdownComplete()
+                        }
                     }
                     
                     NeutralGlassButton(title: "Next") {
                         timer?.invalidate()
                         router.navigateTo(.menu)
                     }
+                    .padding(.bottom, 40)
+                    .padding(.horizontal)
                 }
-                .padding(.bottom, 40)
-                .padding(.horizontal)
             }
             .background(Color.white.ignoresSafeArea())
             
@@ -100,14 +117,14 @@ struct CountdownView: View {
         .onAppear { startCountdown() }
         .onDisappear { timer?.invalidate() }
     }
-
+    
     // MARK: - Time Formatting
     private var formattedTime: String {
         let minutes = Int(timeElapsed) / 60
         let seconds = Int(timeElapsed) % 60
         return String(format: "%02d:%02d", minutes, seconds)
     }
-
+    
     // MARK: - Countdown Logic
     private func startCountdown() {
         countdown = 3
@@ -122,35 +139,56 @@ struct CountdownView: View {
                 countdown -= 1
             } else {
                 t.invalidate()
-                withAnimation(.easeOut(duration: 0.3)) {
-                    showCountdown = false
+                
+                // Start workout on countdown completion using the exact selected type
+                if let type = router.selectedWorkoutType {
+                    iPhoneConnectivityManager.shared.startWorkoutFromPhone(type: type)
+                } else {
+                    print("⚠️ No selectedWorkoutType set in Router; not starting workout")
                 }
-                onCountdownComplete()
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    if let last = router.lastWorkoutSource {
+                        switch last {
+                        case .adjustMenuCardio:
+                            router.navigateTo(.startCardio)
+                        case .adjustMenuStrength:
+                            router.navigateTo(.startStrength)
+                        default:
+                            break
+                        }
+                    }
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        showCountdown = false
+                    }
+                    onCountdownComplete()
+                }
             }
         }
     }
-
-    // MARK: - Workout Timer Logic
-    private func startWorkoutTimer() {
-        timeElapsed = 0
-        isPaused = false
         
-        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
-            if !isPaused && !showCountdown {
-                timeElapsed += 1
-            }
+        // MARK: - Workout Timer Logic
+        private func startWorkoutTimer() {
+            timeElapsed = 0
+            isPaused = false
             
-            // Store reference only after countdown
-            if !showCountdown && timer == nil {
-                timer = t
+            Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
+                if !isPaused && !showCountdown {
+                    timeElapsed += 1
+                }
+                
+                // Store reference only after countdown
+                if !showCountdown && timer == nil {
+                    timer = t
+                }
             }
+        }
+        
+        private func toggleTimer() {
+            isPaused.toggle()
         }
     }
 
-    private func toggleTimer() {
-        isPaused.toggle()
-    }
-}
 
 #Preview {
     NavigationStack {
@@ -158,3 +196,4 @@ struct CountdownView: View {
             .environmentObject(Router())
     }
 }
+

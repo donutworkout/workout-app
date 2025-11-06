@@ -1,14 +1,35 @@
 import SwiftUI
+import SwiftData
 
 struct MenuView: View {
     @EnvironmentObject var router: Router
+    
+    @Query private var userCycles: [UserCycle]
+    
+    @StateObject var cycleViewModel: CycleViewModel
     @State private var selectedDay: Int = Calendar.current.component(.weekday, from: Date()) - 1
     
-    private var currentPhase: PhaseType {
-        switch selectedDay {
-        case 0, 2, 4, 6: return .menstrual
-        default: return .follicular
-        }
+    private var userCycle: UserCycle? {
+        userCycles.first
+    }
+    
+    init() {
+        // Create placeholder ViewModel (will be replaced)
+        let placeholder = UserCycle(
+            isCycleRegular: true,
+            cycleStartDate: Date(),
+            cycleEndDate: Date(),
+            cycleLength: 28,
+            menstrualDuration: 5,
+            cycleSymptoms: [],
+            cycleEnergy: .stable,
+            cycleMoodAffectsMotivation: .never
+        )
+        _cycleViewModel = StateObject(wrappedValue: CycleViewModel(userCycle: placeholder))
+    }
+    
+    private var currentPhase: MenstrualPhase {
+        cycleViewModel.phase(for: cycleViewModel.selectedDayIndex) ?? .menstruation
     }
     
     var body: some View {
@@ -20,11 +41,9 @@ struct MenuView: View {
                     .padding(.horizontal)
                     .padding(.top, 16)
                 
-                DaySelectorView(selectedDay: $selectedDay)
-                
-                // Combined Phase + Workout Card
+                DaySelectorView(selectedDay: $cycleViewModel.selectedDayIndex)
                 CombinedWorkoutCardView(phase: currentPhase, onStartWorkout: {
-                    if currentPhase == .menstrual {
+                    if currentPhase == .menstruation {
                         router.navigateTo(.adjustMenuCardio)
                     } else {
                         router.navigateTo(.adjustMenuStrength)
@@ -37,24 +56,30 @@ struct MenuView: View {
                     .padding(.horizontal)
                     .padding(.top, 8)
                 
-                StreakCardView(phase: currentPhase)
-                    .padding(.bottom, 100)
+                StreakCardView()
+                    //.padding(.bottom, 100)
             }
         }
         .background(Color.white.ignoresSafeArea())
     }
 }
 
+// Update WorkoutCardView agar bisa terima callback
 struct CombinedWorkoutCardView: View {
-    let phase: PhaseType
+    let phase: MenstrualPhase
+
     var onStartWorkout: () -> Void
     
     private var cardInfo: (image: String, workoutTitle: String, phaseDesc: String) {
         switch phase {
-        case .menstrual:
-            return ("buttercup", "Today's Cardio Menu!", "Take it slow today 🌙 It's okay to rest or move gently.")
+        case .menstruation:
+            return ("buttercup", "Today's Cardio Menu!", "Don’t worry about being perfect! just move and let your body wake up!")
         case .follicular:
-            return ("bubbles", "Today's Strength Menu!", "You're glowing, girl! Perfect time to try new moves or push a little more.")
+            return ("bubbles", "Today's Strength Menu!", "Let's wake up those muscles just good vibes and sweat!")
+        case .luteal:
+            return ("bubbles", "Today's Strength Menu!", "Let's wake up those muscles just good vibes and sweat!")
+        case .ovulation:
+            return ("bubbles", "Today's Strength Menu!", "Let's wake up those muscles just good vibes and sweat!")
         }
     }
     
@@ -165,18 +190,82 @@ struct DaySelectorView: View {
     }
 }
 
-// MARK: - Streak Card
-struct StreakCardView: View {
-    let phase: PhaseType
+// MARK: - Phase Card
+struct PhaseCardView: View {
+    let phase: MenstrualPhase
     
-    private var streakInfo: (title: String, desc: String) {
+    private var phaseInfo: (desc: String, mood: String) {
         switch phase {
-        case .menstrual:
-            return ("You're on a roll!", "Another checkmark for the consistency queen!")
+        case .menstruation:
+            return (
+                "Take it slow today ✨Your body's busy doing internal magic – it's okay to rest or move gently.",
+                "Mood note: Self-care focus."
+            )
         case .follicular:
-            return ("Go Girl!", "Don't break it, bestie! You're killing it!")
+            return (
+                "You're glowing, girl! Perfect time to try new moves or push a little more.",
+                "Mood note: Rising energy, motivation boost, open to challenges."
+            )
+        case .luteal:
+            return (
+                "You're glowing, girl! Perfect time to try new moves or push a little more.",
+                "Mood note: Rising energy, motivation boost, open to challenges."
+            )
+        case .ovulation:
+            return (
+                "You're glowing, girl! Perfect time to try new moves or push a little more.",
+                "Mood note: Rising energy, motivation boost, open to challenges."
+            )
         }
     }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(phase.rawValue)
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundColor(.black)
+            
+            Text(phaseInfo.desc)
+                .font(.system(size: 15))
+                .fontWeight(.semibold)
+                .foregroundColor(.black)
+                .lineSpacing(4)
+            
+            // Pink bar dengan rounded corners seperti di foto
+            Text(phaseInfo.mood)
+                .font(.system(size: 14))
+                .fontWeight(.semibold)
+                .foregroundColor(.black)
+                .padding(.vertical, 10)
+                .padding(.horizontal, 12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color("pinkTextPrimary").opacity(0.15))
+                )
+        }
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color.white)
+                .shadow(color: .black.opacity(0.06), radius: 10, x: 0, y: 4)
+        )
+        .padding(.horizontal)
+    }
+}
+
+// MARK: - Streak Card
+struct StreakCardView: View {
+//    let phase: PhaseType
+//    
+//    private var streakInfo: (title: String, desc: String) {
+//        switch phase {
+//        case .menstrual:
+//            return ("You're on a roll!", "Another checkmark for the consistency queen!")
+//        case .follicular:
+//            return ("Go Girl!", "Don’t break it, bestie! You’re killing it!")
+//        }
+//    }
     
     var body: some View {
         HStack(spacing: 16) {
@@ -184,10 +273,10 @@ struct StreakCardView: View {
                 .font(.system(size: 48))
             
             VStack(alignment: .leading, spacing: 6) {
-                Text(streakInfo.title)
+                Text("Streak")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.black)
-                Text(streakInfo.desc)
+                Text("You go girl!")
                     .font(.system(size: 14))
                     .fontWeight(.semibold)
                     .foregroundColor(.black)

@@ -61,6 +61,7 @@ struct AdjustMenuStrengthView: View {
                     case .gym:
                         workoutType = .traditionalStrengthTraining
                     }
+                    router.selectedWorkoutType = workoutType
                     iPhoneConnectivityManager.shared.sendSelectedWorkout(workoutType)
                 }
                 
@@ -118,3 +119,4 @@ struct WorkoutItem: Identifiable {
         AdjustMenuStrengthView()
     }
 }
+

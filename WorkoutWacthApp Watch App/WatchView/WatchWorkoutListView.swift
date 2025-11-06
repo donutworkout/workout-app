@@ -28,7 +28,7 @@ struct WatchWorkoutListView: View {
                 VStack(spacing: 16) {
                     Spacer()
                     
-                    Text(category(for: workoutType))
+                    Text(workoutType.category)
                         .font(.system(size: 22, weight: .semibold))
                         .foregroundColor(.white)
                     
@@ -84,17 +84,6 @@ struct WatchWorkoutListView: View {
             default: return "figure.walk"
             }
         }
-    
-    private func category(for type: HKWorkoutActivityType) -> String {
-        switch type {
-        case .running, .cycling, .walking, .swimming, .soccer, .tennis, .badminton, .basketball, .volleyball:
-            return "Cardio"
-        case .traditionalStrengthTraining, .functionalStrengthTraining:
-            return "Strength"
-        default:
-            return "Workout"
-        }
-    }
 }
 
     // MARK: - Helper
@@ -140,9 +129,29 @@ struct WatchWorkoutListView: View {
 //        .environmentObject(mockSession)
 //        .environmentObject(mockConnectivity)
 //}
-    
-
-    
+   
+//    let cardioWorkouts: [(String, HKWorkoutActivityType)] = [
+//        ("Running", .running),
+//        ("Cycling", .cycling),
+//        ("Walking", .walking),
+//        ("Swimming", .swimming),
+//        ("Badminton", .badminton),
+//        ("Basketball", .basketball),
+//        ("Tennis", .tennis),
+//        ("Volleyball", .volleyball),
+//        ("Soccer", .soccer),
+//    ]
+//    
+//    let strengthWorkouts: [(String, HKWorkoutActivityType)] = [
+//        //        ("Core Training", .coreTraining),
+//        //        ("High Intensity Interval Training", .highIntensityIntervalTraining),
+//        ("Traditional Strength Training", .traditionalStrengthTraining),
+//        ("Functional Strength Training", .functionalStrengthTraining),
+//        
+//    ]
+//    
+//    let workoutType: HKWorkoutActivityType
+//
 //    var body: some View {
 //        VStack {
 //            Image(systemName: "figure.run")
@@ -157,7 +166,6 @@ struct WatchWorkoutListView: View {
 //            }
 //        }
 //    }
-
 
 //    let workouts: [(String, HKWorkoutActivityType)] = [
 //        ("Running", .running),

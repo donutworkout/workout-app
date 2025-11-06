@@ -55,22 +55,28 @@ struct WatchActiveWorkoutView: View {
         }
         .onAppear { startTimer() }
         .onDisappear { stopTimer() }
+        .onReceive(clockTimer) { _ in
+            updateCurrentTime()
+        }
     }
     
     // MARK: - Helper Functions
-    private func getWorkoutIcon() -> String {
-        switch workoutType {
-        case .running: return "figure.run"
-        case .cycling: return "figure.outdoor.cycle"
-        case .walking: return "figure.walk"
-        case .swimming: return "figure.pool.swim"
-        case .basketball: return "figure.basketball"
-        case .tennis: return "figure.tennis"
-        case .yoga: return "figure.yoga"
-        case .traditionalStrengthTraining: return "figure.strengthtraining.traditional"
-        default: return "figure.walk"
+    private func getWorkoutIcon(for type: HKWorkoutActivityType) -> String {
+            switch type {
+            case .running: return "figure.run"
+            case .cycling: return "figure.outdoor.cycle"
+            case .walking: return "figure.walk"
+            case .swimming: return "figure.pool.swim"
+            case .basketball: return "figure.basketball"
+            case .tennis: return "figure.tennis"
+            case .badminton: return "figure.badminton"
+            case .volleyball: return "figure.volleyball"
+            case .soccer: return "figure.soccer"
+            case .traditionalStrengthTraining: return "figure.strengthtraining.traditional"
+            case .functionalStrengthTraining: return "figure.functional.training"
+            default: return "figure.walk"
+            }
         }
-    }
     
     private func updateCurrentTime() {
         let formatter = DateFormatter()
