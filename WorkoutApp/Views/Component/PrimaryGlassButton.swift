@@ -10,17 +10,26 @@ import SwiftUI
 struct PrimaryGlassButton: View {
     var title: String
     var action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             Text(title)
                 .font(.headline)
                 .fontWeight(.semibold)
+                .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 20)
-                .foregroundStyle(.white)
+                .padding(.vertical, 18)
+                .background(
+                    RoundedRectangle(cornerRadius: 100)
+                        .fill(Color("pinkTextSecondary"))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 100)
+                        .stroke(Color("pinkTextSecondary"), lineWidth: 1)
+                )
         }
-        .glassEffect(.regular.tint(.pinkTextPrimary.opacity(0.6)).interactive())
+        .glassEffect(.regular.interactive())
+        .buttonStyle(.plain)
     }
 }
 
@@ -30,5 +39,5 @@ struct PrimaryGlassButton: View {
         PrimaryGlassButton(title: "Continue") {}
     }
     .padding()
-//    .background(.black)
+    .background(.ultraThinMaterial)
 }

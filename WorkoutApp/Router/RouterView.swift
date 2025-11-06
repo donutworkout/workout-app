@@ -41,7 +41,7 @@ struct RouterView: View {
                     .environmentObject(surveyManager)
                 
             case .menu:
-                MenuView(modelContext: modelContext)
+                TabBarView()
                     .environmentObject(router)
                     .environmentObject(surveyManager)
                 
