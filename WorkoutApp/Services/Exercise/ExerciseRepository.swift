@@ -41,25 +41,18 @@ class ExerciseRepository {
         
         //  Filter by level + bodyPart
         switch level {
-        case .beginner:
+        case .beginner, .intermediate:
             // Beginners only get full-body exercises
-            filtered = filtered.filter { $0.bodyPart == .fullBody }
-            print("  🟢 Beginner filter: \(filtered.count)")
-            
-        case .intermediate:
-            // Intermediates: target part but allow full-body fallback
-            if let bodyPart = bodyPart {
-                filtered = filtered.filter { exercise in
-                    exercise.bodyPart == bodyPart || exercise.bodyPart == .fullBody
-                }
-                print("  🟡 Intermediate \(bodyPart.rawValue) filter: \(filtered.count)")
+            filtered = filtered.filter { exercise in
+                exercise.bodyPart.contains(.fullBody)
             }
+            print("  🟢 Beginner filter: \(filtered.count)")
             
         case .advanced:
             // Advanced: isolate specific muscle group (strict)
             if let bodyPart = bodyPart {
                 filtered = filtered.filter { exercise in
-                    exercise.bodyPart == bodyPart
+                    exercise.bodyPart.contains(.upperPull) || exercise.bodyPart.contains(.upperPush)
                 }
                 print("  🔴 Advanced strict \(bodyPart.rawValue) filter: \(filtered.count)")
             }
@@ -90,9 +83,17 @@ class ExerciseRepository {
         
         while selected.count < count && !remaining.isEmpty {
             // Try new body part
-            if let exercise = remaining.first(where: { !usedBodyParts.contains($0.bodyPart) }) {
+            if let exercise = remaining.first(where: { ex in
+                        // Check: Does exercise have a bodyPart that is NOT yet used?
+                        ex.bodyPart.contains { !usedBodyParts.contains($0) }
+            }) {
                 selected.append(exercise)
-                usedBodyParts.insert(exercise.bodyPart)
+                
+                // Add ALL its body parts to used set
+                for part in exercise.bodyPart {
+                    usedBodyParts.insert(part)
+                }
+                
                 remaining.removeAll { $0.id == exercise.id }
             }
             
@@ -100,6 +101,10 @@ class ExerciseRepository {
             else {
                 let exercise = remaining.removeFirst()
                 selected.append(exercise)
+                
+                for part in exercise.bodyPart {
+                    usedBodyParts.insert(part)
+                }
             }
         }
         

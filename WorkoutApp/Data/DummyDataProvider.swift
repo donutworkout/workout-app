@@ -18,56 +18,119 @@ class DummyExerciseProvider {
             
             Exercise(
                 name: "Wall Press",
-                bodyPart: .fullBody,
+                bodyPart: [.fullBody, .upperPush],
                 time: nil,
                 imageName: nil
             ),
             
             Exercise(
                 name: "Shoulder Toner",
-                bodyPart: .fullBody,
+                bodyPart: [.fullBody, .upperPush],
                 time: nil,
                 imageName: nil
             ),
             
             Exercise(
                 name: "Bent Over Row",
-                bodyPart: .fullBody,
+                bodyPart: [.fullBody],
                 time: nil,
                 imageName: nil
             ),
             
             Exercise(
                 name: "Bodyweight Squat",
-                bodyPart: .fullBody,
+                bodyPart: [.fullBody],
                 time: nil,
                 imageName: nil
             ),
             
             Exercise(
                 name: "Glute Bridge",
-                bodyPart: .fullBody,
+                bodyPart: [.fullBody],
                 time: nil,
                 imageName: nil
             ),
             
             Exercise(
                 name: "Dead Bug",
-                bodyPart: .fullBody,
+                bodyPart: [.fullBody],
                 time: nil,
                 imageName: nil
             ),
             
             Exercise(
                 name: "Plank with Knee Dip",
-                bodyPart: .fullBody,
+                bodyPart: [.fullBody, .upperPush],
                 time: nil,
                 imageName: nil
             ),
             
             Exercise(
                 name: "Child Pose",
-                bodyPart: .fullBody,
+                bodyPart: [.fullBody],
+                time: nil,
+                imageName: nil
+            ),
+            
+            Exercise(
+                name: "Tricep Dip",
+                bodyPart: [.upperPush],
+                time: nil,
+                imageName: nil
+            ),
+            
+            Exercise(
+                name: "One Knee Push Up",
+                bodyPart: [.upperPush],
+                time: nil,
+                imageName: nil
+            ),
+            
+            Exercise(
+                name: "Plank to Downward Dog",
+                bodyPart: [.upperPush],
+                time: nil,
+                imageName: nil
+            ),
+            
+            Exercise(
+                name: "Plank Row",
+                bodyPart: [.upperPull],
+                time: nil,
+                imageName: nil
+            ),
+            
+            Exercise(
+                name: "Knee to Elbow Kick Back",
+                bodyPart: [.upperPull],
+                time: nil,
+                imageName: nil
+            ),
+            
+            Exercise(
+                name: "Squat Jump",
+                bodyPart: [.upperPull],
+                time: nil,
+                imageName: nil
+            ),
+            
+            Exercise(
+                name: "Single Leg Deadlift",
+                bodyPart: [.upperPull],
+                time: nil,
+                imageName: nil
+            ),
+            
+            Exercise(
+                name: "Walking Lunge",
+                bodyPart: [.upperPull],
+                time: nil,
+                imageName: nil
+            ),
+            
+            Exercise(
+                name: "Plank with Hip Dips",
+                bodyPart: [.upperPull],
                 time: nil,
                 imageName: nil
             )

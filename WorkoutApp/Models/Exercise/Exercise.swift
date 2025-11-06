@@ -9,20 +9,16 @@ import Foundation
 import SwiftData
 
 enum BodyPart: String, Codable, CaseIterable {
-    case core
-    case upper
-    case lower
     case fullBody
-    case back
-    case glutes
-    case shoulders
+    case upperPush
+    case upperPull
 }
 
 @Model
 class Exercise{
     var id: UUID = UUID()
     var name: String = ""
-    var bodyPart: BodyPart = BodyPart.fullBody
+    var bodyPart: [BodyPart] = []
     var sets: Int?
     var reps: Int?
     var time: Int? // pick one, rest/time
@@ -32,7 +28,7 @@ class Exercise{
         
         id: UUID = UUID(),
         name: String,
-        bodyPart: BodyPart,
+        bodyPart: [BodyPart],
         sets: Int? = nil,
         reps: Int? = nil,
         time: Int? = nil,
