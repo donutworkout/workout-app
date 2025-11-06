@@ -49,13 +49,6 @@ struct MenuView: View {
                         router.navigateTo(.adjustMenuStrength)
                     }
                 })
-                Text("Today Phase")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(.black)
-                    .padding(.horizontal)
-                    .padding(.top, 8)
-                
-                PhaseCardView(phase: currentPhase)
                 
                 Text("Streak")
                     .font(.system(size: 20, weight: .semibold))
@@ -72,11 +65,12 @@ struct MenuView: View {
 }
 
 // Update WorkoutCardView agar bisa terima callback
-struct WorkoutCardView: View {
+struct CombinedWorkoutCardView: View {
     let phase: MenstrualPhase
+
     var onStartWorkout: () -> Void
     
-    private var workoutInfo: (image: String, title: String, description: String) {
+    private var cardInfo: (image: String, workoutTitle: String, phaseDesc: String) {
         switch phase {
         case .menstruation:
             return ("buttercup", "Today's Cardio Menu!", "Don’t worry about being perfect! just move and let your body wake up!")
@@ -90,29 +84,76 @@ struct WorkoutCardView: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 16) {
-                Image(workoutInfo.image)
+        VStack(alignment: .leading, spacing: 0) {
+            
+            // MARK: - Phase Header
+            Text(phase.rawValue)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(.black)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    UnevenRoundedRectangle(
+                        topLeadingRadius: 17,
+                        bottomLeadingRadius: 0,
+                        bottomTrailingRadius: 0,
+                        topTrailingRadius: 17,
+                        style: .continuous
+                    )
+                    .fill(Color("pinkTextTertiary"))
+                )
+            
+            // MARK: - Abu-abu dan Gambar
+            ZStack {
+                // Abu-abu full kiri-kanan
+                Color.gray.opacity(0.15)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 180)
+                    .clipShape(Rectangle())
+                
+                // Gambar di tengah
+                Image(cardInfo.image)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 90, height: 90)
-                
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(workoutInfo.title)
-                        .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(.black)
+                    .frame(height: 150)
+            }
+            
+            // MARK: - Konten bawah (judul, deskripsi, tombol)
+            VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .center) {
+                        Text(cardInfo.workoutTitle)
+                            .font(.system(size: 17, weight: .bold))
+                            .foregroundColor(.black)
+                            .lineLimit(1)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        
+                        // Capsule waktu (posisi stabil)
+                        Text("30 min")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.black.opacity(0.7))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(
+                                Capsule()
+                                    .fill(Color.gray.opacity(0.2))
+                            )
+                            .fixedSize()
+                    }
                     
-                    Text(workoutInfo.description)
+                    Text(cardInfo.phaseDesc)
                         .font(.system(size: 14))
                         .foregroundColor(.black.opacity(0.7))
                         .lineSpacing(3)
                 }
-                Spacer()
+                
+                // Tombol
+                PrimaryGlassButton(title: "Start Workout", action: onStartWorkout)
             }
-            
-            PrimaryGlassButton(title: "Start Workout", action: onStartWorkout)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 20)
         }
-        .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 20)
                 .fill(Color.white)
@@ -121,7 +162,6 @@ struct WorkoutCardView: View {
         .padding(.horizontal)
     }
 }
-
 
 // MARK: - Day Selector
 struct DaySelectorView: View {
@@ -262,4 +302,5 @@ enum PhaseType: String {
 
 #Preview {
     MenuView()
+        .environmentObject(Router())
 }

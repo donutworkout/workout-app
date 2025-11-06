@@ -8,14 +8,22 @@
 import Foundation
 import HealthKit
 
+enum WorkoutCommand: String {
+    case start
+    case started
+    case stop
+    case pause
+    case resume
+}
+
 @Observable
 class WorkoutSessionManager: NSObject {
-
-
+    
+    
     private let healthStore = HKHealthStore()
     private var workoutSession: HKWorkoutSession?
     private var workoutBuilder: HKLiveWorkoutBuilder?
-
+    
     var heartRate: Double = 0.0
     var energyBurned: Double = 0.0
     var distance: Double = 0.0
@@ -23,13 +31,13 @@ class WorkoutSessionManager: NSObject {
     var timeActive: Double = 0.0
     
     // MARK: - Start Workout
-
+    
     func startWorkout(of type: HKWorkoutActivityType) {
         guard HKHealthStore.isHealthDataAvailable() else { return }
-
+        
         let typesToShare: Set = [HKQuantityType.workoutType()]
         let typesToRead = typesToRead(for: type)
-
+        
         healthStore.requestAuthorization(
             toShare: typesToShare,
             read: typesToRead
@@ -48,20 +56,20 @@ class WorkoutSessionManager: NSObject {
     }
     
     //MARK: - Begin Workout
-
+    
     private func beginWorkout(of type: HKWorkoutActivityType) {
         let config = HKWorkoutConfiguration()
         config.activityType = type
-
+        
         do {
             workoutSession = try HKWorkoutSession(
                 healthStore: healthStore,
                 configuration: config
             )
             workoutBuilder = workoutSession?.associatedWorkoutBuilder()
-
+            
             guard let workoutBuilder = workoutBuilder else { return }
-
+            
             workoutBuilder.dataSource = HKLiveWorkoutDataSource(
                 healthStore: healthStore,
                 workoutConfiguration: config
@@ -71,7 +79,7 @@ class WorkoutSessionManager: NSObject {
             
             let startDate = Date()
             workoutSession?.startActivity(with: startDate)
-
+            
             workoutBuilder.beginCollection(withStart: startDate) {
                 success,
                 error in
@@ -85,14 +93,14 @@ class WorkoutSessionManager: NSObject {
                 "Couldn't create workout session: \(error.localizedDescription)"
             )
         }
-
+        
     }
-
+    
     func stopWorkout() {
         guard let session = workoutSession, let builder = workoutBuilder else {
             return
         }
-
+        
         session.end()
         builder.endCollection(withEnd: Date()) { _, _ in
             builder.finishWorkout { workout, error in
@@ -105,9 +113,18 @@ class WorkoutSessionManager: NSObject {
                     }
                 }
             }
-
+            
         }
     }
+    
+    func pauseWorkout() {
+        workoutSession?.pause()
+    }
+
+    func resumeWorkout() {
+        workoutSession?.resume()
+    }
+
 
 }
 
@@ -121,7 +138,7 @@ extension WorkoutSessionManager: HKWorkoutSessionDelegate {
     func workoutSession(_ workoutSession: HKWorkoutSession, didGenerate event: HKWorkoutEvent) {
         print("workout session generated")
     }
-
+    
     
     func workoutSession(_ workoutSession: HKWorkoutSession, didChangeTo toState: HKWorkoutSessionState, from fromState: HKWorkoutSessionState, date: Date) {
         switch toState {
@@ -139,7 +156,7 @@ extension WorkoutSessionManager: HKWorkoutSessionDelegate {
 
 extension WorkoutSessionManager: HKLiveWorkoutBuilderDelegate {
     func workoutBuilderDidCollectEvent(_ workoutBuilder: HKLiveWorkoutBuilder) {
-
+        
     }
     
     func workoutBuilder(_ workoutBuilder: HKLiveWorkoutBuilder, didCollectDataOf collectedTypes: Set<HKSampleType>) {
@@ -152,13 +169,13 @@ extension WorkoutSessionManager: HKLiveWorkoutBuilderDelegate {
                 case HKQuantityType.quantityType(forIdentifier: .heartRate):
                     let heartRateUnit = HKUnit.count().unitDivided(by: HKUnit.minute())
                     self.heartRate = statistics?.mostRecentQuantity()?.doubleValue(for: heartRateUnit) ?? 0
-
+                    
                 case HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned):
                     self.energyBurned = statistics?.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
-
+                    
                 case HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning):
                     self.distance = statistics?.sumQuantity()?.doubleValue(for: .meter()) ?? 0
-
+                    
                 default:
                     break
                 }
@@ -168,7 +185,7 @@ extension WorkoutSessionManager: HKLiveWorkoutBuilderDelegate {
 }
 
 func typesToRead(for activity: HKWorkoutActivityType) -> Set<HKObjectType> {
-    var readTypes: Set<HKObjectType> = [
+    let readTypes: Set<HKObjectType> = [
         HKQuantityType.quantityType(forIdentifier: .heartRate)!,
         HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)!,
         HKQuantityType.quantityType(forIdentifier: .appleExerciseTime)!,
@@ -181,7 +198,7 @@ func typesToRead(for activity: HKWorkoutActivityType) -> Set<HKObjectType> {
         
         
     ]
-
+    
     return readTypes
 }
 

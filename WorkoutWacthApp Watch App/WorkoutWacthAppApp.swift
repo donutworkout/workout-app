@@ -11,17 +11,16 @@ import SwiftUI
 struct WorkoutWacthApp_Watch_AppApp: App {
     
     init() {
-         HealthKitManager.shared.requestAuthorization()
-     }
-    
+        HealthKitManager.shared.requestAuthorization()
+    }
     @State private var sessionManager = WorkoutSessionManager()
     @State private var connectivity = WatchConnectivityManager()
-        
-        var body: some Scene {
-            WindowGroup {
-                ContentView()
-                    .environment(sessionManager)
-                    .environment(connectivity)
-            }
+    
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .environment(sessionManager)
+                .environment(connectivity)
         }
+    }
 }

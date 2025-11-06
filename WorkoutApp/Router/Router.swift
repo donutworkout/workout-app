@@ -1,4 +1,5 @@
 import SwiftUI
+import HealthKit
 
 enum Route {
     case onboarding
@@ -26,6 +27,7 @@ final class Router: ObservableObject {
     @Published var isFromProfile: Bool = false
     @Published var selectedTab: Int = 0
     @Published var lastWorkoutSource: Route? = nil   // ✅ tambahkan ini
+    @Published var selectedWorkoutType: HKWorkoutActivityType? = nil
 
     func navigateTo(_ route: Route) {
         currentRoute = route

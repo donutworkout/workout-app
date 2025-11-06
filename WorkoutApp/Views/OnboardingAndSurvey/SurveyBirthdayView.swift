@@ -35,15 +35,16 @@ struct SurveyBirthdayView: View {
     }
 
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
+            
+            // MARK: - Scrollable Content
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 32) {
                     
-                    // MARK: - Header & Title (tanpa garis)
+                    // MARK: - Header & Title
                     HStack(alignment: .top) {
                         VStack(alignment: .leading, spacing: 8) {
                             SurveyProgressText(currentPage: 1, totalPages: 6)
-                            
                             Text("Get to know you more!")
                                 .font(.system(.title, weight: .semibold))
                                 .foregroundColor(Color("pinkTextPrimary"))
@@ -117,15 +118,16 @@ struct SurveyBirthdayView: View {
                     }
                     .padding(.horizontal)
                     
-                    // MARK: - Next Button
-                    PrimaryGlassButton(title: "Next", action: saveAndNext)
-                        .padding(.horizontal)
-                        .padding(.bottom, 40)
-                        .disabled(!isNameFilled)
-                        .opacity(isNameFilled ? 1 : 0.5)
+                    Spacer(minLength: 100) // untuk beri ruang biar scroll tidak nabrak tombol
                 }
-                .padding(.bottom, 100)
             }
+            
+            // MARK: - Next Button (fixed di bawah seperti SurveyBodyInfoView)
+            PrimaryGlassButton(title: "Next", action: saveAndNext)
+                .padding(.horizontal)
+                .padding(.bottom)
+                .disabled(!isNameFilled)
+                .opacity(isNameFilled ? 1 : 0.5)
         }
         .background(Color.white.ignoresSafeArea())
         .onAppear {
@@ -139,9 +141,3 @@ struct SurveyBirthdayView: View {
         }
     }
 }
-
-#Preview {
-    SurveyBirthdayView(onNext: {})
-        .environmentObject(SurveyManager(modelContext: ModelContext(try! ModelContainer(for: UserProfile.self))))
-}
-

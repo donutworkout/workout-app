@@ -7,12 +7,15 @@
 
 import SwiftUI
 import SwiftData
+import WatchConnectivity
 
 @main
 struct WorkoutAppApp: App {
     
     @StateObject private var router = Router()
     @StateObject private var surveyManager = SurveyManager(modelContext: WorkoutAppApp.modelContainer.mainContext)
+    @State private var connectivity = iPhoneConnectivityManager()
+    
     
     static let modelContainer: ModelContainer = {
         do {
@@ -44,16 +47,12 @@ struct WorkoutAppApp: App {
     
     var iPhoneConnect = iPhoneConnectivityManager.shared
     
-    init() {
-        HealthKitManager.shared.requestAuthorization()
-    }
-    
     var body: some Scene {
         WindowGroup {
-            TestMenuGeneratorView()
-//            SurveyView()
-//                .environmentObject(router)
-//                .environmentObject(surveyManager)
+            RouterView()
+                .environmentObject(router)
+                .environmentObject(surveyManager)
+                .environment(connectivity)
         }
         .modelContainer(WorkoutAppApp.modelContainer)
     }

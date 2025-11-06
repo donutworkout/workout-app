@@ -16,6 +16,10 @@ struct WatchActiveWorkoutView: View {
     
     @State private var elapsedTime: TimeInterval = 0
     @State private var timer: Timer?
+    @State private var currentTime = ""
+    @State private var currentTab = 0
+    
+    let clockTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
     var body: some View {
         VStack(spacing: 20) {
@@ -44,45 +48,40 @@ struct WatchActiveWorkoutView: View {
                 
                 MetricView(
                     icon: "timer",
-                    value: formatTime(elapsedTime),
+                    value: formatTimeDisplay(elapsedTime),
                     unit: ""
                 )
             }
-            
-            Spacer()
-            
-            // Controls
-            HStack(spacing: 20) {
-                Button {
-                } label: {
-                    Image(systemName: sessionManager.isRunning ? "pause.fill" : "play.fill")
-                        .font(.title2)
-                }
-                .buttonStyle(.bordered)
-                
-                Button {
-                    // Stop the workout session
-                    sessionManager.stopWorkout()
-                    // Navigate back
-                    dismiss()
-                } label: {
-                    Image(systemName: "stop.fill")
-                        .font(.title2)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.red)
+        }
+        .onAppear { startTimer() }
+        .onDisappear { stopTimer() }
+        .onReceive(clockTimer) { _ in
+            updateCurrentTime()
+        }
+    }
+    
+    // MARK: - Helper Functions
+    private func getWorkoutIcon(for type: HKWorkoutActivityType) -> String {
+            switch type {
+            case .running: return "figure.run"
+            case .cycling: return "figure.outdoor.cycle"
+            case .walking: return "figure.walk"
+            case .swimming: return "figure.pool.swim"
+            case .basketball: return "figure.basketball"
+            case .tennis: return "figure.tennis"
+            case .badminton: return "figure.badminton"
+            case .volleyball: return "figure.volleyball"
+            case .soccer: return "figure.soccer"
+            case .traditionalStrengthTraining: return "figure.strengthtraining.traditional"
+            case .functionalStrengthTraining: return "figure.functional.training"
+            default: return "figure.walk"
             }
         }
-        .padding()
-        .navigationBarBackButtonHidden(true)
-        .onAppear {
-            // Start workout when view appears
-            sessionManager.startWorkout(of: workoutType)
-            startTimer()
-        }
-        .onDisappear {
-            stopTimer()
-        }
+    
+    private func updateCurrentTime() {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        currentTime = formatter.string(from: Date())
     }
     
     private func startTimer() {
@@ -98,9 +97,10 @@ struct WatchActiveWorkoutView: View {
         timer = nil
     }
     
-    private func formatTime(_ time: TimeInterval) -> String {
-        let minutes = Int(time) / 60
+    private func formatTimeDisplay(_ time: TimeInterval) -> String {
+        let hours = Int(time) / 3600
+        let minutes = Int(time) / 60 % 60
         let seconds = Int(time) % 60
-        return String(format: "%02d:%02d", minutes, seconds)
+        return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
 }
