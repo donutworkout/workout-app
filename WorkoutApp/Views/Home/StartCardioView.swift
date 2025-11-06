@@ -50,8 +50,9 @@ struct StartCardioView: View {
             
             // MARK: - Stats
             HStack(spacing: 16) {
-                StatCard(title: "\(calories) KCAL", color: Color("pinkTextPrimary").opacity(0.25))
-                StatCard(title: "❤️ \(bpm) BPM", color: Color("pinkTextPrimary").opacity(0.25))
+                StatCardItem(icon: "flame.fill", value: "\(calories)", label: "KCAL")
+                StatCardItem(icon: "figure.walk", value: String(format: "%.1f", distance), label: "KILOMETERS")
+                StatCardItem(icon: "heart.fill", value: "\(bpm)", label: "BPM")
             }
             .padding(.horizontal)
             

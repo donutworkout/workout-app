@@ -42,7 +42,7 @@ struct MenuView: View {
                     .padding(.top, 16)
                 
                 DaySelectorView(selectedDay: $cycleViewModel.selectedDayIndex)
-                WorkoutCardView(phase: currentPhase, onStartWorkout: {
+                CombinedWorkoutCardView(phase: currentPhase, onStartWorkout: {
                     if currentPhase == .menstruation {
                         router.navigateTo(.adjustMenuCardio)
                     } else {

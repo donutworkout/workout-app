@@ -129,7 +129,7 @@ struct WatchWorkoutListView: View {
 //        .environmentObject(mockSession)
 //        .environmentObject(mockConnectivity)
 //}
-    
+   
 //    let cardioWorkouts: [(String, HKWorkoutActivityType)] = [
 //        ("Running", .running),
 //        ("Cycling", .cycling),
@@ -151,7 +151,7 @@ struct WatchWorkoutListView: View {
 //    ]
 //    
 //    let workoutType: HKWorkoutActivityType
-//    
+//
 //    var body: some View {
 //        VStack {
 //            Image(systemName: "figure.run")
@@ -166,7 +166,6 @@ struct WatchWorkoutListView: View {
 //            }
 //        }
 //    }
-//}
 
 //    let workouts: [(String, HKWorkoutActivityType)] = [
 //        ("Running", .running),
@@ -187,3 +186,4 @@ struct WatchWorkoutListView: View {
 //        ("Martial Arts", .martialArts),
 //
 //    ]
+
