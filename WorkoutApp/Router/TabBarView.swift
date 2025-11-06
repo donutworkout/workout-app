@@ -17,21 +17,21 @@ struct TabBarView: View {
             // MARK: - Menu Tab
             MenuView()
                 .tabItem {
-                    Label("Menu", systemImage: "house.fill")
+                    Label("Menu", systemImage: "menucard.fill")
                 }
                 .tag(0)
             
             // MARK: - Summary Tab
             SummaryView()
                 .tabItem {
-                    Label("Summary", systemImage: "chart.bar.fill")
+                    Label("Summary", systemImage: "text.line.3.summary")
                 }
                 .tag(1)
             
             // MARK: - Profile Tab
             ProfileView()
                 .tabItem {
-                    Label("Profile", systemImage: "person.fill")
+                    Label("Profile", systemImage: "person.crop.circle")
                 }
                 .tag(2)
         }

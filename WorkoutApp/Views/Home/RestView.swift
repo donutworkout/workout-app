@@ -10,6 +10,7 @@ import SwiftUI
 struct RestView: View {
     @Environment(\.dismiss) private var dismiss
     var onNext: () -> Void = {}
+    @EnvironmentObject var router: Router
     
     // MARK: - Props
     var restDuration: TimeInterval = 30
@@ -81,7 +82,7 @@ struct RestView: View {
                 }
 
                 NeutralGlassButton(title: "Next") {
-                    onNext() // ✅ Panggil closure dari RouterView
+                    router.navigateTo(.menu)
                 }
             }
             .padding(.horizontal)

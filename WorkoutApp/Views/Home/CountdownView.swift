@@ -12,14 +12,14 @@ struct CountdownView: View {
     @EnvironmentObject var router: Router
 
     // MARK: - Props
-    var workoutName: String = "Jumping Jack"
-    var reps: String = "12X"
-    var imageName: String = "jumpingJack"
-    var currentSet: Int = 1
-    var totalSets: Int = 7
+    var workoutName: String = "Bridge"
+    var reps: String = "3 x 12"
+    var imageName: String = "bridge"
     var onCountdownComplete: () -> Void = {}
 
     @State private var countdown: Int = 3
+    @State private var showCountdown: Bool = true
+    @State private var timeElapsed: TimeInterval = 0
     @State private var isPaused: Bool = false
     @State private var timer: Timer? = nil
 
@@ -29,33 +29,25 @@ struct CountdownView: View {
 
     var body: some View {
         ZStack {
-            // MARK: - Main Workout Layout
-            VStack(spacing: 0) {
-                // MARK: - Progress Dots
-                HStack(spacing: 8) {
-                    ForEach(0..<totalSets, id: \.self) { index in
-                        Circle()
-                            .fill(
-                                index < currentSet
-                                    ? Color("grayTextPrimary")
-                                    : Color.gray.opacity(0.3)
-                            )
-                            .frame(width: 8, height: 8)
-                    }
-                }
-                .padding(.top, 24)
-
+            // MARK: - Base Workout View (StartStrengthView content)
+            VStack(spacing: 20) {
+                Image(imageName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 320)
+                    .padding(.top, 40)
+                
                 Spacer()
-
-                // MARK: - Workout Info
+                
                 VStack(spacing: 12) {
                     Text(workoutName)
-                        .font(.system(size: 36, weight: .semibold))
+                        .font(.system(size: 34, weight: .semibold))
                         .foregroundColor(Color("pinkTextPrimary"))
-
-                    Text(reps)
-                        .font(.system(size: 60, weight: .bold))
+                    
+                    Text(formattedTime)
+                        .font(.system(size: 40, weight: .bold))
                         .foregroundColor(Color("pinkTextPrimary"))
+                        .padding(.top, 8)
                 }
                 .padding(.top, 20)
 
@@ -81,54 +73,71 @@ struct CountdownView: View {
                             onCountdownComplete()
                         }
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom, 40)
-                }
-            }
-            .background(Color.white.ignoresSafeArea())
-            .navigationTitle("Workout")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button(action: {
+                    
+                    NeutralGlassButton(title: "Next") {
                         timer?.invalidate()
                         router.navigateTo(.menu)
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.black)
-                            .padding(10)
                     }
                 }
+                .padding(.bottom, 40)
+                .padding(.horizontal)
             }
-
-            // MARK: - Full Screen Countdown Overlay
-            if countdown > 0 {
-                Color.black.opacity(0.5)
-                    .ignoresSafeArea()
-                    .transition(.opacity)
-
-                Text("\(countdown)")
-                    .font(.system(size: 200, weight: .bold))
-                    .foregroundColor(Color("pinkTextPrimary"))
-                    .transition(.scale)
+            .background(Color.white.ignoresSafeArea())
+            
+            // MARK: - Countdown Overlay
+            if showCountdown {
+                ZStack {
+                    // Semi-transparent gray overlay
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                    
+                    // Countdown number
+                    Text("\(countdown)")
+                        .font(.system(size: 120, weight: .bold))
+                        .foregroundColor(.white)
+                        .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
+                }
+                .transition(.opacity)
             }
         }
-        .onAppear {
-            startCountdown()
+        .navigationTitle("Workout")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: {
+                    timer?.invalidate()
+                    router.navigateTo(.menu)
+                }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.black)
+                }
+            }
         }
-        .onDisappear {
-            timer?.invalidate()
-        }
+        .onAppear { startCountdown() }
+        .onDisappear { timer?.invalidate() }
+    }
+
+    // MARK: - Time Formatting
+    private var formattedTime: String {
+        let minutes = Int(timeElapsed) / 60
+        let seconds = Int(timeElapsed) % 60
+        return String(format: "%02d:%02d", minutes, seconds)
     }
 
     // MARK: - Countdown Logic
     private func startCountdown() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) {
-            t in
-            if !isPaused && countdown > 0 {
+        countdown = 3
+        showCountdown = true
+        
+        // Start workout timer immediately in background
+        startWorkoutTimer()
+        
+        // Countdown overlay timer
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
+            if countdown > 1 {
                 countdown -= 1
-            } else if countdown == 0 {
+            } else {
                 t.invalidate()
 
                 // Start workout on countdown completion using the exact selected type
@@ -149,15 +158,40 @@ struct CountdownView: View {
                             break
                         }
                     }
+                withAnimation(.easeOut(duration: 0.3)) {
+                    showCountdown = false
                 }
+                onCountdownComplete()
             }
         }
+    }
+
+    // MARK: - Workout Timer Logic
+    private func startWorkoutTimer() {
+        timeElapsed = 0
+        isPaused = false
+        
+        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
+            if !isPaused && !showCountdown {
+                timeElapsed += 1
+            }
+            
+            // Store reference only after countdown
+            if !showCountdown && timer == nil {
+                timer = t
+            }
+        }
+    }
+
+    private func toggleTimer() {
+        isPaused.toggle()
     }
 }
 
 #Preview {
     NavigationStack {
         CountdownView()
+            .environmentObject(Router())
     }
 }
 
