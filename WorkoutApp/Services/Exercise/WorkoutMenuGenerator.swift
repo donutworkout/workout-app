@@ -206,7 +206,7 @@ extension WorkoutMenuGenerator {
     private func determineBodyPartFocus(level: WorkoutLevel, strengthDayIndex: Int) -> BodyPart? {
         switch level {
             case .advanced :
-                return strengthDayIndex % 2 == 0 ? .lower : .upper
+                return strengthDayIndex % 2 == 0 ? .upperPull : .upperPush
             default : return .fullBody
         }
     }

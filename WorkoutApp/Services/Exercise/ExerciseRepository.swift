@@ -18,7 +18,6 @@ class ExerciseRepository {
         forLevel level: WorkoutLevel,
         phase: MenstrualPhase,
         bodyPart: BodyPart? = nil,
-        exerciseTypes: [ExerciseType]? = nil,
         count: Int = 5
     ) -> [Exercise] {
         
@@ -42,70 +41,36 @@ class ExerciseRepository {
         
         //  Filter by level + bodyPart
         switch level {
-        case .beginner:
+        case .beginner, .intermediate:
             // Beginners only get full-body exercises
-            filtered = filtered.filter { $0.bodyPart == .fullBody }
-            print("  🟢 Beginner filter: \(filtered.count)")
-            
-        case .intermediate:
-            // Intermediates: target part but allow full-body fallback
-            if let bodyPart = bodyPart {
-                filtered = filtered.filter { exercise in
-                    exercise.bodyPart == bodyPart || exercise.bodyPart == .fullBody
-                }
-                print("  🟡 Intermediate \(bodyPart.rawValue) filter: \(filtered.count)")
+            filtered = filtered.filter { exercise in
+                exercise.bodyPart.contains(.fullBody)
             }
+            print("  🟢 Beginner filter: \(filtered.count)")
             
         case .advanced:
             // Advanced: isolate specific muscle group (strict)
             if let bodyPart = bodyPart {
                 filtered = filtered.filter { exercise in
-                    exercise.bodyPart == bodyPart
+                    exercise.bodyPart.contains(.upperPull) || exercise.bodyPart.contains(.upperPush)
                 }
                 print("  🔴 Advanced strict \(bodyPart.rawValue) filter: \(filtered.count)")
             }
         }
         
         // Filter by exercise types
-        if let types = exerciseTypes, !types.isEmpty {
-            filtered = filtered.filter { exercise in
-                types.contains(exercise.exerciseType)
-            }
-            print("  ✓ After type filter: \(filtered.count)")
-        }
+//        if let types = exerciseTypes, !types.isEmpty {
+//            filtered = filtered.filter { exercise in
+//                types.contains(exercise.exerciseType)
+//            }
+//            print("  ✓ After type filter: \(filtered.count)")
+//        }
         
         // Select balanced
         let selected = selectBalancedExercises(from: filtered, count: count)
         print("  ✅ Final selected: \(selected.count)\n")
         
         return selected
-    }
-    
-    // MARK: - Phase Suitability Check
-    private func isExerciseSuitableForPhase(_ exercise: Exercise, targetPhase: MenstrualPhase) -> Bool {
-        switch targetPhase {
-        case .menstruation:
-            // Only gentle during menstruation
-            return exercise.exerciseType == .mobility ||
-                   exercise.exerciseType == .stretch ||
-                   exercise.exerciseType == .stability ||
-                   exercise.exerciseType == .lightStrength
-            
-        case .follicular:
-            // Can do follicular or ovulation
-            return exercise.phase == .follicular || exercise.phase == .ovulation
-            
-        case .ovulation:
-            // Peak - anything except menstrual
-            return exercise.phase != .menstruation
-            
-        case .luteal:
-            // Moderate
-            return exercise.phase == .luteal ||
-                   exercise.phase == .follicular ||
-                   exercise.exerciseType == .strength ||
-                   exercise.exerciseType == .compound
-        }
     }
     
     // MARK: - Balanced Selection
@@ -115,26 +80,31 @@ class ExerciseRepository {
         var selected: [Exercise] = []
         var remaining = exercises
         var usedBodyParts: Set<BodyPart> = []
-        var usedTypes: Set<ExerciseType> = []
         
         while selected.count < count && !remaining.isEmpty {
             // Try new body part
-            if let exercise = remaining.first(where: { !usedBodyParts.contains($0.bodyPart) }) {
+            if let exercise = remaining.first(where: { ex in
+                        // Check: Does exercise have a bodyPart that is NOT yet used?
+                        ex.bodyPart.contains { !usedBodyParts.contains($0) }
+            }) {
                 selected.append(exercise)
-                usedBodyParts.insert(exercise.bodyPart)
-                usedTypes.insert(exercise.exerciseType)
+                
+                // Add ALL its body parts to used set
+                for part in exercise.bodyPart {
+                    usedBodyParts.insert(part)
+                }
+                
                 remaining.removeAll { $0.id == exercise.id }
             }
-            // Try new type
-            else if let exercise = remaining.first(where: { !usedTypes.contains($0.exerciseType) }) {
-                selected.append(exercise)
-                usedTypes.insert(exercise.exerciseType)
-                remaining.removeAll { $0.id == exercise.id }
-            }
+            
             // Just pick next
             else {
                 let exercise = remaining.removeFirst()
                 selected.append(exercise)
+                
+                for part in exercise.bodyPart {
+                    usedBodyParts.insert(part)
+                }
             }
         }
         

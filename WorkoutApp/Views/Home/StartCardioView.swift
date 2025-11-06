@@ -26,7 +26,7 @@ struct StartCardioView: View {
     @State private var timer: Timer? = nil
     
     var body: some View {
-        ZStack {
+        VStack {
             VStack(spacing: 0) {
                 // MARK: - Image
                 Image(imageName)

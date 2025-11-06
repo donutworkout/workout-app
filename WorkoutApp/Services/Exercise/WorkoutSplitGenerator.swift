@@ -96,6 +96,7 @@ class WorkoutSplitGenerator {
             
             // check if this is during cramps
             let isDuringCramps = cycleDay >= 1 && cycleDay <= 3
+            
             let shouldRest = isDuringCramps && hasCramps
             
             if shouldRest {
