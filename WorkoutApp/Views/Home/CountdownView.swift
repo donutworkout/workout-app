@@ -31,13 +31,13 @@ struct CountdownView: View {
         ZStack {
             // MARK: - Base Workout View (StartStrengthView content)
             VStack(spacing: 20) {
-                Image(imageName)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 320)
-                    .padding(.top, 40)
-                
-                Spacer()
+//                Image(imageName)
+//                    .resizable()
+//                    .scaledToFit()
+//                    .frame(height: 320)
+//                    .padding(.top, 40)
+//                
+//                Spacer()
                 
                 VStack(spacing: 12) {
                     Text(workoutName)
