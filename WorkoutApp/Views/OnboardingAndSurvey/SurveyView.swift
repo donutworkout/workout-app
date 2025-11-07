@@ -27,14 +27,12 @@ struct SurveyView: View {
                     case 1:
                         SurveyBodyInfoView(onNext: { currentPage += 1 })
                     case 2:
-                        SurveyMotivationView(onNext: { currentPage += 1 })
-                    case 3:
                         SurveyWorkoutLevelView(onNext: { currentPage += 1 })
-                    case 4:
+                    case 3:
                         WorkoutDayView(onNext: { currentPage += 1 })
-                    case 5:
+                    case 4:
                         SurveyCycleView(onFinish: {
-                            router.navigateTo(.tabBar)
+                            router.navigateTo(.menu)
                         })
                     default:
                         Text("Selesai ✅")
