@@ -81,6 +81,7 @@ struct AdjustMenuCardioView: View {
                     if selectedMenu == nil {
                         showCustomAlert = true
                     } else {
+                        router.selectedCardioMenu = selectedMenu
                         router.lastWorkoutSource = .adjustMenuCardio
                         router.navigateTo(.startCardio)
                     }

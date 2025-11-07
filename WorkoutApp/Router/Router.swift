@@ -26,8 +26,9 @@ final class Router: ObservableObject {
     @Published var currentRoute: Route = .onboarding
     @Published var isFromProfile: Bool = false
     @Published var selectedTab: Int = 0
-    @Published var lastWorkoutSource: Route? = nil   // ✅ tambahkan ini
+    @Published var lastWorkoutSource: Route? = nil
     @Published var selectedWorkoutType: HKWorkoutActivityType? = nil
+    @Published var selectedCardioMenu: String? = nil
 
     func navigateTo(_ route: Route) {
         currentRoute = route
