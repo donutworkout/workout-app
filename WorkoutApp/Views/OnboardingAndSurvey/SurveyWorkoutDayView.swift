@@ -41,8 +41,8 @@ struct WorkoutDayView: View {
                 VStack(spacing: 16) {
                     HStack(alignment: .top, spacing: 12) {
                         VStack(alignment: .leading, spacing: 8) {
-                            SurveyProgressText(currentPage: 5, totalPages: 6)
-                            Text("Which days do you usually have time to work out?")
+                            SurveyProgressText(currentPage: 4, totalPages: 5)
+                            Text("When do you have time to work out?")
                                 .font(.system(.title, weight: .semibold))
                                 .foregroundColor(Color("pinkTextPrimary"))
                                 .multilineTextAlignment(.leading)
@@ -53,12 +53,13 @@ struct WorkoutDayView: View {
                         Image("characterSurvey")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 100)
+                            .frame(width: 120)
                             .minimumScaleFactor(0.5)
                             .layoutPriority(0)
                     }
                 }
                 .padding(.horizontal)
+                .padding(.top, 10)
                 
                 // MARK: - Days Grid
                 VStack(spacing: 12) {

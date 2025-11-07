@@ -16,17 +16,17 @@ struct AdjustMenuStrengthView: View {
 
     // Workout data
     let bodyweightWorkouts: [WorkoutItem] = [
-        WorkoutItem(image: "bridge", name: "Bridge", sets: 2, reps: "30 sec"),
-        WorkoutItem(image: "plank", name: "Plank", sets: 3, reps: "30 sec"),
-        WorkoutItem(image: "kneeTap", name: "Knee Tap", sets: 1, reps: "12"),
-        WorkoutItem(image: "catCow", name: "Cat and Cow", sets: 1, reps: "12")
+        WorkoutItem(image: "gluteBridge", name: "Glute Bridge", sets: 2, reps: "30 sec"),
+        WorkoutItem(image: "plankRow", name: "Plank Row", sets: 3, reps: "30 sec"),
+        WorkoutItem(image: "deadBug", name: "Dead Bug", sets: 1, reps: "12"),
+        WorkoutItem(image: "childPose", name: "Child Pose", sets: 1, reps: "12")
     ]
     
     let gymWorkouts: [WorkoutItem] = [
-        WorkoutItem(image: "catCow", name: "Leg Press", sets: 3, reps: "10"),
-        WorkoutItem(image: "kneeTap", name: "Lat Pulldown", sets: 3, reps: "8"),
-        WorkoutItem(image: "plank", name: "Cable Curl", sets: 3, reps: "12"),
-        WorkoutItem(image: "bridge", name: "Shoulder Press", sets: 3, reps: "10")
+        WorkoutItem(image: "childPose", name: "Leg Press", sets: 3, reps: "10"),
+        WorkoutItem(image: "deadBug", name: "Lat Pulldown", sets: 3, reps: "8"),
+        WorkoutItem(image: "plankRow", name: "Cable Curl", sets: 3, reps: "12"),
+        WorkoutItem(image: "gluteBridge", name: "Shoulder Press", sets: 3, reps: "10")
     ]
     
     init() {
@@ -43,7 +43,6 @@ struct AdjustMenuStrengthView: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 20) {
-                
                 // MARK: - Segmented Control
                 Picker("Menu Type", selection: $selectedMenu) {
                     ForEach(StrengthMenuType.allCases, id: \.self) { type in
@@ -64,7 +63,7 @@ struct AdjustMenuStrengthView: View {
                     router.selectedWorkoutType = workoutType
                     iPhoneConnectivityManager.shared.sendSelectedWorkout(workoutType)
                 }
-                
+
                 // MARK: - Workout Cards
                 VStack(spacing: 16) {
                     ForEach(selectedMenu == .bodyweight ? bodyweightWorkouts : gymWorkouts) { workout in
@@ -73,16 +72,21 @@ struct AdjustMenuStrengthView: View {
                 }
                 .padding(.horizontal)
                 .padding(.top, 8)
-                
-                // MARK: - Start Button
+                .padding(.bottom, 24) // extra space so last card isn't obscured by bottom button
+            }
+        }
+        .safeAreaInset(edge: .bottom) {
+            // MARK: - Bottom anchored button
+            VStack {
                 PrimaryGlassButton(title: "Start Now") {
                     router.lastWorkoutSource = .adjustMenuStrength
                     router.navigateTo(.countdownView)
                 }
                 .padding(.horizontal)
-                .padding(.top, 16)
-                .padding(.bottom, 40)
+                .padding(.top, 8)
+                .padding(.bottom, 8)
             }
+            .background(Color.white.opacity(0.95))
         }
         .background(Color.white.ignoresSafeArea())
         .navigationTitle("Today’s Strength Menu!")
@@ -119,4 +123,3 @@ struct WorkoutItem: Identifiable {
         AdjustMenuStrengthView()
     }
 }
-

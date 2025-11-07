@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct EditProfileView: View {
-    @EnvironmentObject var router: Router
+    @Environment(\.dismiss) var dismiss
     @State private var name: String = "Si Jamety"
     @State private var yearOfBirth: String = "2003"
     @State private var height: String = "155 cm"
@@ -25,14 +25,13 @@ struct EditProfileView: View {
                 title: "Edit Profile",
                 isEditing: isEditing,
                 onClose: {
-                    router.navigateTo(.profile) // ❌ back ke profile
+                    dismiss() // ✅ kembali ke ProfileView
                 },
                 onEditToggle: {
                     withAnimation {
                         if isEditing {
-                            // Simpan perubahan
-                            print("Profile saved ✅")
-                            router.navigateTo(.profile) // ✅ setelah finish juga balik ke profile
+                            print("✅ Profile saved")
+                            dismiss() // ✅ setelah selesai edit, kembali ke ProfileView
                         } else {
                             isEditing = true
                         }
@@ -84,23 +83,13 @@ struct EditProfileView: View {
                             .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
                     )
                     .padding(.horizontal)
-                    
-                    // Optional: manual Save button
-                    if isEditing {
-                        PrimaryGlassButton(title: "Save Changes") {
-                            print("Profile saved ✅")
-                            router.navigateTo(.profile)
-                        }
-                        .padding(.horizontal)
-                        .padding(.top, 4)
-                        .padding(.bottom, 40)
-                    }
                 }
+                .padding(.bottom, 40)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.white)
-        .navigationBarHidden(true)
+        .background(Color.white.ignoresSafeArea())
+        .navigationBarBackButtonHidden(true) // ✅ Hilangkan back default
     }
 }
 
@@ -128,6 +117,7 @@ struct ProfileTextField: View {
 }
 
 #Preview {
-    EditProfileView()
-        .environmentObject(Router())
+    NavigationStack {
+        EditProfileView()
+    }
 }

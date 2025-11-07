@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct MenstrualCycleView: View {
-    @EnvironmentObject var router: Router
+    @Environment(\.dismiss) var dismiss
     @State private var isEditing: Bool = false
     @State private var tempMenstrualDates: Set<Date> = []
     @State private var menstrualDates: Set<Date> = []
@@ -24,7 +24,7 @@ struct MenstrualCycleView: View {
                 title: "Menstrual Cycle",
                 isEditing: isEditing,
                 onClose: {
-                    router.navigateTo(.profile) // ❌ Back ke ProfileView
+                    dismiss() // ✅ kembali ke ProfileView dengan TabBar
                 },
                 onEditToggle: {
                     withAnimation(.spring()) {
@@ -32,7 +32,7 @@ struct MenstrualCycleView: View {
                             // ✅ Simpan perubahan lalu balik ke Profile
                             menstrualDates = tempMenstrualDates
                             calculateOvulationDates()
-                            router.navigateTo(.profile)
+                            dismiss()
                         } else {
                             // Masuk mode edit
                             tempMenstrualDates = menstrualDates
@@ -56,25 +56,25 @@ struct MenstrualCycleView: View {
                             Spacer()
                             
                             HStack(spacing: 20) {
-                                Button(action: {
+                                Button {
                                     withAnimation {
                                         if let newMonth = calendar.date(byAdding: .month, value: -1, to: currentMonth) {
                                             currentMonth = newMonth
                                         }
                                     }
-                                }) {
+                                } label: {
                                     Image(systemName: "chevron.left")
                                         .font(.system(size: 16, weight: .semibold))
                                         .foregroundColor(Color("pinkTextPrimary"))
                                 }
                                 
-                                Button(action: {
+                                Button {
                                     withAnimation {
                                         if let newMonth = calendar.date(byAdding: .month, value: 1, to: currentMonth) {
                                             currentMonth = newMonth
                                         }
                                     }
-                                }) {
+                                } label: {
                                     Image(systemName: "chevron.right")
                                         .font(.system(size: 16, weight: .semibold))
                                         .foregroundColor(Color("pinkTextPrimary"))
@@ -181,6 +181,7 @@ struct MenstrualCycleView: View {
             }
         }
         .background(Color(UIColor.systemGroupedBackground).ignoresSafeArea())
+        .navigationBarBackButtonHidden(true) // ✅ hilangkan back bawaan
         .onAppear {
             initializeDates()
         }
@@ -329,13 +330,12 @@ struct DayCell: View {
                     }
                 }
             }
-            .frame(height: 48)
         }
-        .disabled(!isEditing)
     }
 }
 
 #Preview {
-    MenstrualCycleView()
-        .environmentObject(Router())
+    NavigationStack {
+        MenstrualCycleView()
+    }
 }
