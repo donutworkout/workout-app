@@ -66,8 +66,14 @@ struct AdjustMenuStrengthView: View {
 
                 // MARK: - Workout Cards
                 VStack(spacing: 16) {
-                    ForEach(selectedMenu == .bodyweight ? bodyweightWorkouts : gymWorkouts) { workout in
-                        WorkoutItemCard(workout: workout)
+                    if selectedMenu == .bodyweight {
+                        ForEach(bodyweightWorkouts) { workout in
+                            WorkoutItemCard(workout: workout)
+                        }
+                    } else {
+                        Text("Do your own gym routine! :)")
+                        
+                        Spacer()
                     }
                 }
                 .padding(.horizontal)

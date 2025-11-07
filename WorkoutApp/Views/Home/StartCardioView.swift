@@ -92,7 +92,7 @@ struct StartCardioView: View {
             }
         }
         .background(Color.white.ignoresSafeArea())
-        .navigationTitle(activityName)
+        .navigationTitle(router.selectedCardioMenu ?? "Cardio Workout")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {

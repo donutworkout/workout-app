@@ -18,6 +18,10 @@ class WorkoutSplitGenerator {
         let dayNumbers = chosenDays.compactMap { $0.toDayNumber() }.sorted()
         let totalDays = dayNumbers.count
         
+        if chosenDays.contains(.flexible) {
+            return generateFlexibleSplit(level: level)
+        }
+        
         // 1. create base balanced split (50/50)
         var baseSplit: [MenuCategory] = []
         
@@ -116,7 +120,45 @@ class WorkoutSplitGenerator {
         return schedule
     }
     
-    
+    private func generateFlexibleSplit(level: WorkoutLevel) -> [Int: MenuCategory] {
+        
+        func recommendedDays(for level: WorkoutLevel) -> Int {
+            switch level {
+            case .beginner: return 3
+            case .intermediate: return 4
+            case .advanced: return 5
+            }
+        }
+        
+        let totalDays = recommendedDays(for: level)
+        let restDays = 7 - totalDays
+        
+        // alternating strength/cardio
+        var workoutPattern: [MenuCategory] = []
+        for i in 0..<totalDays {
+            workoutPattern.append(i % 2 == 0 ? .strength : .cardio)
+        }
+        
+        let gap = 7.0 / Double(restDays + 1)
+        let restPositions = (1...restDays).map { i in
+            Int(round(Double(i) * gap))
+        }
+        
+        // map to 7-day week
+        var schedule: [Int: MenuCategory] = [:]
+        var workoutIndex = 0
+            
+        for day in 1...7 {
+            if restPositions.contains(day) {
+                schedule[day] = .rest
+            } else {
+                schedule[day] = workoutPattern[workoutIndex]
+                workoutIndex += 1
+            }
+        }
+        
+        return schedule
+    }
 }
 
 extension WorkoutSplitGenerator {
