@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct EditMotivationView: View {
-    @EnvironmentObject var router: Router
+    @Environment(\.dismiss) var dismiss
     @State private var selectedMotivation: String? = nil
     
     private let motivations = [
@@ -26,12 +26,8 @@ struct EditMotivationView: View {
             HeaderButton(
                 title: "Motivation",
                 isEditing: true,
-                onClose: {
-                    router.navigateTo(.profile)
-                },
-                onEditToggle: {
-                    router.navigateTo(.profile)
-                }
+                onClose: { dismiss() },
+                onEditToggle: { dismiss() }
             )
             
             // MARK: - Title & Character
@@ -72,22 +68,14 @@ struct EditMotivationView: View {
             .padding(.horizontal)
             
             Spacer()
-            
-            // MARK: - Finish Button
-            PrimaryGlassButton(title: "Finish") {
-                print("✅ Motivation saved (UI only): \(selectedMotivation ?? "None")")
-                router.navigateTo(.profile)
-            }
-            .padding(.horizontal)
-            .padding(.vertical)
-            .disabled(selectedMotivation == nil)
-            .opacity(selectedMotivation == nil ? 0.5 : 1)
         }
         .background(Color.white.ignoresSafeArea())
+        .navigationBarBackButtonHidden(true) // ✅ Hilangkan back default
     }
 }
 
 #Preview {
-    EditMotivationView()
-        .environmentObject(Router())
+    NavigationStack {
+        EditMotivationView()
+    }
 }

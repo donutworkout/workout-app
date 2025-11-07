@@ -52,7 +52,7 @@ struct FinishWorkoutView: View {
                     .fill(Color.white)
                     .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
             )
-            .padding(.horizontal, 24)
+            .padding(.horizontal, 20)
             .padding(.top, 8)
             
             Spacer()

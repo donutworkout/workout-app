@@ -12,8 +12,8 @@ struct StartStrengthView: View {
     @EnvironmentObject var router: Router
     private let phoneConnectivity = iPhoneConnectivityManager.shared
     
-    var workoutName: String = "Bridge"
-    var imageName: String = "bridge"
+    var workoutName: String = "gluteBridge"
+    var imageName: String = "gluteBridge"
     var duration: TimeInterval = 60
     
     // Misal latihan ke-2 dari 5

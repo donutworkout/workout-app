@@ -58,35 +58,20 @@ struct StartCardioView: View {
             
             Spacer()
             
-            // MARK: - Buttons
-            HStack(spacing: 16) {
-                Button(action: {
-                    if isPaused {
-                        // resume
-                        phoneConnectivity.resumeWorkoutFromPhone()
-                        isPaused = false
-                    } else {
-                        // pause
-                        phoneConnectivity.pauseWorkoutFromPhone()
-                        isPaused = true
-                    }
-                }) {
-                    Image(systemName: isPaused ? "play.fill" : "pause.fill")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.black)
-                        .frame(width: 44, height: 44)
-                        .background(Circle().fill(.ultraThinMaterial))
+            // MARK: - Button
+            PrimaryGlassButton(title: isPaused ? "Resume" : "Pause") {
+                if isPaused {
+                    // ✅ Resume workout
+                    phoneConnectivity.resumeWorkoutFromPhone()
+                } else {
+                    // ✅ Pause workout
+                    phoneConnectivity.pauseWorkoutFromPhone()
                 }
-                .padding(.bottom, 32)
-                
-                PrimaryGlassButton(title: "Done") {
-                    phoneConnectivity.stopWorkoutFromPhone()
-                    router.navigateTo(.menu)
-                    timer?.invalidate()
-                }
-                .padding(.horizontal)
-                .padding(.bottom, 40)
+                isPaused.toggle()
             }
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.horizontal)
+            .padding(.bottom, 40)
             .blur(radius: showPausePopup ? 3 : 0)
             .disabled(showPausePopup)
             
@@ -95,10 +80,8 @@ struct StartCardioView: View {
                 WorkoutPausePopup(
                     characterImage: "buttercup",
                     onResume: {
-                        
-                            showPausePopup = false
-                            isPaused = false
-                        
+                        showPausePopup = false
+                        isPaused = false
                     },
                     onEndWorkout: {
                         timer?.invalidate()
@@ -126,6 +109,7 @@ struct StartCardioView: View {
         .onAppear { startTimer() }
         .onDisappear { timer?.invalidate() }
     }
+
     
     private var formattedTime: String {
         let hours = Int(timeElapsed) / 3600

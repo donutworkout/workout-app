@@ -14,10 +14,6 @@ enum Route {
     case startCardio
     case startStrength
     case restView
-    case editBodyInfo
-    case editMotivation
-    case editProfile
-    case menstrualCycle
     case startWorkout
     case countdownView
 }
