@@ -48,11 +48,11 @@ struct ProfileView: View {
                                 ProfileRow(icon: "figure.arms.open", title: "Body Measurement")
                             }
                             
-                            NavigationLink {
-                                EditMotivationView()
-                            } label: {
-                                ProfileRow(icon: "face.smiling", title: "Change Goal")
-                            }
+//                            NavigationLink {
+//                                EditMotivationView()
+//                            } label: {
+//                                ProfileRow(icon: "face.smiling", title: "Change Goal")
+//                            }
 
                             NavigationLink {
                                 EditProfileView()

@@ -82,14 +82,15 @@ struct MenuView: View {
                                 router.navigateTo(.adjustMenuStrength)
                             }
                         } else {
+                            // Fallback based on phase
                             if selectedPhase == .menstruation {
                                 router.navigateTo(.adjustMenuCardio)
                             } else {
                                 router.navigateTo(.adjustMenuStrength)
                             }
                         }
-                    }
-                )
+                        
+                    })
                 
                 // MARK: - Streak Section
                 VStack(spacing: 8) {
@@ -221,8 +222,6 @@ struct CombinedWorkoutCardView: View {
                         .foregroundColor(.black.opacity(0.7))
                         .lineSpacing(3)
                 }
-                
-                
                 if (menu?.isCardio ?? false) || (menu?.isStrength ?? false) {
                     PrimaryGlassButton(title: "Start Workout", action: onStartWorkout)
                 }
