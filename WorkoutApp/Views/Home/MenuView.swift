@@ -106,6 +106,9 @@ struct MenuView: View {
             .padding(.bottom, 40)
         }
         .background(Color.white.ignoresSafeArea())
+        .onAppear {
+            loadWeeklyMenu()
+        }
     }
     
 }
