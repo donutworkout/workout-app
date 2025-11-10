@@ -10,14 +10,15 @@ import SwiftUI
 struct StartStrengthView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var router: Router
-    private let phoneConnectivity = iPhoneConnectivityManager.shared
+    @EnvironmentObject var sessionManager: StrengthSessionManager
     
-    var workoutName: String = "gluteBridge"
-    var imageName: String = "gluteBridge"
-    var duration: TimeInterval = 60
+    private let phoneConnectivity = iPhoneConnectivityManager.shared
+    //private let sessionManager = StrengthSessionManager.shared
+    
+    //let exercises: [Exercise]
     
     // Misal latihan ke-2 dari 5
-    var currentPage: Int = 2
+    var currentPage: Int = 1
     var totalPages: Int = 5
     
     @State private var timeRemaining: TimeInterval = 60
@@ -26,31 +27,37 @@ struct StartStrengthView: View {
     @State private var calories: Int = 0
     @State private var bpm: Int = 90
     
+    var currentExercise: Exercise? {
+        sessionManager.currentExercise
+    }
+    
     var body: some View {
         VStack(spacing: 0) {
             // MARK: - Page Control + Title + Image
             VStack(spacing: 16) {
                 // MARK: Page Control (bulatan)
-                HStack(spacing: 6) {
-                    ForEach(1...totalPages, id: \.self) { index in
-                        Circle()
-                            .fill(index == currentPage ? Color("pinkTextPrimary") : Color.gray.opacity(0.3))
-                            .frame(width: 8, height: 8)
-                    }
-                }
-                .padding(.top, 24)
+//                HStack(spacing: 6) {
+//                    ForEach(1...sessionManager.totalPages, id: \.self) { index in
+//                        Circle()
+//                            .fill(index == sessionManager.currentPage ? Color("pinkTextPrimary") : Color.gray.opacity(0.3))
+//                            .frame(width: 8, height: 8)
+//                    }
+//                }
+//                .padding(.top, 24)
                 
                 // MARK: Workout Title
-                Text(workoutName)
+                Text(currentExercise?.name ?? "Get Ready!")
                     .font(.system(size: 28, weight: .semibold))
                     .foregroundColor(Color("pinkTextPrimary"))
                 
                 // MARK: Image
-                Image(imageName)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 320)
-                    .padding(.top, 8)
+                if let imageName = currentExercise?.imageName {
+                    Image(imageName)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 320)
+                        .padding(.top, 8)
+                }
             }
             
             Spacer()
@@ -91,9 +98,19 @@ struct StartStrengthView: View {
                 }
                 
                 NeutralGlassButton(title: "Next") {
-                    phoneConnectivity.stopWorkoutFromPhone()
-                    timer?.invalidate()
-                    router.navigateTo(.restView)
+                    //                    phoneConnectivity.stopWorkoutFromPhone()
+                    //                    timer?.invalidate()
+                    //                    router.navigateTo(.restView)
+                    
+                    if sessionManager.hasNextExercise {
+                        // Go to rest view, then next exercise
+                        router.navigateTo(.restView)
+                    } else {
+                        // Workout complete - go to summary or home
+                        phoneConnectivity.stopWorkoutFromPhone()
+                        sessionManager.reset()
+                        router.navigateTo(.menu)
+                    }
                 }
             }
             .padding(.horizontal)
@@ -114,8 +131,17 @@ struct StartStrengthView: View {
                 }
             }
         }
-        .onAppear { startTimer() }
+        .onAppear {
+            //sessionManager.startWorkout(with: exercises)
+            startTimer()
+        }
         .onDisappear { timer?.invalidate() }
+        .onChange(of: sessionManager.currentExerciseIndex) { _, _ in
+            // Reset timer for new exercise
+            timer?.invalidate()
+            startTimer()
+            calories = 0
+        }
     }
     
     // MARK: - Formatters
@@ -127,6 +153,7 @@ struct StartStrengthView: View {
     
     // MARK: - Timer Logic
     private func startTimer() {
+        let duration: TimeInterval = TimeInterval(currentExercise?.time ?? 60)
         timeRemaining = duration
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
             if !isPaused {
@@ -152,9 +179,9 @@ struct StartStrengthView: View {
 }
 
 
-#Preview {
-    NavigationStack {
-        StartStrengthView()
-            .environmentObject(Router())
-    }
-}
+//#Preview {
+//    NavigationStack {
+//        StartStrengthView()
+//            .environmentObject(Router())
+//    }
+//}

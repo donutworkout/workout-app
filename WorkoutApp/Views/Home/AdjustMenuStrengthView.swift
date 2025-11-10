@@ -7,27 +7,24 @@
 
 import SwiftUI
 import HealthKit
+import SwiftData
 
 struct AdjustMenuStrengthView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var selectedMenu: StrengthMenuType = .bodyweight
-    @EnvironmentObject var router: Router
-    var onNext: (() -> Void)? = nil
-
-    // Workout data
-    let bodyweightWorkouts: [WorkoutItem] = [
-        WorkoutItem(image: "gluteBridge", name: "Glute Bridge", sets: 2, reps: "30 sec"),
-        WorkoutItem(image: "plankRow", name: "Plank Row", sets: 3, reps: "30 sec"),
-        WorkoutItem(image: "deadBug", name: "Dead Bug", sets: 1, reps: "12"),
-        WorkoutItem(image: "childPose", name: "Child Pose", sets: 1, reps: "12")
-    ]
+    @Environment(\.modelContext) private var modelContext
     
-    let gymWorkouts: [WorkoutItem] = [
-        WorkoutItem(image: "childPose", name: "Leg Press", sets: 3, reps: "10"),
-        WorkoutItem(image: "deadBug", name: "Lat Pulldown", sets: 3, reps: "8"),
-        WorkoutItem(image: "plankRow", name: "Cable Curl", sets: 3, reps: "12"),
-        WorkoutItem(image: "gluteBridge", name: "Shoulder Press", sets: 3, reps: "10")
-    ]
+    @State private var selectedMenu: StrengthMenuType = .bodyweight
+    @State private var workouts: [Exercise] = []
+
+    @EnvironmentObject var router: Router
+    
+    @Query private var userCycles: [UserCycle]
+    @Query private var userProfiles: [UserProfile]
+    @Query private var userWorkouts: [UserWorkout]
+    
+    private let sessionManager = StrengthSessionManager.shared
+    
+    var onNext: (() -> Void)? = nil
     
     init() {
         // Warna segmented control kustom (pink)
@@ -67,10 +64,12 @@ struct AdjustMenuStrengthView: View {
                 // MARK: - Workout Cards
                 VStack(spacing: 16) {
                     if selectedMenu == .bodyweight {
-                        ForEach(bodyweightWorkouts) { workout in
+                        ForEach(workouts) { workout in
                             WorkoutItemCard(workout: workout)
                         }
                     } else {
+                        Spacer()
+                        
                         Text("Do your own gym routine! :)")
                         
                         Spacer()
@@ -85,7 +84,12 @@ struct AdjustMenuStrengthView: View {
             // MARK: - Bottom anchored button
             VStack {
                 PrimaryGlassButton(title: "Start Now") {
+                    
+                    sessionManager.startWorkout(with: workouts)
+                    
                     router.lastWorkoutSource = .adjustMenuStrength
+                    router.workoutExercises = workouts
+
                     router.navigateTo(.countdownView)
                 }
                 .padding(.horizontal)
@@ -107,6 +111,43 @@ struct AdjustMenuStrengthView: View {
                 }
             }
         }
+        .onAppear {
+            DummyExerciseProvider.shared.clearAllExercises(from: modelContext)
+            DummyExerciseProvider.shared.insertDummyData(into: modelContext)
+            
+            loadBodyWeightExercises()
+        }
+        .environmentObject(sessionManager)
+    }
+    
+    private func loadBodyWeightExercises() {
+        guard let cycle = userCycle, let profile = userWorkout else { return }
+        
+        let repo = ExerciseRepository(context: modelContext)
+        let generator = WorkoutMenuGenerator(context: modelContext)
+        let level = profile.workoutLevel
+        
+        let currentPhase = CyclePhaseCalculator.calculateCurrentPhase(
+            lastPeriodStart: cycle.cycleStartDate,
+            menstrualDuration: cycle.menstrualDuration
+        )
+        
+        let specs = generator.getStrengthSpecs(for: level, phase: currentPhase)
+        
+        // Fetch exercises
+        var exercises = repo.getExercises(
+            forLevel: level,
+            phase: currentPhase,
+            count: 5
+        )
+        
+        // Apply sets and reps to each exercise
+        for i in 0..<exercises.count {
+            exercises[i].sets = specs.sets
+            exercises[i].reps = specs.reps
+        }
+        
+        workouts = exercises
     }
 }
 
@@ -116,12 +157,26 @@ enum StrengthMenuType: String, CaseIterable {
     case gym = "Gym"
 }
 
-struct WorkoutItem: Identifiable {
-    var id = UUID()
-    var image: String
-    var name: String
-    var sets: Int
-    var reps: String
+//struct WorkoutItem: Identifiable {
+//    var id = UUID()
+//    var image: String
+//    var name: String
+//    var sets: Int
+//    var reps: String
+//}
+
+extension AdjustMenuStrengthView {
+    private var userCycle: UserCycle? {
+        userCycles.first
+    }
+    
+    private var userProfile: UserProfile? {
+        userProfiles.first
+    }
+    
+    private var userWorkout: UserWorkout? {
+        userWorkouts.first
+    }
 }
 
 #Preview {

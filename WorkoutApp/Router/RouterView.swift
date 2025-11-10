@@ -5,6 +5,7 @@ struct RouterView: View {
     @EnvironmentObject var surveyManager: SurveyManager
     @Environment(iPhoneConnectivityManager.self) private var connectivity
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject var sessionManager: StrengthSessionManager
     
     var body: some View {
         NavigationStack {
@@ -58,9 +59,11 @@ struct RouterView: View {
             case .startStrength:
                 StartStrengthView()
                     .environmentObject(router)
+                    .environmentObject(sessionManager)
                 
             case .restView:
                 RestView(onNext: {
+//                    sessionManager.moveToNextExercise()
                     router.navigateTo(.startStrength)
                 })
                 .environmentObject(router)
@@ -98,7 +101,7 @@ struct RouterView: View {
                 }
                 
             case .countdownView:
-                CountdownView(onCountdownComplete: {
+                CountdownView(exercises: router.workoutExercises, onCountdownComplete: {
                     if let last = router.lastWorkoutSource {
                         switch last {
                         case .adjustMenuCardio:
@@ -111,6 +114,7 @@ struct RouterView: View {
                     }
                 })
                 .environmentObject(router)
+                .environmentObject(sessionManager)
             }
         }
     }

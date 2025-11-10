@@ -58,14 +58,6 @@ class ExerciseRepository {
             }
         }
         
-        // Filter by exercise types
-//        if let types = exerciseTypes, !types.isEmpty {
-//            filtered = filtered.filter { exercise in
-//                types.contains(exercise.exerciseType)
-//            }
-//            print("  ✓ After type filter: \(filtered.count)")
-//        }
-        
         // Select balanced
         let selected = selectBalancedExercises(from: filtered, count: count)
         print("  ✅ Final selected: \(selected.count)\n")

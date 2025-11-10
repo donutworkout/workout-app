@@ -19,120 +19,103 @@ class DummyExerciseProvider {
             Exercise(
                 name: "Wall Press",
                 bodyPart: [.fullBody, .upperPush],
-                time: nil,
-                imageName: nil
+                time: nil
             ),
             
             Exercise(
                 name: "Shoulder Toner",
                 bodyPart: [.fullBody, .upperPush],
-                time: nil,
-                imageName: nil
+                time: nil
             ),
             
             Exercise(
                 name: "Bent Over Row",
                 bodyPart: [.fullBody],
-                time: nil,
-                imageName: nil
+                time: nil
             ),
             
             Exercise(
                 name: "Bodyweight Squat",
                 bodyPart: [.fullBody],
-                time: nil,
-                imageName: nil
+                time: nil
             ),
             
             Exercise(
                 name: "Glute Bridge",
                 bodyPart: [.fullBody],
-                time: nil,
-                imageName: nil
+                time: nil
             ),
             
             Exercise(
                 name: "Dead Bug",
                 bodyPart: [.fullBody],
-                time: nil,
-                imageName: nil
+                time: nil
             ),
             
             Exercise(
-                name: "Plank with Knee Dip",
+                name: "Plank With Knee Dip",
                 bodyPart: [.fullBody, .upperPush],
-                time: nil,
-                imageName: nil
+                time: nil
             ),
             
             Exercise(
                 name: "Child Pose",
                 bodyPart: [.fullBody],
-                time: nil,
-                imageName: nil
+                time: nil
             ),
             
             Exercise(
                 name: "Tricep Dip",
                 bodyPart: [.upperPush],
-                time: nil,
-                imageName: nil
+                time: nil
             ),
             
             Exercise(
                 name: "One Knee Push Up",
                 bodyPart: [.upperPush],
-                time: nil,
-                imageName: nil
+                time: nil
             ),
             
-            Exercise(
-                name: "Plank to Downward Dog",
-                bodyPart: [.upperPush],
-                time: nil,
-                imageName: nil
-            ),
+//            Exercise(
+//                name: "Plank To Downward Dog",
+//                bodyPart: [.upperPush],
+//                time: nil
+//            ),
             
             Exercise(
                 name: "Plank Row",
                 bodyPart: [.upperPull],
-                time: nil,
-                imageName: nil
+                time: nil
             ),
             
-            Exercise(
-                name: "Knee to Elbow Kick Back",
-                bodyPart: [.upperPull],
-                time: nil,
-                imageName: nil
-            ),
+//            Exercise(
+//                name: "Knee To Elbow Kick Back",
+//                bodyPart: [.upperPull],
+//                time: nil
+//            ),
             
             Exercise(
                 name: "Squat Jump",
                 bodyPart: [.upperPull],
-                time: nil,
-                imageName: nil
+                time: nil
             ),
             
             Exercise(
                 name: "Single Leg Deadlift",
                 bodyPart: [.upperPull],
-                time: nil,
-                imageName: nil
+                time: nil
             ),
             
             Exercise(
                 name: "Walking Lunge",
                 bodyPart: [.upperPull],
-                time: nil,
-                imageName: nil
+                time: nil
             ),
             
             Exercise(
-                name: "Plank with Hip Dips",
+                name: "Plank With Hip Dips",
                 bodyPart: [.upperPull],
-                time: nil,
-                imageName: nil
+                time: nil
             )
         ]
     }
