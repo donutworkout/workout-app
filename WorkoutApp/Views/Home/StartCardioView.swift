@@ -26,70 +26,78 @@ struct StartCardioView: View {
     @State private var timer: Timer? = nil
     
     var body: some View {
-        VStack {
-            VStack(spacing: 0) {
-                // MARK: - Image
-                Image(imageName)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 380)
-                    .padding(.top, 20)
-                
-                Text(formattedTime)
-                    .font(.system(size: 36, weight: .bold))
-                    .foregroundColor(Color("pinkTextPrimary"))
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 20)
-            .background(
-                RoundedRectangle(cornerRadius: 24)
-                    .fill(Color.white)
-                    .shadow(color: .gray.opacity(0.15), radius: 6, x: 0, y: 3)
-            )
-            .padding(.horizontal)
-            
-            // MARK: - Stats
-            HStack(spacing: 16) {
-                StatCardItem(icon: "flame.fill", value: "\(calories)", label: "KCAL")
-                StatCardItem(icon: "figure.walk", value: String(format: "%.1f", distance), label: "KILOMETERS")
-                StatCardItem(icon: "heart.fill", value: "\(bpm)", label: "BPM")
-            }
-            .padding(.horizontal)
-            
-            Spacer()
-            
-            // MARK: - Button
-            PrimaryGlassButton(title: isPaused ? "Resume" : "Pause") {
-                if isPaused {
-                    // ✅ Resume workout
-                    phoneConnectivity.resumeWorkoutFromPhone()
-                } else {
-                    // ✅ Pause workout
-                    phoneConnectivity.pauseWorkoutFromPhone()
+        ZStack {
+            VStack {
+                VStack(spacing: 0) {
+                    // MARK: - Image
+                    Image(imageName)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 380)
+                        .padding(.top, 20)
+                    
+                    Text(formattedTime)
+                        .font(.system(size: 36, weight: .bold))
+                        .foregroundColor(Color("pinkTextPrimary"))
                 }
-                isPaused.toggle()
-            }
-            .frame(maxWidth: .infinity, alignment: .center)
-            .padding(.horizontal)
-            .padding(.bottom, 40)
-            .blur(radius: showPausePopup ? 3 : 0)
-            .disabled(showPausePopup)
-            
-            // MARK: - Pause Popup
-            if showPausePopup {
-                WorkoutPausePopup(
-                    characterImage: "buttercup",
-                    onResume: {
-                        showPausePopup = false
-                        isPaused = false
-                    },
-                    onEndWorkout: {
-                        timer?.invalidate()
-                        router.navigateTo(.menu)
-                    }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 20)
+                .background(
+                    RoundedRectangle(cornerRadius: 24)
+                        .fill(Color.white)
+                        .shadow(color: .gray.opacity(0.15), radius: 6, x: 0, y: 3)
                 )
-                .transition(.scale.combined(with: .opacity))
+                .padding(.horizontal)
+                
+                // MARK: - Stats
+                HStack(spacing: 16) {
+                    StatCardItem(icon: "flame.fill", value: "\(calories)", label: "KCAL")
+                    StatCardItem(icon: "figure.walk", value: String(format: "%.1f", distance), label: "KILOMETERS")
+                    StatCardItem(icon: "heart.fill", value: "\(bpm)", label: "BPM")
+                }
+                .padding(.horizontal)
+                
+                Spacer()
+                
+                // MARK: - Button
+                PrimaryGlassButton(title: isPaused ? "Resume" : "Pause") {
+                    if isPaused {
+                        // ✅ Resume workout
+                        phoneConnectivity.resumeWorkoutFromPhone()
+                        isPaused = false
+                        showPausePopup = false
+                    } else {
+                        // ✅ Pause workout
+                        phoneConnectivity.pauseWorkoutFromPhone()
+                        
+                        // ✅ Tampilkan alert/popup
+                        showPausePopup = true
+                        isPaused = true
+                    }
+                }
             }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.horizontal)
+                .padding(.bottom, 40)
+                .blur(radius: showPausePopup ? 3 : 0)
+                .disabled(showPausePopup)
+                
+                // MARK: - Pause Popup
+                if showPausePopup {
+                    WorkoutPausePopup(
+                        characterImage: "buttercup",
+                        onResume: {
+                            showPausePopup = false
+                            isPaused = false
+                        },
+                        onEndWorkout: {
+                            timer?.invalidate()
+                            router.navigateTo(.menu)
+                        }
+                    )
+                    .transition(.scale.combined(with: .opacity))
+                }
+            
         }
         .background(Color.white.ignoresSafeArea())
         .navigationTitle(router.selectedCardioMenu ?? "Cardio Workout")
@@ -179,6 +187,7 @@ struct WorkoutPausePopup: View {
                     .zIndex(1)
                 }
             }
+            .padding(.horizontal, 24)
         }
         .transition(.scale.combined(with: .opacity))
     }
