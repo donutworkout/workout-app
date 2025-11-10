@@ -8,28 +8,33 @@
 import SwiftUI
 
 struct WorkoutItemCard: View {
-    let workout: WorkoutItem
+    let workout: Exercise
     @State private var sets: Int
+    let reps: Int
     
-    init(workout: WorkoutItem) {
+    init(workout: Exercise) {
         self.workout = workout
-        _sets = State(initialValue: workout.sets)
+        _sets = State(initialValue: workout.sets ?? 1)
+        self.reps = workout.reps ?? 0
     }
     
     var body: some View {
         HStack(spacing: 16) {
-            Image(workout.image)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 80, height: 80)
-                .cornerRadius(16)
-            
+            if let imageName = workout.imageName {
+                Image(imageName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 80, height: 80)
+                    .cornerRadius(16)
+            } else {
+                
+            }
             VStack(alignment: .leading, spacing: 6) {
                 Text(workout.name)
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.black)
                 
-                Text("\(sets) x \(workout.reps)")
+                Text("\(sets) x \(reps)")
                     .font(.system(size: 14))
                     .foregroundColor(.gray)
             }

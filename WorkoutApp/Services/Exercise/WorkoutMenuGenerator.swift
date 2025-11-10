@@ -102,7 +102,7 @@ class WorkoutMenuGenerator {
         dayName: String,
         category: MenuCategory,
         level: WorkoutLevel,
-        phase: MenstrualPhase,
+        phase: CurrentPhase,
         strengthType: StrengthType,
         strengthDayIndex: Int,
         cardioDayIndex: Int
@@ -292,7 +292,7 @@ extension WorkoutMenuGenerator {
         }
     }
     
-    private func getStrengthSpecs(for level: WorkoutLevel, phase: MenstrualPhase) -> StrengthSpecs {
+    func getStrengthSpecs(for level: WorkoutLevel, phase: MenstrualPhase) -> StrengthSpecs {
         switch (level, phase) {
         // BEGINNER
         case (.beginner, .menstruation):

@@ -22,17 +22,30 @@ class Exercise{
     var sets: Int?
     var reps: Int?
     var time: Int? // pick one, rest/time
-    var imageName: String?
+    //var imageName: String?
+    
+    var imageName: String? {
+        return name
+            .split(separator: " ")
+            .enumerated()
+            .map { index, word in
+                let cleaned = word
+                    .lowercased()
+                    .filter { $0.isLetter } // remove punctuation
+                return index == 0
+                ? cleaned
+                : cleaned.prefix(1).uppercased() + cleaned.dropFirst()
+            }
+            .joined()
+    }
     
     init(
-        
         id: UUID = UUID(),
         name: String,
         bodyPart: [BodyPart],
         sets: Int? = nil,
         reps: Int? = nil,
-        time: Int? = nil,
-        imageName: String? = nil) {
+        time: Int? = nil) {
             
         self.id = id
         self.name = name
@@ -40,7 +53,6 @@ class Exercise{
         self.sets = sets
         self.reps = reps
         self.time = time
-        self.imageName = imageName
     }
 }
 
