@@ -63,14 +63,20 @@ struct StartCardioView: View {
                 PrimaryGlassButton(title: isPaused ? "Resume" : "Pause") {
                     if isPaused {
                         // ✅ Resume workout
-                        connectivity.resumeWorkoutFromPhone()
+                        phoneConnectivity.resumeWorkoutFromPhone()
+                        isPaused = false
+                        showPausePopup = false
                     } else {
                         // ✅ Pause workout
-                        connectivity.pauseWorkoutFromPhone()
+                        phoneConnectivity.pauseWorkoutFromPhone()
+                        
+                        // ✅ Tampilkan alert/popup
                         showPausePopup = true
+                        isPaused = true
                     }
                     isPaused.toggle()
                 }
+            }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.horizontal)
                 .padding(.bottom, 40)
@@ -184,6 +190,7 @@ struct WorkoutPausePopup: View {
                     .zIndex(1)
                 }
             }
+            .padding(.horizontal, 24)
         }
         .transition(.scale.combined(with: .opacity))
     }

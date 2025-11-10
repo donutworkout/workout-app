@@ -292,7 +292,7 @@ extension WorkoutMenuGenerator {
         }
     }
     
-    private func getStrengthSpecs(for level: WorkoutLevel, phase: MenstrualPhase) -> StrengthSpecs {
+    func getStrengthSpecs(for level: WorkoutLevel, phase: MenstrualPhase) -> StrengthSpecs {
         switch (level, phase) {
         // BEGINNER
         case (.beginner, .menstruation):

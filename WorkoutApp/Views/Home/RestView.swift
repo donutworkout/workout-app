@@ -82,7 +82,7 @@ struct RestView: View {
                 }
 
                 NeutralGlassButton(title: "Next") {
-                    router.navigateTo(.menu)
+                    router.navigateTo(.startStrength)
                 }
             }
             .padding(.horizontal)
