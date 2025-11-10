@@ -38,10 +38,10 @@ struct ContentView: View {
                         workoutName: type.displayName
                     )
                 } else {
-                    WatchWorkoutListView(
-                        sessionManager: _sessionManager,
+                    StartView(
+                        workoutType: type,
                         connectivity: _connectivity,
-                        workoutType: type
+                        sessionManager: _sessionManager,
                     )
                 }
                 

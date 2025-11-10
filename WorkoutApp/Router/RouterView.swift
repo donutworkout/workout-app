@@ -44,12 +44,12 @@ struct RouterView: View {
             case .adjustMenuCardio:
                 AdjustMenuCardioView()
                     .environmentObject(router)
-                    .environment(connectivity)
+                    //.environment(connectivity)
                 
             case .adjustMenuStrength:
                 AdjustMenuStrengthView()
                     .environmentObject(router)
-                    .environment(connectivity)
+                    //.environment(connectivity)
                 
             case .startCardio:
                 StartCardioView()
@@ -92,9 +92,11 @@ struct RouterView: View {
                 if weekday % 2 == 0 {
                     AdjustMenuCardioView()
                         .environmentObject(router)
+                        //.environment(connectivity)
                 } else {
                     AdjustMenuStrengthView()
                         .environmentObject(router)
+                        //.environment(connectivity)
                 }
                 
             case .countdownView:

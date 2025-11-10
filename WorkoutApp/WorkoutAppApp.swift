@@ -14,7 +14,7 @@ struct WorkoutAppApp: App {
     
     @StateObject private var router = Router()
     @StateObject private var surveyManager = SurveyManager(modelContext: WorkoutAppApp.modelContainer.mainContext)
-    @State private var connectivity = iPhoneConnectivityManager()
+    @State var connectivity = iPhoneConnectivityManager.shared
     
     
     static let modelContainer: ModelContainer = {

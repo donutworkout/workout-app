@@ -89,63 +89,58 @@ class WatchConnectivityManager: NSObject {
     func session(_ session: WCSession, didReceiveMessage message: [String: Any])
     {
         print("📩 Received message: \(message)")
+        handleIncomingMessage(message)
+    }
+    
+    private func handleIncomingMessage(_ message: [String: Any]) {
+            DispatchQueue.main.async {
+                if let typeRaw = message["selectedWorkout"] as? UInt,
+                   let type = HKWorkoutActivityType(rawValue: typeRaw) {
+                    self.selectedWorkoutType = type
+                    print("✅ Updated selectedWorkoutType: \(type.displayName)")
+                }
+                if let cmdRaw = message["cmd"] as? String,
+                   let cmd = WorkoutCommand(rawValue: cmdRaw) {
+                    switch cmd {
+                        
+                    // iPhone → start
+                    case .start:
+                        if let typeRaw = message["workoutType"] as? UInt,
+                           let type = HKWorkoutActivityType(rawValue: typeRaw) {
+                            self.selectedWorkoutType = type
+                            print("⌚ Received start command from iPhone: \(type.displayName)")
+                            self.shouldStartWorkout = true
+                        }
 
-        DispatchQueue.main.async {
-            if let typeWorkout = message["selectedWorkout"] as? UInt,
-                let type = HKWorkoutActivityType(rawValue: typeWorkout)
-            {
-                self.selectedWorkoutType = type
-                print("✅ Updated selectedWorkoutType: \(type.displayName)")
-            }
-            if let cmdRaw = message["cmd"] as? String,
-                let cmd = WorkoutCommand(rawValue: cmdRaw)
-            {
+                    // iPhone → pause
+                    case .pause:
+                        //self.shouldPauseWorkout = true
+                        self.sessionManager.pauseWorkout()
+                        print("⏸️ Pause command executed on watch")
 
-                switch cmd {
-                case .start:
-                    guard let type = self.selectedWorkoutType else {
-                        print(
-                            "⚠️ No selectedWorkoutType on watch; ignoring start"
-                        )
-                        return
+                    // iPhone → resume
+                    case .resume:
+                        //self.shouldPauseWorkout = false
+                        self.sessionManager.resumeWorkout()
+                        print("▶️ Resume command executed on watch")
+
+                    // iPhone → stop
+                    case .stop:
+                        self.shouldStartWorkout = false
+                        //self.shouldPauseWorkout = false
+                        self.sessionManager.stopWorkout()
+                        print("🛑 Stop command executed on watch")
+
+                    // Mirror confirmation from iPhone
+                    case .started:
+                        print("✅ iPhone confirmed workout started")
                     }
-                    if !self.sessionManager.isRunning {
-                        self.sessionManager.startWorkout(of: type)
-                    } else {
-                        print(
-                            "ℹ️ Watch workout already running; acknowledging start"
-                        )
-                    }
-                    self.sendMessage([
-                        "cmd": "started",
-                        "workoutType": type.rawValue,
-                    ])
-                    print(
-                        "✅ Start command -> watch ensured workout running and sent confirmation"
-                    )
-
-                case .started:
-                    print("✅ Workout started confirmation from phone")
-
-                case .pause:
-                    self.sessionManager.pauseWorkout()
-                    print("⏸️ Pause command executed on watch")
-
-                case .resume:
-                    self.sessionManager.resumeWorkout()
-                    print("▶️ Resume command executed on watch")
-
-                case .stop:
-                    self.sessionManager.stopWorkout()
-                    self.shouldStartWorkout = false
-                    print("🛑 Stop command executed on watch")
                 }
             }
-
         }
     }
 
-}
+
 
 // MARK: - WCSessionDelegate
 

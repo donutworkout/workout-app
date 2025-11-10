@@ -11,6 +11,8 @@ import HealthKit
 struct StartView: View {
     @State private var currentTime = ""
     var workoutType: HKWorkoutActivityType
+    @Environment var connectivity: WatchConnectivityManager
+    @Environment var sessionManager: WorkoutSessionManager
     
     // Timer for updating time
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
@@ -82,6 +84,10 @@ struct StartView: View {
             
             // MARK: - START Button
             Button(action: {
+                connectivity.sendMessage([
+                    "cmd": WorkoutCommand.start.rawValue,
+                    "workoutType": workoutType.rawValue
+                ])
                 print("Starting \(workoutInfo.name) workout")
             }) {
                 Text("START")
@@ -110,6 +116,6 @@ struct StartView: View {
     }
 }
 
-#Preview {
-    StartView(workoutType: .running)
-}
+//#Preview {
+//    StartView(workoutType: .running)
+//}

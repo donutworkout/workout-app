@@ -18,6 +18,11 @@ final class iPhoneConnectivityManager: NSObject {
     var isWorkoutActive = false
     var isWorkoutPaused = false
     
+    var heartRate: Double = 0
+    var energyBurned: Double = 0
+    var distance: Double = 0
+    var timeActive: Double = 0
+    
     override init() {
         super.init( )
         guard WCSession.isSupported() else {
@@ -54,9 +59,6 @@ extension iPhoneConnectivityManager: WCSessionDelegate {
                  didReceiveMessage message: [String : Any],
                  replyHandler: @escaping ([String : Any]) -> Void) {
         print("iphone received: \(message)")
-
-        // ✅ Always reply, even if empty, to avoid WCErrorCodeDeliveryFailed
-       // defer { replyHandler(["status": "ok"]) }
         self.handleIncomingMessage(message)
     }
 
@@ -80,9 +82,7 @@ private extension iPhoneConnectivityManager {
                     if let typeRaw = message["workoutType"] as? UInt,
                        let type = HKWorkoutActivityType(rawValue: typeRaw) {
                         
-                        print("ini is workout active:\(self.isWorkoutActive)")
                         self.isWorkoutActive = true
-                        print("ini is workout active:\(self.isWorkoutActive)")
                         self.isWorkoutPaused = false
                         
                         if !self.sessionManager.isRunning {
@@ -111,7 +111,20 @@ private extension iPhoneConnectivityManager {
                         self.isWorkoutActive = true
                         self.isWorkoutPaused = false
                         self.sessionManager.startWorkout(of: type)
+                        
                     }
+                }
+            }
+            else if message["cmd"] as? String == "updateMetrics" {
+                if let hr = message["heartRate"] as? Double,
+                   let energy = message["energy"] as? Double,
+                   let dist = message["distance"] as? Double,
+                   let time = message["time"] as? Double {
+                    self.heartRate = hr
+                    self.energyBurned = energy
+                    self.distance = dist
+                    self.timeActive = time
+                    print("📈 Updated metrics from Watch: HR=\(hr), kcal=\(energy), dist=\(dist), time=\(time)")
                 }
             }
         }
@@ -157,7 +170,6 @@ extension iPhoneConnectivityManager {
         if session.isReachable {
             sendMessage(["cmd": "start", "workoutType": type.rawValue])
         } else {
-            // no watch -> phone owns workout
             sessionManager.startWorkout(of: type)
             print("📱 Phone started workout locally (no watch reachable)")
         }

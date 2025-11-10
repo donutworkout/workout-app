@@ -108,6 +108,7 @@ struct MenuView: View {
         .background(Color.white.ignoresSafeArea())
         .onAppear {
             loadWeeklyMenu()
+            
         }
     }
     

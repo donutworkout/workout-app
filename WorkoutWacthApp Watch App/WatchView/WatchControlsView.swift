@@ -47,6 +47,7 @@ struct WatchControlsView: View {
                 connectivity.sendMessage([
                     "cmd": WorkoutCommand.stop.rawValue
                 ])
+                
                 dismiss()
             } label: {
                 VStack(spacing: 8) {
