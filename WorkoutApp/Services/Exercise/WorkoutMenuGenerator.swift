@@ -102,7 +102,7 @@ class WorkoutMenuGenerator {
         dayName: String,
         category: MenuCategory,
         level: WorkoutLevel,
-        phase: CurrentPhase,
+        phase: MenstrualPhase,
         strengthType: StrengthType,
         strengthDayIndex: Int,
         cardioDayIndex: Int

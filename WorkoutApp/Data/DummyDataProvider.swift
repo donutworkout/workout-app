@@ -88,11 +88,11 @@ class DummyExerciseProvider {
                 time: nil
             ),
             
-            Exercise(
-                name: "Knee To Elbow Kick Back",
-                bodyPart: [.upperPull],
-                time: nil
-            ),
+//            Exercise(
+//                name: "Knee To Elbow Kick Back",
+//                bodyPart: [.upperPull],
+//                time: nil
+//            ),
             
             Exercise(
                 name: "Squat Jump",

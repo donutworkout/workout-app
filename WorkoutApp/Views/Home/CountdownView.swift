@@ -10,16 +10,9 @@ import SwiftUI
 struct CountdownView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var router: Router
-    
-    // MARK: - Props
-    var workoutName: String = "gluteBridge"
-    var imageName: String = "gluteBridge"
-    var duration: TimeInterval = 60
-    var onCountdownComplete: () -> Void = {}
-    
-    // Page control (opsional, sesuaikan dengan kebutuhan)
-    var currentPage: Int = 1
-    var totalPages: Int = 5
+    @EnvironmentObject var sessionManager: StrengthSessionManager
+
+    let exercises: [Exercise]
     
     @State private var countdown: Int = 3
     @State private var showCountdown: Bool = true
@@ -29,18 +22,16 @@ struct CountdownView: View {
     @State private var calories: Int = 0
     @State private var bpm: Int = 90
     
-    init(workoutName: String = "gluteBridge",
-         imageName: String = "gluteBridge",
-         duration: TimeInterval = 60,
-         currentPage: Int = 1,
-         totalPages: Int = 5,
-         onCountdownComplete: @escaping () -> Void = {}) {
-        self.workoutName = workoutName
-        self.imageName = imageName
-        self.duration = duration
-        self.currentPage = currentPage
-        self.totalPages = totalPages
-        self.onCountdownComplete = onCountdownComplete
+    var firstExercise: Exercise? {
+        exercises.first
+    }
+        
+    var totalPages: Int {
+        exercises.count
+    }
+    
+    init(exercises: [Exercise], onCountdownComplete: @escaping () -> Void = {}) {
+        self.exercises = exercises
     }
     
     var body: some View {
@@ -50,26 +41,28 @@ struct CountdownView: View {
                 // MARK: - Page Control + Title + Image
                 VStack(spacing: 16) {
                     // MARK: Page Control (bulatan)
-                    HStack(spacing: 6) {
-                        ForEach(1...totalPages, id: \.self) { index in
-                            Circle()
-                                .fill(index == currentPage ? Color("pinkTextPrimary") : Color.gray.opacity(0.3))
-                                .frame(width: 8, height: 8)
-                        }
-                    }
-                    .padding(.top, 24)
+//                    HStack(spacing: 6) {
+//                        ForEach(1...totalPages, id: \.self) { index in
+//                            Circle()
+//                                .fill(index == 1 ? Color("pinkTextPrimary") : Color.gray.opacity(0.3))
+//                                .frame(width: 8, height: 8)
+//                        }
+//                    }
+//                    .padding(.top, 24)
                     
                     // MARK: Workout Title
-                    Text(workoutName)
+                    Text(firstExercise?.name ?? "Get Ready!")
                         .font(.system(size: 28, weight: .semibold))
                         .foregroundColor(Color("pinkTextPrimary"))
                     
                     // MARK: Image
-                    Image(imageName)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 320)
-                        .padding(.top, 8)
+                    if let imageName = firstExercise?.imageName {
+                        Image(imageName)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 320)
+                            .padding(.top, 8)
+                    }
                 }
                 
                 Spacer()
@@ -145,8 +138,11 @@ struct CountdownView: View {
                 }
             }
         }
-        .onAppear { startCountdown() }
-        .onDisappear { timer?.invalidate() }
+        .onAppear {
+            sessionManager.startWorkout(with: sessionManager.exercises)
+            startCountdown()
+        }
+        //.onDisappear { timer?.invalidate() }
     }
     
     // MARK: - Formatters
@@ -160,8 +156,8 @@ struct CountdownView: View {
     private func startCountdown() {
         countdown = 3
         showCountdown = true
-        timeRemaining = duration
-        
+//        timeRemaining = duration
+//        
         // Countdown overlay timer
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
             if countdown > 1 {
@@ -174,14 +170,16 @@ struct CountdownView: View {
                     iPhoneConnectivityManager.shared.startWorkoutFromPhone(type: type)
                 }
                 
+                withAnimation(.easeOut(duration: 0.3)) {
+                    showCountdown = false
+                }
+                
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    withAnimation(.easeOut(duration: 0.3)) {
-                        showCountdown = false
-                    }
-                    onCountdownComplete()
                     
-                    // Start workout timer after countdown
-                    startWorkoutTimer()
+                    // Navigate to StartStrengthView
+                    print("🚀 Navigating to StartStrengthView")
+                    sessionManager.startWorkout(with: exercises)
+                    router.navigateTo(.startStrength)
                 }
             }
         }
@@ -193,7 +191,7 @@ struct CountdownView: View {
             if !isPaused {
                 if timeRemaining > 0 {
                     timeRemaining -= 1
-                    calories = Int((duration - timeRemaining) / 6)
+                    // calories = Int((duration - timeRemaining) / 6)
                     bpm = 90 + Int.random(in: -4...6)
                 } else {
                     t.invalidate()
@@ -208,9 +206,9 @@ struct CountdownView: View {
     }
 }
 
-#Preview {
-    NavigationStack {
-        CountdownView()
-            .environmentObject(Router())
-    }
-}
+//#Preview {
+//    NavigationStack {
+//        CountdownView()
+//            .environmentObject(Router())
+//    }
+//}

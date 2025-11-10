@@ -25,7 +25,8 @@ final class Router: ObservableObject {
     @Published var lastWorkoutSource: Route? = nil
     @Published var selectedWorkoutType: HKWorkoutActivityType? = nil
     @Published var selectedCardioMenu: String? = nil
-
+    @Published var workoutExercises: [Exercise] = []
+    
     func navigateTo(_ route: Route) {
         currentRoute = route
     }

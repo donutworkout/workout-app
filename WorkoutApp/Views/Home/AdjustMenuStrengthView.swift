@@ -15,22 +15,16 @@ struct AdjustMenuStrengthView: View {
     
     @State private var selectedMenu: StrengthMenuType = .bodyweight
     @State private var workouts: [Exercise] = []
-    
+
     @EnvironmentObject var router: Router
     
     @Query private var userCycles: [UserCycle]
     @Query private var userProfiles: [UserProfile]
     @Query private var userWorkouts: [UserWorkout]
     
+    private let sessionManager = StrengthSessionManager.shared
+    
     var onNext: (() -> Void)? = nil
-
-//    // Workout data
-//    let bodyweightWorkouts: [WorkoutItem] = [
-//        WorkoutItem(image: "gluteBridge", name: "Glute Bridge", sets: 2, reps: "30 sec"),
-//        WorkoutItem(image: "plankRow", name: "Plank Row", sets: 3, reps: "30 sec"),
-//        WorkoutItem(image: "deadBug", name: "Dead Bug", sets: 1, reps: "12"),
-//        WorkoutItem(image: "childPose", name: "Child Pose", sets: 1, reps: "12")
-//    ]
     
     init() {
         // Warna segmented control kustom (pink)
@@ -90,7 +84,12 @@ struct AdjustMenuStrengthView: View {
             // MARK: - Bottom anchored button
             VStack {
                 PrimaryGlassButton(title: "Start Now") {
+                    
+                    sessionManager.startWorkout(with: workouts)
+                    
                     router.lastWorkoutSource = .adjustMenuStrength
+                    router.workoutExercises = workouts
+
                     router.navigateTo(.countdownView)
                 }
                 .padding(.horizontal)
@@ -113,10 +112,12 @@ struct AdjustMenuStrengthView: View {
             }
         }
         .onAppear {
+            DummyExerciseProvider.shared.clearAllExercises(from: modelContext)
             DummyExerciseProvider.shared.insertDummyData(into: modelContext)
             
             loadBodyWeightExercises()
         }
+        .environmentObject(sessionManager)
     }
     
     private func loadBodyWeightExercises() {

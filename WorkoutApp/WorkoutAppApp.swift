@@ -14,6 +14,7 @@ struct WorkoutAppApp: App {
     
     @StateObject private var router = Router()
     @StateObject private var surveyManager = SurveyManager(modelContext: WorkoutAppApp.modelContainer.mainContext)
+    @StateObject var sessionManager = StrengthSessionManager.shared
     @State private var connectivity = iPhoneConnectivityManager()
     
     
@@ -53,6 +54,7 @@ struct WorkoutAppApp: App {
                 .environmentObject(router)
                 .environmentObject(surveyManager)
                 .environment(connectivity)
+                .environmentObject(sessionManager)
         }
         .modelContainer(WorkoutAppApp.modelContainer)
     }
