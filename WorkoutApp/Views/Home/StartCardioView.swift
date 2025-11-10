@@ -10,6 +10,7 @@ import SwiftUI
 struct StartCardioView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var router: Router
+    private let phoneConnectivity = iPhoneConnectivityManager.shared
     
     // MARK: - Props
     var activityName: String = "Indoor Walk"
@@ -17,26 +18,22 @@ struct StartCardioView: View {
     
     @State private var timeElapsed: TimeInterval = 0
     @State private var calories: Int = 0
+    @State private var distance: Double = 0.0
     @State private var bpm: Int = 90
     @State private var isPaused: Bool = false
+    @State private var showPausePopup: Bool = false
     
     @State private var timer: Timer? = nil
     
     var body: some View {
-        VStack(spacing: 24) {
-            Image(imageName)
-                .resizable()
-                .scaledToFit()
-                .frame(height: 300)
-                .padding(.top, 40)
-            
-            Spacer()
-            
-            // MARK: - Timer Card
-            VStack(spacing: 8) {
-                Text("Time")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.black)
+        VStack {
+            VStack(spacing: 0) {
+                // MARK: - Image
+                Image(imageName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 380)
+                    .padding(.top, 20)
                 
                 Text(formattedTime)
                     .font(.system(size: 36, weight: .bold))
@@ -53,33 +50,49 @@ struct StartCardioView: View {
             
             // MARK: - Stats
             HStack(spacing: 16) {
-                StatCard(title: "\(calories) KCAL", color: Color("pinkTextPrimary").opacity(0.25))
-                StatCard(title: "❤️ \(bpm) BPM", color: Color("pinkTextPrimary").opacity(0.25))
+                StatCardItem(icon: "flame.fill", value: "\(calories)", label: "KCAL")
+                StatCardItem(icon: "figure.walk", value: String(format: "%.1f", distance), label: "KILOMETERS")
+                StatCardItem(icon: "heart.fill", value: "\(bpm)", label: "BPM")
             }
             .padding(.horizontal)
             
             Spacer()
             
-            // MARK: - Buttons
-            HStack(spacing: 16) {
-                Button(action: toggleTimer) {
-                    Image(systemName: isPaused ? "play.fill" : "pause.fill")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.black)
-                        .frame(width: 44, height: 44)
-                        .background(Circle().fill(.ultraThinMaterial))
+            // MARK: - Button
+            PrimaryGlassButton(title: isPaused ? "Resume" : "Pause") {
+                if isPaused {
+                    // ✅ Resume workout
+                    phoneConnectivity.resumeWorkoutFromPhone()
+                } else {
+                    // ✅ Pause workout
+                    phoneConnectivity.pauseWorkoutFromPhone()
                 }
-                
-                PrimaryGlassButton(title: "Done") {
-                    router.navigateTo(.menu)
-                    timer?.invalidate()
-                }
+                isPaused.toggle()
             }
+            .frame(maxWidth: .infinity, alignment: .center)
             .padding(.horizontal)
-            .padding(.bottom, 24)
+            .padding(.bottom, 40)
+            .blur(radius: showPausePopup ? 3 : 0)
+            .disabled(showPausePopup)
+            
+            // MARK: - Pause Popup
+            if showPausePopup {
+                WorkoutPausePopup(
+                    characterImage: "buttercup",
+                    onResume: {
+                        showPausePopup = false
+                        isPaused = false
+                    },
+                    onEndWorkout: {
+                        timer?.invalidate()
+                        router.navigateTo(.menu)
+                    }
+                )
+                .transition(.scale.combined(with: .opacity))
+            }
         }
         .background(Color.white.ignoresSafeArea())
-        .navigationTitle(activityName)
+        .navigationTitle(router.selectedCardioMenu ?? "Cardio Workout")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -96,30 +109,88 @@ struct StartCardioView: View {
         .onAppear { startTimer() }
         .onDisappear { timer?.invalidate() }
     }
+
     
     private var formattedTime: String {
-        let minutes = Int(timeElapsed) / 60
+        let hours = Int(timeElapsed) / 3600
+        let minutes = (Int(timeElapsed) % 3600) / 60
         let seconds = Int(timeElapsed) % 60
-        return String(format: "%02d:%02d", minutes, seconds)
+        return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
     
     private func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
             if !isPaused {
                 timeElapsed += 1
-                calories = Int(timeElapsed / 15) // contoh sederhana
+                calories = Int(timeElapsed / 15)
+                distance = Double(timeElapsed) / 600.0
                 bpm = 90 + Int(timeElapsed.truncatingRemainder(dividingBy: 30))
             }
         }
     }
-    
-    private func toggleTimer() {
-        isPaused.toggle()
+}
+
+// MARK: - Reusable Pause Popup
+struct WorkoutPausePopup: View {
+    let characterImage: String
+    var onResume: () -> Void
+    var onEndWorkout: () -> Void
+
+    var body: some View {
+        ZStack {
+            // Background gelap transparan
+            Color.black.opacity(0.4)
+                .ignoresSafeArea()
+                .onTapGesture { onResume() }
+
+            VStack {
+                ZStack(alignment: .top) {
+                    // MARK: - Character (lebih kecil, di atas box, tidak menimpa)
+                    Image(characterImage)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 140, height: 140)
+                        .zIndex(2)
+                        .padding(.top, -80)
+//                    Spacer()
+
+                    // MARK: - Kotak putih besar di bawah karakter
+                    VStack(spacing: 18) {
+                        Spacer()
+
+                        PrimaryGlassButton(title: "Resume") {
+                            onResume()
+                        }
+                        .frame(width: 320)
+
+                        NeutralGlassButton(title: "End Workout") {
+                            onEndWorkout()
+                        }
+                        .frame(width: 320)
+
+                        Spacer().frame(height: 20)
+                    }
+                    .frame(width: 380, height: 240)
+                    .background(
+                        RoundedRectangle(cornerRadius: 28)
+                            .fill(Color.white)
+                            .shadow(color: .black.opacity(0.15), radius: 20, x: 0, y: 10)
+                    )
+                    .zIndex(1)
+                }
+            }
+        }
+        .transition(.scale.combined(with: .opacity))
     }
 }
+
+
+
 
 #Preview {
     NavigationStack {
         StartCardioView()
+            .environmentObject(Router())
     }
 }
+

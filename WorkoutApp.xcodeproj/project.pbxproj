@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		786D1E512EA0B6A1006D891B /* WatchConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 786D1E502EA0B6A1006D891B /* WatchConnectivity.framework */; };
 		786D1E532EA0B6C1006D891B /* WatchConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 786D1E522EA0B6C1006D891B /* WatchConnectivity.framework */; };
+		9094C6D42EBCE4DB0057A140 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 9094C6D32EBCE4DB0057A140 /* Lottie */; };
+		9094C6DE2EBCE8170057A140 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 9094C6DD2EBCE8170057A140 /* Lottie */; };
+		9094C6E42EBCE81C0057A140 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 9094C6E32EBCE81C0057A140 /* Lottie */; };
 		E194453E2E9E54EE000187BC /* WorkoutWacthApp Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = E194451E2E9E54EC000187BC /* WorkoutWacthApp Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -51,6 +54,36 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		9094C6E22EBCE8170057A140 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9094C6E82EBCE81C0057A140 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9094C6EA2EBCE8730057A140 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E19445422E9E54EE000187BC /* Embed Watch Content */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -138,6 +171,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				786D1E512EA0B6A1006D891B /* WatchConnectivity.framework in Frameworks */,
+				9094C6D42EBCE4DB0057A140 /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -145,6 +179,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9094C6DE2EBCE8170057A140 /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -152,6 +187,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9094C6E42EBCE81C0057A140 /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -227,6 +263,7 @@
 				E19444E12E9E53B5000187BC /* Frameworks */,
 				E19444E22E9E53B5000187BC /* Resources */,
 				E19445422E9E54EE000187BC /* Embed Watch Content */,
+				9094C6EA2EBCE8730057A140 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -238,6 +275,7 @@
 			);
 			name = WorkoutApp;
 			packageProductDependencies = (
+				9094C6D32EBCE4DB0057A140 /* Lottie */,
 			);
 			productName = WorkoutApp;
 			productReference = E19444E42E9E53B5000187BC /* WorkoutApp.app */;
@@ -250,6 +288,7 @@
 				E19444F12E9E53B7000187BC /* Sources */,
 				E19444F22E9E53B7000187BC /* Frameworks */,
 				E19444F32E9E53B7000187BC /* Resources */,
+				9094C6E22EBCE8170057A140 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -261,6 +300,7 @@
 			);
 			name = WorkoutAppTests;
 			packageProductDependencies = (
+				9094C6DD2EBCE8170057A140 /* Lottie */,
 			);
 			productName = WorkoutAppTests;
 			productReference = E19444F52E9E53B7000187BC /* WorkoutAppTests.xctest */;
@@ -273,6 +313,7 @@
 				E19444FB2E9E53B7000187BC /* Sources */,
 				E19444FC2E9E53B7000187BC /* Frameworks */,
 				E19444FD2E9E53B7000187BC /* Resources */,
+				9094C6E82EBCE81C0057A140 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -284,6 +325,7 @@
 			);
 			name = WorkoutAppUITests;
 			packageProductDependencies = (
+				9094C6E32EBCE81C0057A140 /* Lottie */,
 			);
 			productName = WorkoutAppUITests;
 			productReference = E19444FF2E9E53B7000187BC /* WorkoutAppUITests.xctest */;
@@ -400,6 +442,9 @@
 			);
 			mainGroup = E19444DB2E9E53B5000187BC;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				9094C6D22EBCE4DB0057A140 /* XCRemoteSwiftPackageReference "lottie-ios" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E19444E52E9E53B5000187BC /* Products */;
 			projectDirPath = "";
@@ -1014,6 +1059,35 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		9094C6D22EBCE4DB0057A140 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.5.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		9094C6D32EBCE4DB0057A140 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9094C6D22EBCE4DB0057A140 /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
+		};
+		9094C6DD2EBCE8170057A140 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9094C6D22EBCE4DB0057A140 /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
+		};
+		9094C6E32EBCE81C0057A140 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9094C6D22EBCE4DB0057A140 /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E19444DC2E9E53B5000187BC /* Project object */;
 }

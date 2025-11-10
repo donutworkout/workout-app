@@ -7,24 +7,29 @@
 
 import SwiftUI
 import SwiftData
+import WatchConnectivity
 
 @main
 struct WorkoutAppApp: App {
+    
     @StateObject private var router = Router()
     @StateObject private var surveyManager = SurveyManager(modelContext: WorkoutAppApp.modelContainer.mainContext)
+    @State private var connectivity = iPhoneConnectivityManager()
+    
     
     static let modelContainer: ModelContainer = {
         do {
             let schema = Schema([
                 UserProfile.self,
                 UserWorkout.self,
-                UserCycle.self
+                UserCycle.self,
+                Exercise.self
             ])
             
             let modelConfiguration = ModelConfiguration(
                 schema: schema,
                 isStoredInMemoryOnly: false,
-                cloudKitDatabase: .automatic
+                cloudKitDatabase: .automatic // This enables CloudKit!
             )
             
             let container = try ModelContainer(
@@ -33,17 +38,21 @@ struct WorkoutAppApp: App {
             )
             
             container.mainContext.autosaveEnabled = true
+            
             return container
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }
     }()
     
+    var iPhoneConnect = iPhoneConnectivityManager.shared
+    
     var body: some Scene {
         WindowGroup {
             RouterView()
                 .environmentObject(router)
                 .environmentObject(surveyManager)
+                .environment(connectivity)
         }
         .modelContainer(WorkoutAppApp.modelContainer)
     }

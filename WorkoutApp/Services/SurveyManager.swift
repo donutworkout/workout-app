@@ -8,7 +8,8 @@
 import SwiftUI
 import SwiftData
 
-//@Observable
+@MainActor
+@Observable
 class SurveyManager : ObservableObject {
     var modelContext: ModelContext
     
@@ -44,6 +45,31 @@ class SurveyManager : ObservableObject {
     var isProfileComplete: Bool = false
     var isWorkoutComplete: Bool = false
     var isCycleComplete: Bool = false
+    
+    var currentCyclePhase: MenstrualPhase {
+        return CyclePhaseCalculator.calculateCurrentPhase(
+            lastPeriodStart: tempCycleStartDate,
+            cycleLength: tempCycleLength,
+            menstrualDuration: 5 //bisa diganti pake hasil dari rumus nanti
+        )
+    }
+    
+    var daysUntilNextPeriod: Int? {
+        guard let nextPeriod = CyclePhaseCalculator.predictNextPeriod(
+            lastPeriodStart: tempCycleStartDate,
+            cycleLength: tempCycleLength > 0 ? tempCycleLength : 28
+        ) else { return nil }
+        
+        let calendar = Calendar.current
+        return calendar.dateComponents([.day], from: Date(), to: nextPeriod).day
+    }
+    
+    var currentDayInCycle: Int {
+        let calendar = Calendar.current
+        let daysSinceStart = calendar.dateComponents([.day], from: tempCycleStartDate, to: Date()).day ?? 0
+
+        return (daysSinceStart % tempCycleLength) + 1
+    }
     
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
@@ -270,6 +296,7 @@ class SurveyManager : ObservableObject {
                 cycleStartDate: tempCycleStartDate,
                 cycleEndDate: tempCycleEndDate,
                 cycleLength: tempCycleLength,
+                menstrualDuration: 5,
                 cycleSymptoms: tempCycleSymptoms,
                 cycleEnergy: tempCycleEnergy,
                 cycleMoodAffectsMotivation: tempCycleMoodAffectsMotivation
@@ -393,6 +420,7 @@ class SurveyManager : ObservableObject {
         }
     }
     
+
     func verifyLatestData() {
         print("\n🗄️ --- SwiftData Latest Data Check ---")
         
@@ -471,6 +499,7 @@ class SurveyManager : ObservableObject {
                 print(#"   • Symptoms: \((symptoms.isEmpty ? "None" : symptoms))"#)
                 print("   • Energy: \(cycle.cycleEnergy.displayName)")
                 print("   • Mood Affects Motivation: \(cycle.cycleMoodAffectsMotivation.displayName)")
+                print("   • Current Phase: \(currentCyclePhase)")
             } else {
                 print("💪 No saved workouts yet.")
             }

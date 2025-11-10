@@ -39,4 +39,17 @@ extension HKWorkoutActivityType {
         default: return "Workout"
         }
     }
+    
+    var category: String {
+            switch self {
+            case .running, .cycling, .walking, .swimming, .badminton, .basketball, .tennis, .volleyball, .soccer:
+                return "Cardio"
+            case .traditionalStrengthTraining, .functionalStrengthTraining:
+                return "Strength"
+            default:
+                return "Workout"
+            }
+        }
 }
+
+

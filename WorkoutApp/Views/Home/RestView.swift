@@ -10,13 +10,14 @@ import SwiftUI
 struct RestView: View {
     @Environment(\.dismiss) private var dismiss
     var onNext: () -> Void = {}
+    @EnvironmentObject var router: Router
     
     // MARK: - Props
     var restDuration: TimeInterval = 30
     var nextWorkoutNumber: Int = 2
     var totalWorkouts: Int = 7
-    var nextWorkoutName: String = "Crunches"
-    var nextWorkoutImage: String = "crunches"
+    var nextWorkoutName: String = "Wall Press"
+    var nextWorkoutImage: String = "wallPress"
     
     @State private var timeRemaining: TimeInterval = 30
     @State private var isPaused: Bool = false
@@ -71,7 +72,7 @@ struct RestView: View {
                     )
                     .clipShape(RoundedRectangle(cornerRadius: 24))
             }
-            .padding(.horizontal, 24)
+            .padding(.horizontal, 20)
             .padding(.bottom, 40)
             
             // MARK: - Bottom Buttons
@@ -81,7 +82,7 @@ struct RestView: View {
                 }
 
                 NeutralGlassButton(title: "Next") {
-                    onNext() // ✅ Panggil closure dari RouterView
+                    router.navigateTo(.menu)
                 }
             }
             .padding(.horizontal)

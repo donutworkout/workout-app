@@ -9,37 +9,48 @@ import SwiftUI
 
 struct TabBarView: View {
     @EnvironmentObject var router: Router
-    @State private var selectedTab = 0
+    @State private var selectedTab: Int
+    @Environment(\.modelContext) private var modelContext
+    
+    init(selectedTab: Int = 0) {
+        _selectedTab = State(initialValue: selectedTab)
+    }
     
     var body: some View {
         TabView(selection: $selectedTab) {
             
             // MARK: - Menu Tab
-            MenuView()
-                .tabItem {
-                    Label("Menu", systemImage: "house.fill")
-                }
-                .tag(0)
+            NavigationStack {
+                MenuView(modelContext: modelContext)
+            }
+            .tabItem {
+                Label("Menu", systemImage: "menucard.fill")
+            }
+            .tag(0)
             
             // MARK: - Summary Tab
-            SummaryView()
-                .tabItem {
-                    Label("Summary", systemImage: "chart.bar.fill")
-                }
-                .tag(1)
+            NavigationStack {
+                SummaryView()
+            }
+            .tabItem {
+                Label("Summary", systemImage: "text.line.3.summary")
+            }
+            .tag(1)
             
             // MARK: - Profile Tab
-            ProfileView()
-                .tabItem {
-                    Label("Profile", systemImage: "person.fill")
-                }
-                .tag(2)
+            NavigationStack {
+                ProfileView()
+            }
+            .tabItem {
+                Label("Profile", systemImage: "person.crop.circle")
+            }
+            .tag(2)
         }
-        .accentColor(Color("pinkTextPrimary")) // warna pink kamu
+        .accentColor(Color("pinkTextPrimary"))
         .onAppear {
             router.selectedTab = selectedTab
         }
-        .onChange(of: selectedTab) { newValue in
+        .onChange(of: selectedTab) { _, newValue in
             router.selectedTab = newValue
         }
     }
