@@ -44,26 +44,15 @@ struct WatchWorkoutListView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
-                Button(action: {
+                PrimaryGlassButton(title: "START", icon: "") {
                     connectivity.sendMessage([
                         "cmd": WorkoutCommand.start.rawValue,
                         "workoutType": workoutType.rawValue
                     ])
-                }) {
-                    Text("START")
-                        .font(.system(.headline, design: .rounded))
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .background(
-                            Capsule()
-                                .fill(Color("grayTextPrimary"))
-                        )
                 }
-                .buttonStyle(PlainButtonStyle())
                 .padding(.horizontal, 20)
-                .padding(.bottom, 10)
+                .padding(.bottom, 0)
+                .ignoresSafeArea(.container, edges: .bottom)
             }
         }
     }
@@ -85,4 +74,190 @@ struct WatchWorkoutListView: View {
             }
         }
 }
+    
+    // MARK: - Helper
+    //    private var categoryName: String {
+    //        switch connectivity.todayCategory {
+    //        case .cardio:
+    //            return "Cardio"
+    //        case .strength:
+    //            return "Strength"
+    //        default:
+    //            return "Workout"
+    //        }
+    //    }
+    //
+    //    private var categoryIcon: String {
+    //        switch connectivity.todayCategory {
+    //        case .cardio:
+    //            return "figure.run"
+    //        case .strength:
+    //            return "figure.strengthtraining.traditional"
+    //        default:
+    //            return "figure.mixed.cardio"
+    //        }
+    //    }
+    //
+    //    private var currentWorkouts: [(String, HKWorkoutActivityType)] {
+    //        switch connectivity.todayCategory {
+    //        case .cardio:
+    //            return cardioWorkouts
+    //        case .strength:
+    //            return strengthWorkouts
+    //        default:
+    //            return cardioWorkouts
+    //        }
+    //    }
+    
+    //#Preview {
+    //    let mockSession = WorkoutSessionManager()
+    //    let mockConnectivity = WatchConnectivityManager()
+    //    mockConnectivity.todayCategory = .cardio
+    //
+    //    return WatchWorkoutListView()
+    //        .environmentObject(mockSession)
+    //        .environmentObject(mockConnectivity)
+    //}
+    
+//    let cardioWorkouts: [(String, HKWorkoutActivityType)] = [
+
+    // MARK: - Helper
+//    private var categoryName: String {
+//        switch connectivity.todayCategory {
+//        case .cardio:
+//            return "Cardio"
+//        case .strength:
+//            return "Strength"
+//        default:
+//            return "Workout"
+//        }
+//    }
+//    
+//    private var categoryIcon: String {
+//        switch connectivity.todayCategory {
+//        case .cardio:
+//            return "figure.run"
+//        case .strength:
+//            return "figure.strengthtraining.traditional"
+//        default:
+//            return "figure.mixed.cardio"
+//        }
+//    }
+//    
+//    private var currentWorkouts: [(String, HKWorkoutActivityType)] {
+//        switch connectivity.todayCategory {
+//        case .cardio:
+//            return cardioWorkouts
+//        case .strength:
+//            return strengthWorkouts
+//        default:
+//            return cardioWorkouts
+//        }
+//    }
+
+//#Preview {
+//    let mockSession = WorkoutSessionManager()
+//    let mockConnectivity = WatchConnectivityManager()
+//    mockConnectivity.todayCategory = .cardio
+//    
+//    return WatchWorkoutListView()
+//        .environmentObject(mockSession)
+//        .environmentObject(mockConnectivity)
+//}
+   
+//    let cardioWorkouts: [(String, HKWorkoutActivityType)] = [
+//        ("Running", .running),
+//        ("Cycling", .cycling),
+//        ("Walking", .walking),
+//        ("Swimming", .swimming),
+//        ("Badminton", .badminton),
+//        ("Basketball", .basketball),
+//        ("Tennis", .tennis),
+//        ("Volleyball", .volleyball),
+//        ("Soccer", .soccer),
+//    ]
+//    
+//    let strengthWorkouts: [(String, HKWorkoutActivityType)] = [
+//        //        ("Core Training", .coreTraining),
+//        //        ("High Intensity Interval Training", .highIntensityIntervalTraining),
+//        ("Traditional Strength Training", .traditionalStrengthTraining),
+//        ("Functional Strength Training", .functionalStrengthTraining),
+//        
+//    ]
+//    
+//    let workoutType: HKWorkoutActivityType
+//
+//    var body: some View {
+//        VStack {
+//            Image(systemName: "figure.run")
+//                .font(.system(size: 50))
+//                .foregroundStyle(Color(.pink))
+//            Text("WorkoutName:\(workoutType.displayName)")
+//            Button("Start Workout") {
+//                connectivity.sendMessage([
+//                        "cmd": WorkoutCommand.start.rawValue,
+//                        "workoutType": workoutType.rawValue
+//                    ])
+//            }
+//        }
+//    }
+
+//    let workouts: [(String, HKWorkoutActivityType)] = [
+//        ("Running", .running),
+//        ("Cycling", .cycling),
+//        ("Walking", .walking),
+//        ("Swimming", .swimming),
+//        ("Badminton", .badminton),
+//        ("Basketball", .basketball),
+//        ("Tennis", .tennis),
+//        ("Volleyball", .volleyball),
+//        ("Soccer", .soccer),
+//    ]
+//    
+//    let strengthWorkouts: [(String, HKWorkoutActivityType)] = [
+//        //        ("Core Training", .coreTraining),
+//        //        ("High Intensity Interval Training", .highIntensityIntervalTraining),
+//        ("Traditional Strength Training", .traditionalStrengthTraining),
+//        ("Functional Strength Training", .functionalStrengthTraining),
+//        
+//    ]
+//    
+//    let workoutType: HKWorkoutActivityType
+//    
+//    var body: some View {
+//        VStack {
+//            Image(systemName: "figure.run")
+//                .font(.system(size: 50))
+//                .foregroundStyle(Color(.pink))
+//            Text("WorkoutName:\(workoutType.displayName)")
+//            Button("Start Workout") {
+//                connectivity.sendMessage([
+//                    "cmd": WorkoutCommand.start.rawValue,
+//                    "workoutType": workoutType.rawValue
+//                ])
+//            }
+//        }
+//    }
+//}
+    
+    
+    //    let workouts: [(String, HKWorkoutActivityType)] = [
+    //        ("Running", .running),
+    //        ("Cycling", .cycling),
+    //        ("Walking", .walking),
+    //        ("Swimming", .swimming),
+    //        ("Badminton", .badminton),
+    //        ("Basketball", .basketball),
+    //        ("Tennis", .tennis),
+    //        ("Volleyball", .volleyball),
+    //        ("Soccer", .soccer),
+    //        ("Pilates", .pilates),
+    //        ("Yoga", .yoga),
+    //        ("Core Training", .coreTraining),
+    //        ("High Intensity Interval Training", .highIntensityIntervalTraining),
+    //        ("Traditional Strength Training", .traditionalStrengthTraining),
+    //        ("Functional Strength Training", .functionalStrengthTraining),
+    //        ("Martial Arts", .martialArts),
+    //
+    //    ]
 
