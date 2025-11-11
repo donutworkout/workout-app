@@ -1,60 +1,162 @@
 import SwiftUI
+import SwiftData
 
 struct MenuView: View {
     @EnvironmentObject var router: Router
+    
+    @Query private var userCycles: [UserCycle]
+    @Query private var userProfiles: [UserProfile]
+    @Query private var userWorkouts: [UserWorkout]
+    
+    @StateObject var cycleViewModel: CycleViewModel
+    @StateObject var menuViewModel: MenuViewModel
     @State private var selectedDay: Int = Calendar.current.component(.weekday, from: Date()) - 1
     
-    private var currentPhase: PhaseType {
-        switch selectedDay {
-        case 0, 2, 4, 6: return .menstrual
-        default: return .follicular
-        }
+    private var userCycle: UserCycle? {
+        userCycles.first
+    }
+    
+    private var userProfile: UserProfile? {
+        userProfiles.first
+    }
+    
+    private var userWorkout: UserWorkout? {
+        userWorkouts.first
+    }
+    
+    private var selectedPhase: MenstrualPhase {
+        cycleViewModel.phase(for: cycleViewModel.selectedDayIndex) ?? .menstruation
+    }
+    
+    private var selectedDate: Date {
+        cycleViewModel.dateForSelectedDay()
+    }
+    
+    private var selectedDayMenu: DailyMenu? {
+        menuViewModel.getMenuForDate(selectedDate)
+    }
+    
+    init(modelContext: ModelContext) {
+        // Create placeholder ViewModel (will be replaced)
+        let placeholder = UserCycle(
+            isCycleRegular: true,
+            cycleStartDate: Date(),
+            cycleEndDate: Date(),
+            cycleLength: 28,
+            menstrualDuration: 5,
+            cycleSymptoms: [],
+            cycleEnergy: .stable,
+            cycleMoodAffectsMotivation: .never
+        )
+        _cycleViewModel = StateObject(wrappedValue: CycleViewModel(userCycle: placeholder))
+        _menuViewModel = StateObject(wrappedValue: MenuViewModel(modelContext: modelContext))
+    }
+    
+    private var currentPhase: MenstrualPhase {
+        cycleViewModel.phase(for: cycleViewModel.selectedDayIndex) ?? .menstruation
     }
     
     var body: some View {
         ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 24) {
+                
+                // MARK: - Header
                 Text("Menu")
                     .font(.system(size: 34, weight: .bold))
                     .foregroundColor(.black)
-                    .padding(.horizontal)
-                    .padding(.top, 16)
+                    .padding(.top, 32)
+                    .padding(.horizontal, 20)
                 
-                DaySelectorView(selectedDay: $selectedDay)
+                // MARK: - Day Selector
+                DaySelectorView(selectedDay: $cycleViewModel.selectedDayIndex)
                 
-                // Combined Phase + Workout Card
-                CombinedWorkoutCardView(phase: currentPhase, onStartWorkout: {
-                    if currentPhase == .menstrual {
-                        router.navigateTo(.adjustMenuCardio)
-                    } else {
-                        router.navigateTo(.adjustMenuStrength)
-                    }
-                })
+                // MARK: - Workout Card
+                CombinedWorkoutCardView(
+                    phase: selectedPhase,
+                    menu: selectedDayMenu,
+                    onStartWorkout: {
+                        if let menu = selectedDayMenu {
+                            if menu.isCardio {
+                                router.navigateTo(.adjustMenuCardio)
+                            } else if menu.isStrength {
+                                router.navigateTo(.adjustMenuStrength)
+                            }
+                        } else {
+                            // Fallback based on phase
+                            if selectedPhase == .menstruation {
+                                router.navigateTo(.adjustMenuCardio)
+                            } else {
+                                router.navigateTo(.adjustMenuStrength)
+                            }
+                        }
+                        
+                    })
                 
-                Text("Streak")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(.black)
-                    .padding(.horizontal)
-                    .padding(.top, 8)
-                
-                StreakCardView(phase: currentPhase)
-                    .padding(.bottom, 100)
+                // MARK: - Streak Section
+                VStack(spacing: 8) {
+                    Text("Streak")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 20)
+                    StreakCardView()
+                }
             }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 40)
         }
         .background(Color.white.ignoresSafeArea())
+        .onAppear {
+            loadWeeklyMenu()
+        }
     }
+    
 }
 
 struct CombinedWorkoutCardView: View {
-    let phase: PhaseType
+    let phase: MenstrualPhase
+    let menu: DailyMenu?
     var onStartWorkout: () -> Void
     
-    private var cardInfo: (image: String, workoutTitle: String, phaseDesc: String) {
-        switch phase {
-        case .menstrual:
-            return ("buttercup", "Today's Cardio Menu!", "Take it slow today 🌙 It's okay to rest or move gently.")
-        case .follicular:
-            return ("bubbles", "Today's Strength Menu!", "You're glowing, girl! Perfect time to try new moves or push a little more.")
+    private var cardInfo: (image: String, workoutTitle: String, phaseDesc: String, duration: String) {
+        // Get workout type from menu, fallback to phase
+        let isCardioDay: Bool
+        let isStrengthDay: Bool
+        
+        if let menu = menu {
+            isCardioDay = menu.isCardio
+            isStrengthDay = menu.isStrength
+        } else {
+            // Fallback based on phase: menstruation -> cardio, others -> strength
+            isCardioDay = (phase == .menstruation)
+            isStrengthDay = !isCardioDay
+        }
+        
+        // Get duration from menu (default to 30 min for now)
+        let duration: String = "30 min"
+        
+        // Determine card content
+        if isCardioDay {
+            return (
+                "buttercup",
+                "Today's Cardio Menu!",
+                "Don't worry about being perfect! just move and let your body wake up!",
+                duration
+            )
+        } else if isStrengthDay {
+            return (
+                "bubbles",
+                "Today's Strength Menu!",
+                "Let's wake up those muscles just good vibes and sweat!",
+                duration
+            )
+        } else {
+            return (
+                "bubbles",
+                "Time to rest",
+                "Take your time to relax and enjoy the day!",
+                duration
+            )
         }
     }
     
@@ -62,7 +164,7 @@ struct CombinedWorkoutCardView: View {
         VStack(alignment: .leading, spacing: 0) {
             
             // MARK: - Phase Header
-            Text(phase.rawValue)
+            Text("\(phase.rawValue.capitalized) Phase")
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundColor(.black)
                 .padding(.horizontal, 20)
@@ -104,17 +206,18 @@ struct CombinedWorkoutCardView: View {
                             .lineLimit(1)
                             .frame(maxWidth: .infinity, alignment: .leading)
                         
-                        // Capsule waktu (posisi stabil)
-                        Text("30 min")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(.black.opacity(0.7))
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 4)
-                            .background(
-                                Capsule()
-                                    .fill(Color.gray.opacity(0.2))
-                            )
-                            .fixedSize()
+                        if (menu?.isCardio ?? false) || (menu?.isStrength ?? false) {
+                            Text(cardInfo.duration)
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundColor(.black.opacity(0.7))
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 4)
+                                .background(
+                                    Capsule()
+                                        .fill(Color.gray.opacity(0.2))
+                                )
+                                .fixedSize()
+                        }
                     }
                     
                     Text(cardInfo.phaseDesc)
@@ -122,9 +225,9 @@ struct CombinedWorkoutCardView: View {
                         .foregroundColor(.black.opacity(0.7))
                         .lineSpacing(3)
                 }
-                
-                // Tombol
-                PrimaryGlassButton(title: "Start Workout", action: onStartWorkout)
+                if (menu?.isCardio ?? false) || (menu?.isStrength ?? false) {
+                    PrimaryGlassButton(title: "Start Workout", action: onStartWorkout)
+                }
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 20)
@@ -134,7 +237,7 @@ struct CombinedWorkoutCardView: View {
                 .fill(Color.white)
                 .shadow(color: .black.opacity(0.06), radius: 10, x: 0, y: 4)
         )
-        .padding(.horizontal)
+        .padding(.horizontal, 20)
     }
 }
 
@@ -165,18 +268,82 @@ struct DaySelectorView: View {
     }
 }
 
-// MARK: - Streak Card
-struct StreakCardView: View {
-    let phase: PhaseType
+// MARK: - Phase Card
+struct PhaseCardView: View {
+    let phase: MenstrualPhase
     
-    private var streakInfo: (title: String, desc: String) {
+    private var phaseInfo: (desc: String, mood: String) {
         switch phase {
-        case .menstrual:
-            return ("You're on a roll!", "Another checkmark for the consistency queen!")
+        case .menstruation:
+            return (
+                "Take it slow today ✨Your body's busy doing internal magic – it's okay to rest or move gently.",
+                "Mood note: Self-care focus."
+            )
         case .follicular:
-            return ("Go Girl!", "Don't break it, bestie! You're killing it!")
+            return (
+                "You're glowing, girl! Perfect time to try new moves or push a little more.",
+                "Mood note: Rising energy, motivation boost, open to challenges."
+            )
+        case .luteal:
+            return (
+                "You're glowing, girl! Perfect time to try new moves or push a little more.",
+                "Mood note: Rising energy, motivation boost, open to challenges."
+            )
+        case .ovulation:
+            return (
+                "You're glowing, girl! Perfect time to try new moves or push a little more.",
+                "Mood note: Rising energy, motivation boost, open to challenges."
+            )
         }
     }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(phase.rawValue)
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundColor(.black)
+            
+            Text(phaseInfo.desc)
+                .font(.system(size: 15))
+                .fontWeight(.semibold)
+                .foregroundColor(.black)
+                .lineSpacing(4)
+            
+            // Pink bar dengan rounded corners seperti di foto
+            Text(phaseInfo.mood)
+                .font(.system(size: 14))
+                .fontWeight(.semibold)
+                .foregroundColor(.black)
+                .padding(.vertical, 10)
+                .padding(.horizontal, 12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color("pinkTextPrimary").opacity(0.15))
+                )
+        }
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color.white)
+                .shadow(color: .black.opacity(0.06), radius: 10, x: 0, y: 4)
+        )
+        .padding(.horizontal)
+    }
+}
+
+// MARK: - Streak Card
+struct StreakCardView: View {
+    //    let phase: PhaseType
+    //
+    //    private var streakInfo: (title: String, desc: String) {
+    //        switch phase {
+    //        case .menstrual:
+    //            return ("You're on a roll!", "Another checkmark for the consistency queen!")
+    //        case .follicular:
+    //            return ("Go Girl!", "Don’t break it, bestie! You’re killing it!")
+    //        }
+    //    }
     
     var body: some View {
         HStack(spacing: 16) {
@@ -184,10 +351,10 @@ struct StreakCardView: View {
                 .font(.system(size: 48))
             
             VStack(alignment: .leading, spacing: 6) {
-                Text(streakInfo.title)
+                Text("Streak")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.black)
-                Text(streakInfo.desc)
+                Text("You go girl!")
                     .font(.system(size: 14))
                     .fontWeight(.semibold)
                     .foregroundColor(.black)
@@ -201,7 +368,7 @@ struct StreakCardView: View {
                 .fill(Color.white)
                 .shadow(color: .black.opacity(0.06), radius: 10, x: 0, y: 4)
         )
-        .padding(.horizontal)
+        .padding(.horizontal, 20)
     }
 }
 
@@ -211,7 +378,26 @@ enum PhaseType: String {
     case follicular = "Follicular Phase"
 }
 
-#Preview {
-    MenuView()
-        .environmentObject(Router())
+extension MenuView {
+    private func loadWeeklyMenu() {
+        guard let cycle = userCycle, let profile = userWorkout else { return }
+        
+        // Get user's chosen days (you need to fetch this from somewhere)
+        let chosenDays: [WorkoutDayPreference] = profile.workoutDaysPreference // TODO: Get from profile
+        print("Chosen days: \(chosenDays.map { $0.rawValue })")
+        
+        Task {
+            await menuViewModel.generateWeeklyMenu(
+                userCycle: cycle,
+                userLevel: profile.workoutLevel,
+                chosenDays: chosenDays
+            )
+        }
+    }
 }
+
+//#Preview {
+//    MenuView(modelContext: ModelContext)
+//        .environmentObject(Router())
+//}
+

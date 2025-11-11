@@ -5,18 +5,10 @@
 //  Created by Jennifer Evelyn on 30/10/25.
 //
 
-//
-//  EditBodyInfoView.swift
-//  WorkoutApp
-//
-//  Created by Jennifer Evelyn on 30/10/25.
-//
-
 import SwiftUI
 
 struct EditBodyInfoView: View {
-    @EnvironmentObject var router: Router
-    
+    @Environment(\.dismiss) var dismiss
     @State private var selectedHeight: Int = 0
     @State private var selectedWeight: Int = 0
     @State private var showHeightPicker = false
@@ -37,12 +29,8 @@ struct EditBodyInfoView: View {
             HeaderButton(
                 title: "Body Measurement",
                 isEditing: true,
-                onClose: {
-                    router.navigateTo(.profile)
-                },
-                onEditToggle: {
-                    router.navigateTo(.profile)
-                }
+                onClose: { dismiss() },
+                onEditToggle: { dismiss() }
             )
             
             // MARK: - Title & Character
@@ -106,18 +94,9 @@ struct EditBodyInfoView: View {
             .padding(.horizontal)
             
             Spacer()
-            
-            // MARK: - Finish Button
-            PrimaryGlassButton(title: "Finish") {
-                print("✅ Body info saved (UI only)")
-                router.navigateTo(.profile)
-            }
-            .padding(.horizontal)
-            .padding(.bottom)
-            .disabled(!isFormValid)
-            .opacity(isFormValid ? 1 : 0.5)
         }
         .background(Color.white.ignoresSafeArea())
+        .navigationBarBackButtonHidden(true) // ✅ hilangkan back bawaan
         .sheet(isPresented: $showHeightPicker) {
             PickerSheetView(
                 title: "Select Height",
@@ -138,6 +117,7 @@ struct EditBodyInfoView: View {
 }
 
 #Preview {
-    EditBodyInfoView()
-        .environmentObject(Router())
+    NavigationStack {
+        EditBodyInfoView()
+    }
 }

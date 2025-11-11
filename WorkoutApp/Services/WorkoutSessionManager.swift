@@ -10,6 +10,7 @@ import HealthKit
 
 enum WorkoutCommand: String {
     case start
+    case started
     case stop
     case pause
     case resume

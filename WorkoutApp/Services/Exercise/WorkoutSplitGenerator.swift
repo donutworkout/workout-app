@@ -13,21 +13,73 @@ class WorkoutSplitGenerator {
         chosenDays: [WorkoutDayPreference],
         level: WorkoutLevel,
         userCycle: UserCycle,
-        //hasCramps: Bool
-        
     ) -> [Int: MenuCategory] {
         
         let dayNumbers = chosenDays.compactMap { $0.toDayNumber() }.sorted()
         let totalDays = dayNumbers.count
         
-        // 1. create base balanced split (50/50)
-        var baseSplit: [MenuCategory] = []
-        for i in 0..<totalDays {
-            baseSplit.append(i % 2 == 0 ? .strength : .cardio)
+        if chosenDays.contains(.flexible) {
+            return generateFlexibleSplit(level: level)
         }
         
-        // 2. adjust for level
-        baseSplit = adjustForLevel(split: baseSplit, level: level)
+        // 1. create base balanced split (50/50)
+        var baseSplit: [MenuCategory] = []
+        
+        switch level {
+            
+        case .beginner:
+            if totalDays >= 3 {
+                baseSplit = [.strength, .cardio, .strength]
+                // If more than 3 days, repeat pattern
+                while baseSplit.count < totalDays {
+                    baseSplit.append(contentsOf: [.strength, .cardio])
+                }
+            } else {
+                // Less than 3 days: just alternate
+                for i in 0..<totalDays {
+                    baseSplit.append(i % 2 == 0 ? .cardio : .strength)
+                }
+            }
+            
+        case .intermediate:
+            if totalDays == 4 {
+                baseSplit = [.strength, .cardio, .strength, .cardio]
+                // If more than 3 days, repeat pattern
+                while baseSplit.count < totalDays {
+                    baseSplit.append(contentsOf: [.strength, .cardio])
+                }
+            } else if totalDays >= 5 {
+                // 5+ days: 3 strength, 2 cardio, repeat pattern
+                baseSplit = [.strength, .cardio, .strength, .cardio, .strength]
+                while baseSplit.count < totalDays {
+                    baseSplit.append(contentsOf: [.cardio, .strength])
+                }
+            } else {
+                // Less than 4 days: alternate
+                for i in 0..<totalDays {
+                    baseSplit.append(i % 2 == 0 ? .strength : .cardio)
+                }
+            }
+                        
+        case .advanced:
+            if totalDays == 5 {
+                // 5 days: 3 strength (lower-upper-lower), 2 cardio
+                baseSplit = [.strength, .cardio, .strength, .cardio, .strength]
+            } else if totalDays == 6 {
+                // 6+ days: 4 strength (lower-upper-lower-upper), 2 cardio
+                baseSplit = [.strength, .cardio, .strength, .cardio, .strength, .strength]
+                while baseSplit.count < totalDays {
+                    baseSplit.append(.cardio)
+                }
+            } else {
+                // Less than 5 days: prioritize strength
+                for i in 0..<totalDays {
+                    baseSplit.append(i < 3 ? .strength : .cardio)
+                }
+            }
+        }
+
+        baseSplit = Array(baseSplit.prefix(totalDays))
         
         let hasCramps = userCycle.hasCrampsToday
         
@@ -48,9 +100,10 @@ class WorkoutSplitGenerator {
             
             // check if this is during cramps
             let isDuringCramps = cycleDay >= 1 && cycleDay <= 3
+            
             let shouldRest = isDuringCramps && hasCramps
             
-            if isDuringCramps && hasCramps {
+            if shouldRest {
                 schedule[dayNumber] = .rest
             } else {
                 schedule[dayNumber] = baseSplit[index]
@@ -64,25 +117,51 @@ class WorkoutSplitGenerator {
             }
         }
         
-        
         return schedule
     }
     
-    private func adjustForLevel(split: [MenuCategory], level: WorkoutLevel) -> [MenuCategory] {
-        var adjusted = split
+    private func generateFlexibleSplit(level: WorkoutLevel) -> [Int: MenuCategory] {
         
-        // Advanced users with 5+ days get extra strength
-        if level == .advanced && split.count >= 5 {
-            if let lastCardioIndex = adjusted.lastIndex(of: .cardio) {
-                adjusted[lastCardioIndex] = .strength
-                print("Adjusted for advanced level: added extra strength day")
+        func recommendedDays(for level: WorkoutLevel) -> Int {
+            switch level {
+            case .beginner: return 3
+            case .intermediate: return 4
+            case .advanced: return 5
             }
         }
         
-        return adjusted
+        let totalDays = recommendedDays(for: level)
+        let restDays = 7 - totalDays
+        
+        // alternating strength/cardio
+        var workoutPattern: [MenuCategory] = []
+        for i in 0..<totalDays {
+            workoutPattern.append(i % 2 == 0 ? .strength : .cardio)
+        }
+        
+        let gap = 7.0 / Double(restDays + 1)
+        let restPositions = (1...restDays).map { i in
+            Int(round(Double(i) * gap))
+        }
+        
+        // map to 7-day week
+        var schedule: [Int: MenuCategory] = [:]
+        var workoutIndex = 0
+            
+        for day in 1...7 {
+            if restPositions.contains(day) {
+                schedule[day] = .rest
+            } else {
+                schedule[day] = workoutPattern[workoutIndex]
+                workoutIndex += 1
+            }
+        }
+        
+        return schedule
     }
-    
-    // MARK: - Get Cycle Day for Specific Date
+}
+
+extension WorkoutSplitGenerator {
     private func getCycleDayForDate(
         date: Date,
         lastPeriodStart: Date,
@@ -136,8 +215,6 @@ class WorkoutSplitGenerator {
         return formatter.string(from: date)
     }
 }
-
-
 
 extension WorkoutDayPreference {
     func toDayNumber() -> Int? {

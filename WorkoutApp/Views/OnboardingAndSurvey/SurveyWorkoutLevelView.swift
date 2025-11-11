@@ -63,7 +63,7 @@ struct SurveyWorkoutLevelView: View {
                     // MARK: - Title & Character
                     HStack(alignment: .top) {
                         VStack(alignment: .leading, spacing: 8) {
-                            SurveyProgressText(currentPage: 4, totalPages: 6)
+                            SurveyProgressText(currentPage: 3, totalPages: 5)
                             Text("Workout\nLevel")
                                 .font(.system(.title, weight: .semibold))
                                 .foregroundColor(Color("pinkTextPrimary"))

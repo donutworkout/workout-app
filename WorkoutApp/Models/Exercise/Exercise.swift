@@ -9,67 +9,50 @@ import Foundation
 import SwiftData
 
 enum BodyPart: String, Codable, CaseIterable {
-    case core
-    case upper
-    case lower
     case fullBody
-    case back
-    case glutes
-    case shoulders
-}
-
-enum ExerciseType: String, Codable, CaseIterable {
-    case mobility
-    case stability
-    case stretch
-    case strength
-    case hold
-    case lightStrength
-    case compound
-    case dynamic
-    case endurance
-    case power
-    case isolation
-    case control
-    case isometric
+    case upperPush
+    case upperPull
 }
 
 @Model
 class Exercise{
     var id: UUID = UUID()
     var name: String = ""
-    var exerciseType: ExerciseType = ExerciseType.mobility
-    var bodyPart: BodyPart = BodyPart.fullBody
+    var bodyPart: [BodyPart] = []
     var sets: Int?
     var reps: Int?
     var time: Int? // pick one, rest/time
-    var level: WorkoutLevel = WorkoutLevel.beginner
-    var phase: MenstrualPhase = MenstrualPhase.menstruation
-    var imageName: String?
+    //var imageName: String?
+    
+    var imageName: String? {
+        return name
+            .split(separator: " ")
+            .enumerated()
+            .map { index, word in
+                let cleaned = word
+                    .lowercased()
+                    .filter { $0.isLetter } // remove punctuation
+                return index == 0
+                ? cleaned
+                : cleaned.prefix(1).uppercased() + cleaned.dropFirst()
+            }
+            .joined()
+    }
     
     init(
-        
         id: UUID = UUID(),
         name: String,
-        exerciseType: ExerciseType,
-        bodyPart: BodyPart,
+        bodyPart: [BodyPart],
         sets: Int? = nil,
         reps: Int? = nil,
-        time: Int? = nil,
-        level: WorkoutLevel,
-        phase: MenstrualPhase,
-        imageName: String? = nil) {
+        time: Int? = nil) {
             
         self.id = id
         self.name = name
-        self.exerciseType = exerciseType
         self.bodyPart = bodyPart
         self.sets = sets
         self.reps = reps
         self.time = time
-        self.level = level
-        self.phase = phase
-        self.imageName = imageName
     }
 }
 

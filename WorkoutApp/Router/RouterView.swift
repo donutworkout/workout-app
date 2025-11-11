@@ -3,12 +3,15 @@ import SwiftUI
 struct RouterView: View {
     @EnvironmentObject var router: Router
     @EnvironmentObject var surveyManager: SurveyManager
+    @Environment(iPhoneConnectivityManager.self) private var connectivity
+    @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject var sessionManager: StrengthSessionManager
     
     var body: some View {
         NavigationStack {
             switch router.currentRoute {
                 
-                // MARK: - Onboarding & Setup Flow
+            // MARK: - Onboarding & Setup Flow
             case .onboarding:
                 OnboardingView()
                     .environmentObject(router)
@@ -32,25 +35,22 @@ struct RouterView: View {
                     .environmentObject(router)
                     .environmentObject(surveyManager)
                 
-                // MARK: - Main App Flow
-            case .tabBar:
+            // MARK: - Main App Flow
+            case .tabBar, .menu, .profile:
                 TabBarView()
                     .environmentObject(router)
                     .environmentObject(surveyManager)
                 
-            case .menu:
-                MenuView()
-                    .environmentObject(router)
-                    .environmentObject(surveyManager)
-                
-                // MARK: - Workout Flow
+            // MARK: - Workout Flow
             case .adjustMenuCardio:
                 AdjustMenuCardioView()
                     .environmentObject(router)
+                    .environment(connectivity)
                 
             case .adjustMenuStrength:
                 AdjustMenuStrengthView()
                     .environmentObject(router)
+                    .environment(connectivity)
                 
             case .startCardio:
                 StartCardioView()
@@ -59,34 +59,38 @@ struct RouterView: View {
             case .startStrength:
                 StartStrengthView()
                     .environmentObject(router)
+                    .environmentObject(sessionManager)
                 
             case .restView:
                 RestView(onNext: {
+//                    sessionManager.moveToNextExercise()
                     router.navigateTo(.startStrength)
                 })
                 .environmentObject(router)
                 
-                // MARK: - Profile Section Routes
-            case .profile:
-                ProfileView()
-                    .environmentObject(router)
+            // MARK: - Profile Section (Tetap di dalam TabBar)
+//            case .editBodyInfo:
+//                TabBarView(selectedTab: 2) // tab ke-2 = Profile
+//                    .environmentObject(router)
+//                    .environmentObject(surveyManager)
+//                
+//            case .editMotivation:
+//                TabBarView(selectedTab: 2)
+//                    .environmentObject(router)
+//                    .environmentObject(surveyManager)
+//                
+//            case .editProfile:
+//                TabBarView(selectedTab: 2)
+//                    .environmentObject(router)
+//                    .environmentObject(surveyManager)
+//                
+//            case .menstrualCycle:
+//                TabBarView(selectedTab: 2)
+//                    .environmentObject(router)
+//                    .environmentObject(surveyManager)
                 
-            case .editBodyInfo:
-                EditBodyInfoView()
-                    .environmentObject(router)
-                
-            case .editMotivation:
-                EditMotivationView()
-                    .environmentObject(router)
-                
-            case .editProfile:
-                EditProfileView()
-                
-            case .menstrualCycle:
-                MenstrualCycleView()
-                
+            // MARK: - Workout Start Flow
             case .startWorkout:
-                // Misal: tentukan jenis workout berdasarkan hari
                 let weekday = Calendar.current.component(.weekday, from: Date())
                 if weekday % 2 == 0 {
                     AdjustMenuCardioView()
@@ -95,8 +99,9 @@ struct RouterView: View {
                     AdjustMenuStrengthView()
                         .environmentObject(router)
                 }
+                
             case .countdownView:
-                CountdownView(onCountdownComplete: {
+                CountdownView(exercises: router.workoutExercises, onCountdownComplete: {
                     if let last = router.lastWorkoutSource {
                         switch last {
                         case .adjustMenuCardio:
@@ -109,6 +114,7 @@ struct RouterView: View {
                     }
                 })
                 .environmentObject(router)
+                .environmentObject(sessionManager)
             }
         }
     }

@@ -57,7 +57,7 @@ struct SurveyCycleView: View {
                     // MARK: - Title & Character
                     HStack(alignment: .top) {
                         VStack(alignment: .leading, spacing: 8) {
-                            SurveyProgressText(currentPage: 6, totalPages: 6)
+                            SurveyProgressText(currentPage: 5, totalPages: 5)
                             Text("Menstrual \nCycle")
                                 .font(.system(.title, weight: .semibold))
                                 .foregroundColor(Color("pinkTextPrimary"))
