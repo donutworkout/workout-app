@@ -22,6 +22,12 @@ class StrengthSessionManager: ObservableObject {
         return exercises[currentExerciseIndex]
     }
     
+    var nextExercise: Exercise? {
+        let nextIndex = currentExerciseIndex + 1
+        guard nextIndex < exercises.count else { return nil }
+        return exercises[nextIndex]
+    }
+    
     var hasNextExercise: Bool {
         return currentExerciseIndex < exercises.count - 1
     }
