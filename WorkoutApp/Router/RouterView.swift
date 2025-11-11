@@ -67,7 +67,7 @@ struct RouterView: View {
                 
             case .restView:
                 RestView(onNext: {
-                    //                    sessionManager.moveToNextExercise()
+                    sessionManager.moveToNextExercise()
                     router.navigateTo(.startStrength)
                 })
                 .environmentObject(router)
