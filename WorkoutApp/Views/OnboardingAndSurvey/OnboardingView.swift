@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AuthenticationServices
+import Lottie
 
 struct OnboardingView: View {
     @State private var navigateToSurvey = false
@@ -31,13 +32,10 @@ struct OnboardingView: View {
                         .padding(.horizontal)
                 }
                 
-                // MARK: - Mascot Image
-                Image("character")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 300)
-                    .padding(.vertical, 16)
-                    .accessibilityLabel("Mascot character")
+                // MARK: - Mascot Animation
+                LottieView(name: "characterAnimation", loopMode: .loop)
+                    .frame(width: 300, height: 300)
+                    .scaleEffect(0.35)
                 
                 Spacer()
                 

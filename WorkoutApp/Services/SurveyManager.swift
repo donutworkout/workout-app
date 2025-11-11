@@ -296,6 +296,7 @@ class SurveyManager : ObservableObject {
                 cycleStartDate: tempCycleStartDate,
                 cycleEndDate: tempCycleEndDate,
                 cycleLength: tempCycleLength,
+                menstrualDuration: 5,
                 cycleSymptoms: tempCycleSymptoms,
                 cycleEnergy: tempCycleEnergy,
                 cycleMoodAffectsMotivation: tempCycleMoodAffectsMotivation

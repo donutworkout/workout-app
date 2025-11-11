@@ -44,7 +44,7 @@ struct SurveyBirthdayView: View {
                     // MARK: - Header & Title
                     HStack(alignment: .top) {
                         VStack(alignment: .leading, spacing: 8) {
-                            SurveyProgressText(currentPage: 1, totalPages: 6)
+                            SurveyProgressText(currentPage: 1, totalPages: 5)
                             Text("Get to know you more!")
                                 .font(.system(.title, weight: .semibold))
                                 .foregroundColor(Color("pinkTextPrimary"))

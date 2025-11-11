@@ -66,7 +66,8 @@ class DailyMenu: Identifiable {
     
     var strengthType: StrengthType?
     //var strengthExercises: [Exercise]?
-    @Relationship(deleteRule: .cascade) var strengthExercises: [Exercise]?
+//    @Relationship(deleteRule: .cascade)
+    var strengthExercises: [Exercise]?
 
     var intensity: String?
     var estimatedDuration: Int?
@@ -74,6 +75,11 @@ class DailyMenu: Identifiable {
     var restActivities: [RestActivities]?
     
     var isMenuComplete: Bool
+    
+    // for cardio
+    var vigorousDuration: Int?
+    var moderateDuration: Int?
+    var targetHeartRate: Int?
     
     var isStrength: Bool { category == .strength }
     var isCardio: Bool { category == .cardio }
@@ -89,7 +95,10 @@ class DailyMenu: Identifiable {
         restActivities: [RestActivities]? = nil,
         intensity: String? = nil, // New
         estimatedDuration: Int? = nil, // New
-        isMenuComplete: Bool = false
+        isMenuComplete: Bool = false,
+        vigorousDuration: Int? = nil,
+        moderateDuration: Int? = nil,
+        targetHeartRate: Int? = nil
     ){
             self.dayNumber = dayNumber
             self.dayName = dayName
@@ -101,9 +110,12 @@ class DailyMenu: Identifiable {
             self.intensity = intensity // New
             self.estimatedDuration = estimatedDuration // New
             self.isMenuComplete = isMenuComplete
+            self.vigorousDuration = vigorousDuration
+            self.moderateDuration = moderateDuration
+            self.targetHeartRate = targetHeartRate
     }
     
-    static func cardioDay(dayNumber: Int, dayName: String, date: Date? = nil, cardioExercisesOption: [CardioOptions]? = nil, isMenuComplete: Bool = false) -> DailyMenu {
+    static func cardioDay(dayNumber: Int, dayName: String, date: Date? = nil, cardioExercisesOption: [CardioOptions]? = nil, isMenuComplete: Bool = false, intensity: String, estimatedDuration: Int) -> DailyMenu {
         return DailyMenu(
             dayNumber: dayNumber,
             dayName: dayName,
@@ -111,12 +123,13 @@ class DailyMenu: Identifiable {
             category: .cardio,
             cardioExercisesOption: cardioExercisesOption,
             intensity: "Low",
-            estimatedDuration: 30,
-            isMenuComplete: isMenuComplete
+            estimatedDuration: estimatedDuration,
+            isMenuComplete: isMenuComplete,
+            
             )
     }
     
-    static func strengthDay(dayNumber: Int, dayName: String, date: Date? = nil, strengthType: StrengthType, strengthExercises: [Exercise]? = nil, isMenuComplete: Bool = false) -> DailyMenu {
+    static func strengthDay(dayNumber: Int, dayName: String, date: Date? = nil, strengthType: StrengthType, strengthExercises: [Exercise]? = nil, isMenuComplete: Bool = false, intensity: String, estimatedDuration: Int) -> DailyMenu {
         return DailyMenu(
             dayNumber: dayNumber,
             dayName: dayName,
@@ -124,7 +137,7 @@ class DailyMenu: Identifiable {
             category: .strength,
             strengthExercises: strengthExercises,
             intensity: "Moderate",
-            estimatedDuration: 45,
+            estimatedDuration: estimatedDuration,
             isMenuComplete: isMenuComplete
             )
     }

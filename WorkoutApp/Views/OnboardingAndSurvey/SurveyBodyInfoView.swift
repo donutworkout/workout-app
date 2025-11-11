@@ -64,7 +64,7 @@ struct SurveyBodyInfoView: View {
             VStack(spacing: 16) {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 8) {
-                        SurveyProgressText(currentPage: 2, totalPages: 6)
+                        SurveyProgressText(currentPage: 2, totalPages: 5)
                         Text("Body Measurement")
                             .font(.system(.title, weight: .semibold))
                             .foregroundColor(Color("pinkTextPrimary"))

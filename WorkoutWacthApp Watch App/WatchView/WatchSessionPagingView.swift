@@ -10,6 +10,7 @@ import HealthKit
 
 struct WatchSessionPagingView: View {
     @Environment(WorkoutSessionManager.self) var sessionManager
+    @Environment(WatchConnectivityManager.self) var connectivity
     let workoutType: HKWorkoutActivityType
     let workoutName: String
     
@@ -26,7 +27,7 @@ struct WatchSessionPagingView: View {
             )
             .tag(Tab.metrics)
 
-            WatchControlsView(sessionManager: _sessionManager)
+            WatchControlsView(sessionManager: _sessionManager, connectivity: _connectivity)
                 .tag(Tab.controls)
         }
         .tabViewStyle(.page)
