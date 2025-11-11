@@ -12,12 +12,21 @@ struct RestView: View {
     var onNext: () -> Void = {}
     @EnvironmentObject var router: Router
     
-    // MARK: - Props
+    private let sessionManager = StrengthSessionManager.shared
+    
+    @State private var timer: Timer? = nil
+    
+    var nextWorkoutName: Exercise? {
+        sessionManager.nextExercise
+    }
+    
+    var nextWorkoutNumber: Int {
+        sessionManager.currentPage + 1
+    }
+    
     var restDuration: TimeInterval = 30
-    var nextWorkoutNumber: Int = 2
+    //var nextWorkoutNumber: Int = 2
     var totalWorkouts: Int = 7
-    var nextWorkoutName: String = "Wall Press"
-    var nextWorkoutImage: String = "wallPress"
     
     @State private var timeRemaining: TimeInterval = 30
     @State private var isPaused: Bool = false
@@ -55,34 +64,54 @@ struct RestView: View {
                     Spacer()
                 }
                 
-                Text(nextWorkoutName)
-                    .font(.system(size: 28, weight: .semibold))
-                    .foregroundColor(.black)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                
-                // Next workout image with pink background
-                Image(nextWorkoutImage)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 200)
-                    .background(
-                        RoundedRectangle(cornerRadius: 24)
-                            .fill(Color("pinkTextPrimary").opacity(0.15))
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 24))
+                if let next = nextWorkoutName {
+                    Text(next.name)
+                        .font(.system(size: 28, weight: .semibold))
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    // Next workout image with pink background
+                    Image(next.imageName ?? "")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 200)
+                        .background(
+                            RoundedRectangle(cornerRadius: 24)
+                                .fill(Color("pinkTextPrimary").opacity(0.15))
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 24))
+                }
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 40)
             
-            // MARK: - Bottom Buttons
             HStack(spacing: 16) {
                 NeutralGlassButton(title: "+10s") {
                     timeRemaining += 10
                 }
 
-                NeutralGlassButton(title: "Next") {
-                    router.navigateTo(.startStrength)
+//                NeutralGlassButton(title: "Next") {
+//                    timeRemaining = 0
+//                    
+//                    DispatchQueue.main.async {
+//                        router.navigateTo(.startStrength)
+//                    }
+//                }
+                NeutralGlassButton(title: nextWorkoutName != nil ? "Next" : "Finish") {
+                    timer?.invalidate() // ✅ Stop timer
+                    timer = nil
+                    
+                    if nextWorkoutName != nil {
+                        sessionManager.moveToNextExercise() // ✅ Move to next BEFORE navigating
+                        print("⏭️ Moving to exercise: \(sessionManager.currentExercise?.name ?? "nil")")
+                        router.navigateTo(.startStrength)
+                    } else {
+                        // Workout complete
+                        iPhoneConnectivityManager.shared.stopWorkoutFromPhone()
+                        sessionManager.reset()
+                        router.navigateTo(.menu)
+                    }
                 }
             }
             .padding(.horizontal)
@@ -93,16 +122,32 @@ struct RestView: View {
         .onAppear {
             startRestTimer()
         }
+        .onDisappear {
+            timer?.invalidate()
+            timer = nil
+        }
     }
     
-    // MARK: - Timer Logic
     private func startRestTimer() {
-        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+        timeRemaining = 30
+        
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
             if !isPaused && timeRemaining > 0 {
                 timeRemaining -= 1
             } else if timeRemaining == 0 {
-                timer.invalidate()
+                t.invalidate()
                 onNext()
+                
+                if nextWorkoutName != nil {
+                    sessionManager.moveToNextExercise()
+                    print("⏰ Auto-advancing to: \(sessionManager.currentExercise?.name ?? "nil")")
+                    router.navigateTo(.startStrength)
+                } else {
+                    // Workout complete
+                    iPhoneConnectivityManager.shared.stopWorkoutFromPhone()
+                    sessionManager.reset()
+                    router.navigateTo(.menu)
+                }
             }
         }
     }
