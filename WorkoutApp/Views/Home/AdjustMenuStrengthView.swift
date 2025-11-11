@@ -86,10 +86,10 @@ struct AdjustMenuStrengthView: View {
                 PrimaryGlassButton(title: "Start Now") {
                     
                     sessionManager.startWorkout(with: workouts)
-                    
-                    router.lastWorkoutSource = .adjustMenuStrength
+                
                     router.workoutExercises = workouts
 
+                    router.lastWorkoutSource = .adjustMenuStrength
                     router.navigateTo(.countdownView)
                 }
                 .padding(.horizontal)

@@ -19,7 +19,7 @@ enum WorkoutCommand: String {
 @Observable
 class WorkoutSessionManager: NSObject {
     
-    
+    private var timer: Timer?
     private let healthStore = HKHealthStore()
     private var workoutSession: HKWorkoutSession?
     private var workoutBuilder: HKLiveWorkoutBuilder?
@@ -85,6 +85,7 @@ class WorkoutSessionManager: NSObject {
                 error in
                 DispatchQueue.main.async {
                     self.isRunning = true
+                    self.startTimer()
                     print("Workout started (\(type.rawValue))")
                 }
             }
@@ -96,21 +97,38 @@ class WorkoutSessionManager: NSObject {
         
     }
     
+    private func startTimer() {
+        timer?.invalidate()
+        timeActive = 0
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            if self.isRunning {
+                self.timeActive += 1
+            }
+        }
+    }
+    
     func stopWorkout() {
+//        print("workout session", workoutSession?.activityType.rawValue ?? "nil")
+//        print("workout builder", workoutBuilder?.workoutSession?.activityType.rawValue ?? "nil")
         guard let session = workoutSession, let builder = workoutBuilder else {
+            print("⚠️ No active workout to stop")
             return
         }
-        
+        print("🛑 Stopping workout session...")
+        timer?.invalidate()
+        isRunning = false
         session.end()
         builder.endCollection(withEnd: Date()) { _, _ in
             builder.finishWorkout { workout, error in
                 DispatchQueue.main.async {
-                    self.isRunning = false
+                    self.workoutSession = nil
+                    self.workoutBuilder = nil
                     if let workout = workout {
-                        print("Workout finished: \(workout)")
+                        print("✅ Workout finished cleanly: \(workout)")
                     } else if let error {
-                        print("Finished with error: \(error)")
+                        print("❌ Error finishing workout: \(error.localizedDescription)")
                     }
+                    
                 }
             }
             
@@ -179,6 +197,13 @@ extension WorkoutSessionManager: HKLiveWorkoutBuilderDelegate {
                 default:
                     break
                 }
+//                WatchConnectivityManager.shared.sendMessage([
+//                        "cmd": "updateMetrics",
+//                        "heartRate": self.heartRate,
+//                        "energy": self.energyBurned,
+//                        "distance": self.distance,
+//                        "time": self.timeActive
+//                    ])
             }
         }
     }

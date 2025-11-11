@@ -16,6 +16,7 @@ enum Route {
     case restView
     case startWorkout
     case countdownView
+    case finishWorkout
 }
 
 final class Router: ObservableObject {

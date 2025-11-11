@@ -13,11 +13,11 @@ struct AdjustMenuCardioView: View {
     @EnvironmentObject var router: Router
     
     @Environment(iPhoneConnectivityManager.self) private var connectivity
-
+    
     @State private var selectedMenu: String? = nil
     @State private var showCustomAlert = false
     var onNext: () -> Void = {}
-
+    
     // MARK: - Cardio Menu
     private let cardioMenu = [
         "Outdoor Walk", "Indoor Walk",
@@ -26,7 +26,7 @@ struct AdjustMenuCardioView: View {
         "Volleyball", "Tennis",
         "Padel", "Soccer",
     ]
-
+    
     var body: some View {
         ZStack {
             VStack(spacing: 32) {
@@ -44,7 +44,7 @@ struct AdjustMenuCardioView: View {
                                     .font(.system(size: 16, weight: .semibold))
                                     .foregroundColor(
                                         selectedMenu == activity
-                                            ? .white : .black
+                                        ? .white : .black
                                     )
                                     .frame(maxWidth: .infinity)
                                     .frame(height: 70)
@@ -52,8 +52,8 @@ struct AdjustMenuCardioView: View {
                                         RoundedRectangle(cornerRadius: 20)
                                             .fill(
                                                 selectedMenu == activity
-                                                    ? Color("pinkTextPrimary")
-                                                    : Color.white
+                                                ? Color("pinkTextPrimary")
+                                                : Color.white
                                             )
                                             .shadow(
                                                 color: .gray.opacity(0.15),
@@ -73,18 +73,23 @@ struct AdjustMenuCardioView: View {
                 }
                 .padding(.horizontal)
                 .padding(.top, 8)
-
+                
                 Spacer()
-
+                
                 // MARK: - Start Button (Disabled if no selection)
                 PrimaryGlassButton(title: "Start Now") {
-                    if selectedMenu == nil {
+                    guard let selectedMenu = selectedMenu else {
                         showCustomAlert = true
-                    } else {
-                        router.selectedCardioMenu = selectedMenu
-                        router.lastWorkoutSource = .adjustMenuCardio
-                        router.navigateTo(.startCardio)
+                        return
                     }
+                    
+                    let type = mapActivityToHKType(selectedMenu)
+                    router.selectedWorkoutType = type
+                    router.selectedCardioMenu = selectedMenu
+                    connectivity.startWorkoutFromPhone(type: type)
+                    
+                    router.lastWorkoutSource = .adjustMenuCardio
+                    router.navigateTo(.countdownView)
                 }
                 .padding(.horizontal)
                 .padding(.vertical)
@@ -93,7 +98,7 @@ struct AdjustMenuCardioView: View {
             }
             .animation(.easeInOut, value: selectedMenu)
             .background(Color.white.ignoresSafeArea())
-
+            
             // MARK: - Custom Alert Overlay
             if showCustomAlert {
                 Color.white.opacity(0.5)
@@ -102,19 +107,19 @@ struct AdjustMenuCardioView: View {
                     .onTapGesture {
                         withAnimation { showCustomAlert = false }
                     }
-
+                
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Oops!")
                         .font(.system(size: 20, weight: .semibold))
                         .foregroundColor(.black)
                         .padding(.horizontal)
-
+                    
                     Text("Please pick one cardio activity to begin.")
                         .multilineTextAlignment(.leading)
                         .font(.system(size: 15))
                         .foregroundColor(.black.opacity(0.8))
                         .padding(.horizontal)
-
+                    
                     Button {
                         withAnimation { showCustomAlert = false }
                     } label: {
@@ -141,31 +146,29 @@ struct AdjustMenuCardioView: View {
                 print("🏋️ Watch started workout → go to countdown/start")
                 router.lastWorkoutSource = .adjustMenuCardio
                 router.navigateTo(.countdownView)
-            } else {
-                print("🏁 Workout stopped → back to menu")
-                router.navigateTo(.menu)
             }
-    }
-
-//        .onChange(of: connectivity.isWorkoutPaused) { _, paused in
-//            if router.currentRoute == .adjustMenuCardio ||
-//               router.currentRoute == .startCardio {
-//                if paused {
-//                    print("⏸️ Watch paused → show rest screen")
-//                    router.navigateTo(.restView)
-//                } else if connectivity.isWorkoutActive {
-//                    print("▶️ Watch resumed → back to active workout")
-//                    router.navigateTo(.startCardio)
-//                }
-//            }
-//        }
-//            .onChange(of: connectivity.isWorkoutPaused) { _, paused in
-//                if paused {
-//                    router.navigateTo(.restView)
-//                } else if connectivity.isWorkoutActive {
-//                    router.navigateTo(.startCardio)
-//                }
-//            }
+            
+        }
+        
+        //        .onChange(of: connectivity.isWorkoutPaused) { _, paused in
+        //            if router.currentRoute == .adjustMenuCardio ||
+        //               router.currentRoute == .startCardio {
+        //                if paused {
+        //                    print("⏸️ Watch paused → show rest screen")
+        //                    router.navigateTo(.restView)
+        //                } else if connectivity.isWorkoutActive {
+        //                    print("▶️ Watch resumed → back to active workout")
+        //                    router.navigateTo(.startCardio)
+        //                }
+        //            }
+        //        }
+        //            .onChange(of: connectivity.isWorkoutPaused) { _, paused in
+        //                if paused {
+        //                    router.navigateTo(.restView)
+        //                } else if connectivity.isWorkoutActive {
+        //                    router.navigateTo(.startCardio)
+        //                }
+        //            }
         // MARK: - Native Navigation Title
         .navigationTitle("Today’s Cardio Menu!")
         .navigationBarTitleDisplayMode(.inline)
@@ -185,7 +188,7 @@ struct AdjustMenuCardioView: View {
         }
     }
     
-
+    
     // MARK: - Logic
     private func handleSelection(for activity: String) {
         if selectedMenu == activity {
@@ -197,7 +200,7 @@ struct AdjustMenuCardioView: View {
             iPhoneConnectivityManager.shared.sendSelectedWorkout(type)
         }
     }
-
+    
     private var isButtonEnabled: Bool {
         selectedMenu != nil
     }

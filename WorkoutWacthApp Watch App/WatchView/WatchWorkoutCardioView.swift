@@ -8,11 +8,18 @@
 // page 2 dari start stop, page 1 nya di WatchWorkoutControlView
 
 import SwiftUI
+import HealthKit
 
 struct WatchWorkoutCardioView: View {
+    @Environment(WorkoutSessionManager.self) private var sessionManager
+    @Environment(WatchConnectivityManager.self) private var connectivity
+    
+    let workoutType: HKWorkoutActivityType
+    
     @State private var elapsedTime: Int = 0
     @State private var currentTime: String = Self.formatCurrentTime()
-    private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    
+    private let clockTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
         ZStack {
@@ -27,8 +34,7 @@ struct WatchWorkoutCardioView: View {
                             .fill(Color.white.opacity(0.15))
                             .frame(width: 36, height: 36)
                         
-                        Image(systemName: "figure.run")
-                            .font(.system(size: 18))
+                        Image(systemName: getWorkoutIcon(for: connectivity.selectedWorkoutType ?? .running))   .font(.system(size: 18))
                             .foregroundColor(Color("pinkTextPrimary"))
                     }
                     
@@ -37,7 +43,7 @@ struct WatchWorkoutCardioView: View {
                     Text(currentTime)
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.white)
-                        .onReceive(timer) { _ in updateTime() }
+                        .onReceive(clockTimer) { _ in updateTime() }
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 20)
@@ -54,37 +60,17 @@ struct WatchWorkoutCardioView: View {
                 // MARK: - Timer + Stats
                 VStack(alignment: .leading, spacing: 0) {
                     // Timer tampil jam:menit:detik
-                    Text(formatTime(elapsedTime))
+                    Text(formatTime(Int(sessionManager.timeActive)))
                         .font(.system(size: 28, weight: .semibold))
                         .foregroundColor(.white)
                         .padding(.bottom, 4)
 
-                    HStack(spacing: 6) {
-                        Image(systemName: "flame.fill")
-                            .font(.system(size: 16))
-                            .foregroundColor(Color("pinkTextPrimary"))
-                        Text("19 kcal")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                    }
-
-                    HStack(spacing: 6) {
-                        Image(systemName: "figure.walk")
-                            .font(.system(size: 16))
-                            .foregroundColor(Color("pinkTextPrimary"))
-                        Text("6.2 km")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                    }
-
-                    HStack(spacing: 6) {
-                        Image(systemName: "heart.fill")
-                            .font(.system(size: 16))
-                            .foregroundColor(Color("pinkTextPrimary"))
-                        Text("95 bpm")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                    }
+                    StatRow(icon: "flame.fill",
+                            text: String(format: "%.0f kcal", sessionManager.energyBurned))
+                    StatRow(icon: "figure.walk",
+                            text: String(format: "%.2f km", sessionManager.distance / 1000))
+                    StatRow(icon: "heart.fill",
+                            text: String(format: "%.0f bpm", sessionManager.heartRate))
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, 16)
@@ -94,17 +80,43 @@ struct WatchWorkoutCardioView: View {
                 .padding(.bottom, 20)
             }
         }
-        .onReceive(timer) { _ in
-            elapsedTime += 1
+        .onReceive(clockTimer) { _ in
+            updateTime()
         }
         .onAppear {
             // Reset or continue as desired; keeping current value
+            if !sessionManager.isRunning {
+                if let type = connectivity.selectedWorkoutType {
+                    sessionManager.startWorkout(of: type)
+                } else {
+                    sessionManager.startWorkout(of: .walking)
+                }
+            }
         }
         .onDisappear {
             // No-op here; the autoconnected timer will stop delivering when view is gone
         }
+        
     }
 
+    
+    private func getWorkoutIcon(for type: HKWorkoutActivityType) -> String {
+            switch type {
+            case .running: return "figure.run"
+            case .cycling: return "figure.outdoor.cycle"
+            case .walking: return "figure.walk"
+            case .swimming: return "figure.pool.swim"
+            case .basketball: return "figure.basketball"
+            case .tennis: return "figure.tennis"
+            case .badminton: return "figure.badminton"
+            case .volleyball: return "figure.volleyball"
+            case .soccer: return "figure.soccer"
+            case .traditionalStrengthTraining: return "figure.strengthtraining.traditional"
+            case .functionalStrengthTraining: return "figure.functional.training"
+            default: return "figure.walk"
+            }
+        }
+    
     // MARK: - Update Time
     private func updateTime() {
         let formatter = DateFormatter()
@@ -128,6 +140,25 @@ struct WatchWorkoutCardioView: View {
     }
 }
 
-#Preview("Stats") {
-    WatchWorkoutCardioView()
+// MARK: - Small row component
+private struct StatRow: View {
+    let icon: String
+    let text: String
+    
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.system(size: 16))
+                .foregroundColor(Color("pinkTextPrimary"))
+            Text(text)
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(.white)
+        }
+    }
+}
+
+#Preview {
+    WatchWorkoutCardioView(workoutType: .running)
+        .environment(WorkoutSessionManager())
+        .environment(WatchConnectivityManager())
 }
