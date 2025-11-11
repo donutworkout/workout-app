@@ -53,6 +53,7 @@ class WatchConnectivityManager: NSObject {
                     shouldStartWorkout = true
                 }
             }
+            print("message: \(message["cmd"] ?? "nil")")
             session.sendMessage(
                 message,
                 replyHandler: { reply in
@@ -61,7 +62,7 @@ class WatchConnectivityManager: NSObject {
                 errorHandler: { error in
                     let nsError = error as NSError
                     if nsError.code == 7014 {
-                        // ✅ Fallback for when phone app is not reachable
+                        print(error)
                         print("⚠️ sendMessage failed (7014: not reachable), retrying via transferUserInfo()")
                         self.session.transferUserInfo(message)
                     }
@@ -72,18 +73,10 @@ class WatchConnectivityManager: NSObject {
             session.transferUserInfo(message)
         }
     }
-
-    func sendStartWorkout(category: WorkoutCategory) {
-        if session.isReachable {
-            session.sendMessage(
-                [
-                    "event": "startWorkout",
-                    "category": category.rawValue,
-                ],
-                replyHandler: nil,
-                errorHandler: nil
-            )
-        }
+    
+    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any]) {
+        print("📬 Received background message: \(userInfo)")
+        handleIncomingMessage(userInfo)
     }
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any])
@@ -110,6 +103,7 @@ class WatchConnectivityManager: NSObject {
                             self.selectedWorkoutType = type
                             print("⌚ Received start command from iPhone: \(type.displayName)")
                             self.shouldStartWorkout = true
+                            
                         }
 
                     // iPhone → pause
@@ -126,10 +120,12 @@ class WatchConnectivityManager: NSObject {
 
                     // iPhone → stop
                     case .stop:
-                        self.shouldStartWorkout = false
-                        //self.shouldPauseWorkout = false
-                        self.sessionManager.stopWorkout()
-                        print("🛑 Stop command executed on watch")
+                        DispatchQueue.main.async {
+                            self.shouldStartWorkout = false
+                            self.sessionManager.stopWorkout()
+                            print("🛑 Stop command executed on watch")
+
+                        }
 
                     // Mirror confirmation from iPhone
                     case .started:

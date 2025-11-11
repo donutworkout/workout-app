@@ -5,14 +5,15 @@
 //  Created by Jennifer Evelyn on 05/11/25.
 //
 
-// page 2 dari start stop, page 1 nya di WatchWorkoutControlView
-
 import SwiftUI
+import HealthKit
 
 struct WatchWorkoutStrengthView: View {
-    @State private var elapsedTime: Int = 0
+    @Environment(WorkoutSessionManager.self) private var sessionManager
+    @Environment(WatchConnectivityManager.self) private var connectivity
+    
     @State private var currentTime: String = Self.formatCurrentTime()
-    private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    private let clockTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
         ZStack {
@@ -27,7 +28,7 @@ struct WatchWorkoutStrengthView: View {
                             .fill(Color.white.opacity(0.15))
                             .frame(width: 36, height: 36)
                         
-                        Image(systemName: "figure.run")
+                        Image(systemName: getWorkoutIcon(for: connectivity.selectedWorkoutType ?? .traditionalStrengthTraining))
                             .font(.system(size: 18))
                             .foregroundColor(Color("pinkTextPrimary"))
                     }
@@ -37,7 +38,7 @@ struct WatchWorkoutStrengthView: View {
                     Text(currentTime)
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.white)
-                        .onReceive(timer) { _ in updateTime() }
+                        .onReceive(clockTimer) { _ in updateTime() }
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 20)
@@ -45,65 +46,47 @@ struct WatchWorkoutStrengthView: View {
                 Spacer()
 
                 // MARK: - Character
-                Image("buttercup") // pastikan asset sama
+                Image("buttercup")
                     .resizable()
                     .scaledToFit()
                     .frame(height: 80)
                     .padding(.top, -20)
 
                 // MARK: - Timer + Stats
-                VStack(alignment: .leading, spacing: 0) {
+                VStack(alignment: .leading, spacing: 8) {
                     // Timer tampil jam:menit:detik
-                    Text(formatTime(elapsedTime))
+                    Text(formatTime(Int(sessionManager.timeActive)))
                         .font(.system(size: 28, weight: .semibold))
                         .foregroundColor(.white)
                         .padding(.bottom, 4)
 
-                    HStack(spacing: 6) {
-                        Image(systemName: "flame.fill")
-                            .font(.system(size: 16))
-                            .foregroundColor(Color("pinkTextPrimary"))
-                        Text("19 kcal")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                    }
-
-                    HStack(spacing: 6) {
-                        Image(systemName: "heart.fill")
-                            .font(.system(size: 16))
-                            .foregroundColor(Color("pinkTextPrimary"))
-                        Text("95 bpm")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                    }
+                    StatRow(icon: "flame.fill", text: String(format: "%.0f kcal", sessionManager.energyBurned))
+                    StatRow(icon: "heart.fill", text: String(format: "%.0f bpm", sessionManager.heartRate))
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, 16)
                 .padding(.top, 10)
 
                 Spacer()
-                .padding(.bottom, 20)
+                    .padding(.bottom, 20)
             }
         }
-        .onReceive(timer) { _ in
-            elapsedTime += 1
-        }
         .onAppear {
-            // Reset or continue as desired; keeping current value
+            // Start workout session for strength if not running
+            if !sessionManager.isRunning {
+                sessionManager.startWorkout(of: connectivity.selectedWorkoutType ?? .traditionalStrengthTraining)
+            }
         }
-        .onDisappear {
-            // No-op here; the autoconnected timer will stop delivering when view is gone
-        }
+        .onReceive(clockTimer) { _ in updateTime() }
     }
 
-    // MARK: - Update Time
+    // MARK: - Helpers
     private func updateTime() {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
         currentTime = formatter.string(from: Date())
     }
     
-    // MARK: - Format Functions
     private static func formatCurrentTime() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
@@ -114,11 +97,37 @@ struct WatchWorkoutStrengthView: View {
         let h = seconds / 3600
         let m = (seconds % 3600) / 60
         let s = seconds % 60
-        // Selalu tampil jam:menit:detik (00:00:00)
         return String(format: "%02d:%02d:%02d", h, m, s)
+    }
+
+    private func getWorkoutIcon(for type: HKWorkoutActivityType) -> String {
+        switch type {
+        case .traditionalStrengthTraining: return "figure.strengthtraining.traditional"
+        case .functionalStrengthTraining: return "figure.functional.training"
+        default: return "figure.strengthtraining.traditional"
+        }
     }
 }
 
-#Preview("Stats") {
+// MARK: - Small reusable row
+private struct StatRow: View {
+    let icon: String
+    let text: String
+    
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.system(size: 16))
+                .foregroundColor(Color("pinkTextPrimary"))
+            Text(text)
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(.white)
+        }
+    }
+}
+
+#Preview {
     WatchWorkoutStrengthView()
+        .environment(WorkoutSessionManager())
+        .environment(WatchConnectivityManager())
 }

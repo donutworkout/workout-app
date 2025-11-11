@@ -197,13 +197,13 @@ extension WorkoutSessionManager: HKLiveWorkoutBuilderDelegate {
                 default:
                     break
                 }
-                WatchConnectivityManager.shared.sendMessage([
-                        "cmd": "updateMetrics",
-                        "heartRate": self.heartRate,
-                        "energy": self.energyBurned,
-                        "distance": self.distance,
-                        "time": self.timeActive
-                    ])
+//                WatchConnectivityManager.shared.sendMessage([
+//                        "cmd": "updateMetrics",
+//                        "heartRate": self.heartRate,
+//                        "energy": self.energyBurned,
+//                        "distance": self.distance,
+//                        "time": self.timeActive
+//                    ])
             }
         }
     }

@@ -86,10 +86,9 @@ struct AdjustMenuCardioView: View {
                     let type = mapActivityToHKType(selectedMenu)
                     router.selectedWorkoutType = type
                     router.selectedCardioMenu = selectedMenu
-                    router.lastWorkoutSource = .adjustMenuCardio
                     connectivity.startWorkoutFromPhone(type: type)
                     
-                    // ⏩ iPhone langsung masuk ke countdown
+                    router.lastWorkoutSource = .adjustMenuCardio
                     router.navigateTo(.countdownView)
                 }
                 .padding(.horizontal)
@@ -147,9 +146,6 @@ struct AdjustMenuCardioView: View {
                 print("🏋️ Watch started workout → go to countdown/start")
                 router.lastWorkoutSource = .adjustMenuCardio
                 router.navigateTo(.countdownView)
-            } else {
-                print("🏁 Workout stopped → back to menu")
-                router.navigateTo(.menu)
             }
             
         }

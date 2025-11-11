@@ -10,7 +10,8 @@ import SwiftUI
 struct CountdownCardioView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var router: Router
-    private let phoneConnectivity = iPhoneConnectivityManager.shared
+//    private let phoneConnectivity = iPhoneConnectivityManager.shared
+    @Environment(iPhoneConnectivityManager.self) private var connectivity
     
     // MARK: - Props
     var activityName: String = "Indoor Walk"
@@ -75,10 +76,10 @@ struct CountdownCardioView: View {
                     PrimaryGlassButton(title: isPaused ? "Resume" : "Pause") {
                         if isPaused {
                             // Resume workout
-                            phoneConnectivity.resumeWorkoutFromPhone()
+                            connectivity.resumeWorkoutFromPhone()
                         } else {
                             // Pause workout
-                            phoneConnectivity.pauseWorkoutFromPhone()
+                            connectivity.pauseWorkoutFromPhone()
                         }
                         isPaused.toggle()
                     }
@@ -163,7 +164,7 @@ struct CountdownCardioView: View {
                 
                 // Start workout on countdown completion
                 if let type = router.selectedWorkoutType {
-                    iPhoneConnectivityManager.shared.startWorkoutFromPhone(type: type)
+                    connectivity.startWorkoutFromPhone(type: type)
                 }
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -171,8 +172,6 @@ struct CountdownCardioView: View {
                         showCountdown = false
                     }
                     onCountdownComplete()
-                    
-                    // Start cardio timer after countdown
                     startTimer()
                 }
             }
