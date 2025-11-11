@@ -44,26 +44,15 @@ struct WatchWorkoutListView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
-                Button(action: {
+                PrimaryGlassButton(title: "START", icon: "") {
                     connectivity.sendMessage([
                         "cmd": WorkoutCommand.start.rawValue,
                         "workoutType": workoutType.rawValue
                     ])
-                }) {
-                    Text("START")
-                        .font(.system(.headline, design: .rounded))
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .background(
-                            Capsule()
-                                .fill(Color("grayTextPrimary"))
-                        )
                 }
-                .buttonStyle(PlainButtonStyle())
                 .padding(.horizontal, 20)
-                .padding(.bottom, 10)
+                .padding(.bottom, 0)
+                .ignoresSafeArea(.container, edges: .bottom)
             }
         }
     }

@@ -27,38 +27,47 @@ struct StartCardioView: View {
     
     var body: some View {
         ZStack {
-            VStack {
-                VStack(spacing: 0) {
-                    // MARK: - Image
+            VStack(spacing: 0) {
+                // MARK: - Title and Image
+                VStack(spacing: 16) {
+                    Text(activityName)
+                        .font(.system(size: 28, weight: .semibold))
+                        .foregroundColor(Color("pinkTextPrimary"))
+                        .padding(.top, 16)
+
                     Image(imageName)
                         .resizable()
                         .scaledToFit()
-                        .frame(height: 380)
-                        .padding(.top, 20)
-                    
-                    Text(formattedTime)
-                        .font(.system(size: 36, weight: .bold))
-                        .foregroundColor(Color("pinkTextPrimary"))
+                        .frame(height: 320)
+                        .padding(.top, 8)
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 20)
-                .background(
-                    RoundedRectangle(cornerRadius: 24)
-                        .fill(Color.white)
-                        .shadow(color: .gray.opacity(0.15), radius: 6, x: 0, y: 3)
-                )
-                .padding(.horizontal)
-                
+
+                Spacer()
+
+                // MARK: - Timer
+                HStack(spacing: 8) {
+                    Image(systemName: "timer")
+                        .font(.system(size: 32, weight: .medium))
+                        .foregroundColor(Color("pinkTextPrimary"))
+
+                    Text(formattedTime)
+                        .font(.system(size: 48, weight: .bold))
+                        .foregroundColor(Color("pinkTextPrimary"))
+                        .monospacedDigit()
+                }
+                .padding(.bottom, 32)
+
                 // MARK: - Stats
-                HStack(spacing: 16) {
+                HStack(spacing: 12) {
                     StatCardItem(icon: "flame.fill", value: "\(calories)", label: "KCAL")
                     StatCardItem(icon: "figure.walk", value: String(format: "%.1f", distance), label: "KILOMETERS")
                     StatCardItem(icon: "heart.fill", value: "\(bpm)", label: "BPM")
                 }
                 .padding(.horizontal)
-                
+                .padding(.bottom, 32)
+
                 Spacer()
-                
+
                 // MARK: - Button
                 PrimaryGlassButton(title: isPaused ? "Resume" : "Pause") {
                     if isPaused {
@@ -71,36 +80,35 @@ struct StartCardioView: View {
                         phoneConnectivity.pauseWorkoutFromPhone()
                         
                         // ✅ Tampilkan alert/popup
-                        showPausePopup = true
                         isPaused = true
+                        showPausePopup = true
                     }
                 }
-            }
-                .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.horizontal)
                 .padding(.bottom, 40)
-                .blur(radius: showPausePopup ? 3 : 0)
-                .disabled(showPausePopup)
-                
-                // MARK: - Pause Popup
-                if showPausePopup {
-                    WorkoutPausePopup(
-                        characterImage: "buttercup",
-                        onResume: {
-                            showPausePopup = false
-                            isPaused = false
-                        },
-                        onEndWorkout: {
-                            timer?.invalidate()
-                            router.navigateTo(.menu)
-                        }
-                    )
-                    .transition(.scale.combined(with: .opacity))
-                }
-            
+            }
+            .blur(radius: showPausePopup ? 3 : 0)
+            .disabled(showPausePopup)
+
+            // MARK: - Pause Popup Overlay
+            if showPausePopup {
+                WorkoutPausePopup(
+                    characterImage: "buttercup",
+                    onResume: {
+                        showPausePopup = false
+                        isPaused = false
+                    },
+                    onEndWorkout: {
+                        timer?.invalidate()
+                        router.navigateTo(.menu)
+                    }
+                )
+                .transition(.scale.combined(with: .opacity))
+                .zIndex(10)
+            }
         }
         .background(Color.white.ignoresSafeArea())
-        .navigationTitle(router.selectedCardioMenu ?? "Cardio Workout")
+        .navigationTitle("Cardio Workout")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -151,55 +159,40 @@ struct WorkoutPausePopup: View {
                 .ignoresSafeArea()
                 .onTapGesture { onResume() }
 
-            VStack {
+            VStack(spacing: 0) {
                 ZStack(alignment: .top) {
-                    // MARK: - Character (lebih kecil, di atas box, tidak menimpa)
-                    Image(characterImage)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 140, height: 140)
-                        .zIndex(2)
-                        .padding(.top, -80)
-//                    Spacer()
-
-                    // MARK: - Kotak putih besar di bawah karakter
-                    VStack(spacing: 18) {
-                        Spacer()
+                    // MARK: - Kotak Putih
+                    VStack(spacing: 14) {
+                        Spacer().frame(height: 50) // ruang untuk karakter di atas
 
                         PrimaryGlassButton(title: "Resume") {
                             onResume()
                         }
-                        .frame(width: 320)
 
                         NeutralGlassButton(title: "End Workout") {
                             onEndWorkout()
                         }
-                        .frame(width: 320)
-
-                        Spacer().frame(height: 20)
+                        Spacer().frame(height: 10)
                     }
-                    .frame(width: 380, height: 240)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 20)
                     .background(
-                        RoundedRectangle(cornerRadius: 28)
+                        RoundedRectangle(cornerRadius: 24)
                             .fill(Color.white)
-                            .shadow(color: .black.opacity(0.15), radius: 20, x: 0, y: 10)
+                            .shadow(color: .black.opacity(0.15), radius: 15, x: 0, y: 8)
                     )
-                    .zIndex(1)
+
+                    // MARK: - Karakter setengah badan di atas kotak
+                    Image(characterImage)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 130, height: 130)
+                        .offset(y: -65) // setengah badannya nongol di atas kotak
                 }
             }
-            .padding(.horizontal, 24)
+            .padding(.horizontal, 40)
+            .transition(.scale.combined(with: .opacity))
         }
-        .transition(.scale.combined(with: .opacity))
-    }
-}
-
-
-
-
-#Preview {
-    NavigationStack {
-        StartCardioView()
-            .environmentObject(Router())
     }
 }
 
