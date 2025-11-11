@@ -11,7 +11,7 @@ struct RouterView: View {
         NavigationStack {
             switch router.currentRoute {
                 
-            // MARK: - Onboarding & Setup Flow
+                // MARK: - Onboarding & Setup Flow
             case .onboarding:
                 OnboardingView()
                     .environmentObject(router)
@@ -35,22 +35,26 @@ struct RouterView: View {
                     .environmentObject(router)
                     .environmentObject(surveyManager)
                 
-            // MARK: - Main App Flow
+                // MARK: - Main App Flow
             case .tabBar, .menu, .profile:
                 TabBarView()
                     .environmentObject(router)
                     .environmentObject(surveyManager)
                 
-            // MARK: - Workout Flow
+                // MARK: - Workout Flow
             case .adjustMenuCardio:
                 AdjustMenuCardioView()
                     .environmentObject(router)
-                    .environment(connectivity)
+                //.environment(connectivity)
                 
             case .adjustMenuStrength:
                 AdjustMenuStrengthView()
                     .environmentObject(router)
-                    .environment(connectivity)
+                //.environment(connectivity)
+                
+            case .finishWorkout:
+                FinishWorkoutView()
+                    .environmentObject(router)
                 
             case .startCardio:
                 StartCardioView()
@@ -63,58 +67,94 @@ struct RouterView: View {
                 
             case .restView:
                 RestView(onNext: {
-//                    sessionManager.moveToNextExercise()
+                    sessionManager.moveToNextExercise()
                     router.navigateTo(.startStrength)
                 })
                 .environmentObject(router)
                 
-            // MARK: - Profile Section (Tetap di dalam TabBar)
-//            case .editBodyInfo:
-//                TabBarView(selectedTab: 2) // tab ke-2 = Profile
-//                    .environmentObject(router)
-//                    .environmentObject(surveyManager)
-//                
-//            case .editMotivation:
-//                TabBarView(selectedTab: 2)
-//                    .environmentObject(router)
-//                    .environmentObject(surveyManager)
-//                
-//            case .editProfile:
-//                TabBarView(selectedTab: 2)
-//                    .environmentObject(router)
-//                    .environmentObject(surveyManager)
-//                
-//            case .menstrualCycle:
-//                TabBarView(selectedTab: 2)
-//                    .environmentObject(router)
-//                    .environmentObject(surveyManager)
+                // MARK: - Profile Section (Tetap di dalam TabBar)
+                //            case .editBodyInfo:
+                //                TabBarView(selectedTab: 2) // tab ke-2 = Profile
+                //                    .environmentObject(router)
+                //                    .environmentObject(surveyManager)
+                //
+                //            case .editMotivation:
+                //                TabBarView(selectedTab: 2)
+                //                    .environmentObject(router)
+                //                    .environmentObject(surveyManager)
+                //
+                //            case .editProfile:
+                //                TabBarView(selectedTab: 2)
+                //                    .environmentObject(router)
+                //                    .environmentObject(surveyManager)
+                //
+                //            case .menstrualCycle:
+                //                TabBarView(selectedTab: 2)
+                //                    .environmentObject(router)
+                //                    .environmentObject(surveyManager)
                 
-            // MARK: - Workout Start Flow
+                // MARK: - Workout Start Flow
             case .startWorkout:
                 let weekday = Calendar.current.component(.weekday, from: Date())
                 if weekday % 2 == 0 {
                     AdjustMenuCardioView()
                         .environmentObject(router)
+                    //.environment(connectivity)
                 } else {
                     AdjustMenuStrengthView()
                         .environmentObject(router)
+                    //.environment(connectivity)
                 }
                 
+                
             case .countdownView:
-                CountdownView(exercises: router.workoutExercises, onCountdownComplete: {
-                    if let last = router.lastWorkoutSource {
-                        switch last {
-                        case .adjustMenuCardio:
-                            router.navigateTo(.startCardio)
-                        case .adjustMenuStrength:
-                            router.navigateTo(.startStrength)
-                        default:
+                if let last = router.lastWorkoutSource {
+                    switch last {
+                    case .adjustMenuCardio:
+                        CountdownCardioView(
+                            activityName: router.selectedCardioMenu ?? "Cardio",
+                            imageName: router.selectedCardioMenu?
+                                .lowercased()
+                                .replacingOccurrences(of: " ", with: "") ?? "indoorWalk",
+                            onCountdownComplete: {
+                                print("🚀 CountdownCardio selesai → ke StartCardioView")
+                                router.navigateTo(.startCardio)
+                            }
+                        )
+                        .environmentObject(router)
+                        .environment(iPhoneConnectivityManager.shared)
+                        
+                    case .adjustMenuStrength:
+                        CountdownView(
+                            exercises: router.workoutExercises,
+                            onCountdownComplete: {
+                                print("🚀 CountdownStrength selesai → ke StartStrengthView")
+                                router.navigateTo(.startStrength)
+                            }
+                        )
+                        .environmentObject(router)
+                        .environmentObject(sessionManager)
+                        
+                        // fallback kalau undefined
+                    default:
+                        VStack {
+                            Text("⚠️ Workout Source Not Found")
+                                .font(.headline)
+                                .foregroundColor(.gray)
+                            Button("Back to Menu") {
+                                router.navigateTo(.menu)
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+                    }
+                } else {
+                    VStack {
+                        Text("⚠️ No workout source set")
+                        Button("Back to Menu") {
                             router.navigateTo(.menu)
                         }
                     }
-                })
-                .environmentObject(router)
-                .environmentObject(sessionManager)
+                }
             }
         }
     }

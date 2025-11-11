@@ -10,12 +10,10 @@ import SwiftUI
 struct StartStrengthView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var router: Router
-    @EnvironmentObject var sessionManager: StrengthSessionManager
+    //@EnvironmentObject var sessionManager: StrengthSessionManager
     
+    private let sessionManager = StrengthSessionManager.shared
     private let phoneConnectivity = iPhoneConnectivityManager.shared
-    //private let sessionManager = StrengthSessionManager.shared
-    
-    //let exercises: [Exercise]
     
     // Misal latihan ke-2 dari 5
     var currentPage: Int = 1
@@ -26,6 +24,7 @@ struct StartStrengthView: View {
     @State private var timer: Timer? = nil
     @State private var calories: Int = 0
     @State private var bpm: Int = 90
+    @State private var lastExerciseIndex: Int = 0
     
     var currentExercise: Exercise? {
         sessionManager.currentExercise
@@ -132,16 +131,18 @@ struct StartStrengthView: View {
             }
         }
         .onAppear {
-            //sessionManager.startWorkout(with: exercises)
-            startTimer()
+            if timer == nil || lastExerciseIndex != sessionManager.currentExerciseIndex {
+                lastExerciseIndex = sessionManager.currentExerciseIndex
+                startTimer()
+            }
         }
         .onDisappear { timer?.invalidate() }
-        .onChange(of: sessionManager.currentExerciseIndex) { _, _ in
-            // Reset timer for new exercise
-            timer?.invalidate()
-            startTimer()
-            calories = 0
-        }
+//        .onChange(of: sessionManager.currentExerciseIndex) { _, _ in
+//            // Reset timer for new exercise
+//            timer?.invalidate()
+//            startTimer()
+//            calories = 0
+//        }
     }
     
     // MARK: - Formatters
@@ -153,6 +154,8 @@ struct StartStrengthView: View {
     
     // MARK: - Timer Logic
     private func startTimer() {
+        timer?.invalidate()
+        
         let duration: TimeInterval = TimeInterval(currentExercise?.time ?? 60)
         timeRemaining = duration
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in

@@ -10,21 +10,21 @@ import SwiftUI
 struct StartCardioView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var router: Router
-    private let phoneConnectivity = iPhoneConnectivityManager.shared
-    
+    @Environment(iPhoneConnectivityManager.self) private var connectivity
+
     // MARK: - Props
     var activityName: String = "Indoor Walk"
     var imageName: String = "indoorWalk"
-    
+
     @State private var timeElapsed: TimeInterval = 0
     @State private var calories: Int = 0
     @State private var distance: Double = 0.0
     @State private var bpm: Int = 90
     @State private var isPaused: Bool = false
     @State private var showPausePopup: Bool = false
-    
+
     @State private var timer: Timer? = nil
-    
+
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
@@ -72,17 +72,18 @@ struct StartCardioView: View {
                 PrimaryGlassButton(title: isPaused ? "Resume" : "Pause") {
                     if isPaused {
                         // ✅ Resume workout
-                        phoneConnectivity.resumeWorkoutFromPhone()
+                        connectivity.resumeWorkoutFromPhone()
                         isPaused = false
                         showPausePopup = false
                     } else {
                         // ✅ Pause workout
-                        phoneConnectivity.pauseWorkoutFromPhone()
-                        
+                        connectivity.pauseWorkoutFromPhone()
+
                         // ✅ Tampilkan alert/popup
                         isPaused = true
                         showPausePopup = true
                     }
+                    isPaused.toggle()
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 40)
@@ -90,7 +91,6 @@ struct StartCardioView: View {
             .blur(radius: showPausePopup ? 3 : 0)
             .disabled(showPausePopup)
 
-            // MARK: - Pause Popup Overlay
             if showPausePopup {
                 WorkoutPausePopup(
                     characterImage: "buttercup",
@@ -122,20 +122,32 @@ struct StartCardioView: View {
                 }
             }
         }
-        .onAppear { startTimer() }
+        .onAppear {
+            print("connectivity \(connectivity.isWorkoutActive)")
+            startTimer()
+        }
         .onDisappear { timer?.invalidate() }
+        .onChange(of: connectivity.isWorkoutActive) { _, active in
+            print("onchange isWorkoutActive: \(connectivity.isWorkoutActive)")
+            if !active {
+                print(
+                    "🏁 Workout stopped from watch → showing FinishWorkoutView"
+                )
+                router.navigateTo(.finishWorkout)
+            }
+        }
     }
 
-    
     private var formattedTime: String {
-        let hours = Int(timeElapsed) / 3600
-        let minutes = (Int(timeElapsed) % 3600) / 60
-        let seconds = Int(timeElapsed) % 60
+        let hours = Int(connectivity.timeActive) / 3600
+        let minutes = (Int(connectivity.timeActive) % 3600) / 60
+        let seconds = Int(connectivity.timeActive) % 60
         return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
-    
+
     private func startTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) {
+            _ in
             if !isPaused {
                 timeElapsed += 1
                 calories = Int(timeElapsed / 15)
@@ -151,6 +163,8 @@ struct WorkoutPausePopup: View {
     let characterImage: String
     var onResume: () -> Void
     var onEndWorkout: () -> Void
+    
+    @Environment(iPhoneConnectivityManager.self) private var connectivity
 
     var body: some View {
         ZStack {
@@ -161,6 +175,7 @@ struct WorkoutPausePopup: View {
 
             VStack(spacing: 0) {
                 ZStack(alignment: .top) {
+
                     // MARK: - Kotak Putih
                     VStack(spacing: 14) {
                         Spacer().frame(height: 50) // ruang untuk karakter di atas
@@ -171,6 +186,8 @@ struct WorkoutPausePopup: View {
 
                         NeutralGlassButton(title: "End Workout") {
                             onEndWorkout()
+                            WorkoutSessionManager().stopWorkout()
+                            connectivity.stopWorkoutFromPhone()
                         }
                         Spacer().frame(height: 10)
                     }
@@ -180,6 +197,7 @@ struct WorkoutPausePopup: View {
                         RoundedRectangle(cornerRadius: 24)
                             .fill(Color.white)
                             .shadow(color: .black.opacity(0.15), radius: 15, x: 0, y: 8)
+
                     )
 
                     // MARK: - Karakter setengah badan di atas kotak
@@ -193,6 +211,13 @@ struct WorkoutPausePopup: View {
             .padding(.horizontal, 40)
             .transition(.scale.combined(with: .opacity))
         }
+        .transition(.scale.combined(with: .opacity))
     }
 }
 
+// #Preview {
+//     NavigationStack {
+//         StartCardioView()
+//             .environmentObject(Router())
+//     }
+// }

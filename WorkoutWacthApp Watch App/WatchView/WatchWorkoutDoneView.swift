@@ -8,10 +8,12 @@
 import SwiftUI
 
 struct WatchWorkoutDoneView: View {
-    // Timer tidak lagi berjalan — hanya menampilkan waktu akhir.
-    @State private var elapsedTime: Int = 302 // contoh: 5 menit 2 detik (bisa diganti dari parent view)
+    @Environment(WorkoutSessionManager.self) private var sessionManager
+
+    @State private var elapsedTime: Int = 302  // contoh: 5 menit 2 detik (bisa diganti dari parent view)
     @State private var currentTime: String = Self.formatCurrentTime()
-    private let clockTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    private let clockTimer = Timer.publish(every: 1, on: .main, in: .common)
+        .autoconnect()
 
     var body: some View {
         ZStack {
@@ -25,7 +27,7 @@ struct WatchWorkoutDoneView: View {
                         Circle()
                             .fill(Color.white.opacity(0.15))
                             .frame(width: 36, height: 36)
-                        
+
                         Image(systemName: "figure.run")
                             .font(.system(size: 18))
                             .foregroundColor(Color("pinkTextPrimary"))
@@ -59,42 +61,35 @@ struct WatchWorkoutDoneView: View {
 
                 // MARK: - Static Stats
                 VStack(alignment: .leading, spacing: 0) {
-                    // Timer (statis, tidak jalan)
-                    HStack(spacing: 6) {
-                        Image(systemName: "clock.fill")
-                            .font(.system(size: 16))
-                            .foregroundColor(Color("pinkTextPrimary"))
-                        Text(formatTime(elapsedTime))
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                    }
+                    statRow(
+                        icon: "clock.fill",
+                        value: formatTime(Int(sessionManager.timeActive)),
+                        label: "Duration"
+                    )
 
-                    HStack(spacing: 6) {
-                        Image(systemName: "flame.fill")
-                            .font(.system(size: 16))
-                            .foregroundColor(Color("pinkTextPrimary"))
-                        Text("19 kcal")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                    }
+                    statRow(
+                        icon: "flame.fill",
+                        value: String(
+                            format: "%.0f kcal",
+                            sessionManager.energyBurned
+                        ),
+                        label: "Active Energy"
+                    )
 
-                    HStack(spacing: 6) {
-                        Image(systemName: "figure.walk")
-                            .font(.system(size: 16))
-                            .foregroundColor(Color("pinkTextPrimary"))
-                        Text("6.2 km")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                    }
+                    statRow(
+                        icon: "figure.walk",
+                        value: formatDistance(sessionManager.distance),
+                        label: "Distance"
+                    )
 
-                    HStack(spacing: 6) {
-                        Image(systemName: "heart.fill")
-                            .font(.system(size: 16))
-                            .foregroundColor(Color("pinkTextPrimary"))
-                        Text("95 bpm")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                    }
+                    statRow(
+                        icon: "heart.fill",
+                        value: String(
+                            format: "%.0f bpm",
+                            sessionManager.heartRate
+                        ),
+                        label: "Avg Heart Rate"
+                    )
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, 16)
@@ -106,19 +101,44 @@ struct WatchWorkoutDoneView: View {
         }
     }
 
-    // MARK: - Update Real Clock Only
-    private func updateTime() {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        currentTime = formatter.string(from: Date())
-    }
-
     // MARK: - Format Helpers
     private static func formatCurrentTime() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
         return formatter.string(from: Date())
     }
+
+    // MARK: - Reusable Row
+    @ViewBuilder
+    private func statRow(icon: String, value: String, label: String)
+        -> some View
+    {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.system(size: 16))
+                .foregroundColor(Color("pinkTextPrimary"))
+            Text(value)
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(.white)
+        }
+    }
+
+    // MARK: - Update Real Clock Only
+    private func updateTime() {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        currentTime = formatter.string(from: Date())
+    }
+    
+    // MARK: - Formating Distance
+    
+    private func formatDistance(_ meters: Double) -> String {
+           if meters >= 1000 {
+               return String(format: "%.2f km", meters / 1000)
+           } else {
+               return String(format: "%.0f m", meters)
+           }
+       }
 
     private func formatTime(_ seconds: Int) -> String {
         let h = seconds / 3600

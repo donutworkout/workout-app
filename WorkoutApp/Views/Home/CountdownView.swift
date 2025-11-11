@@ -156,9 +156,7 @@ struct CountdownView: View {
     private func startCountdown() {
         countdown = 3
         showCountdown = true
-//        timeRemaining = duration
-//        
-        // Countdown overlay timer
+
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
             if countdown > 1 {
                 countdown -= 1

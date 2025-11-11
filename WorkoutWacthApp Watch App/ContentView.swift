@@ -15,10 +15,13 @@ struct ContentView: View {
     @State private var showCountdown = false
     @State private var countdownValue = 3
     @State private var workoutStarted = false
+    @State private var showDoneView = false
     
     var body: some View {
         Group {
-            if !connectivity.isReachable {
+            if showDoneView {
+                WatchWorkoutDoneView()
+            } else if !connectivity.isReachable {
                 WatchNotConnectedView(connectivity: _connectivity)
                 
             } else if let type = connectivity.selectedWorkoutType {
@@ -32,16 +35,14 @@ struct ContentView: View {
                             }
                         }
                 } else if workoutStarted && sessionManager.isRunning {
-                    WatchSessionPagingView(
-                        sessionManager: _sessionManager,
-                        workoutType: type,
+                    WatchSessionPagingView(                        workoutType: type,
                         workoutName: type.displayName
                     )
                 } else {
-                    WatchWorkoutListView(
-                        sessionManager: _sessionManager,
+                    StartView(
+                        workoutType: type,
                         connectivity: _connectivity,
-                        workoutType: type
+                        sessionManager: _sessionManager,
                     )
                 }
                 
@@ -59,7 +60,22 @@ struct ContentView: View {
                 print("stop workout!!")
                 sessionManager.stopWorkout()
                 WKInterfaceDevice.current().play(.stop) // ✅ Haptic feedback on stop
+                showDoneView = true
                 workoutStarted = false
+            }
+        }
+        .onChange(of: showDoneView) { _, newValue in
+            if newValue {
+                // ketika done view muncul
+                DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
+                    withAnimation(.easeInOut) {
+                        showDoneView = false
+                        // reset state biar user bisa pilih olahraga lagi
+                        connectivity.selectedWorkoutType = nil
+                        connectivity.shouldStartWorkout = false
+                        print("⌚ Auto-dismiss done view → back to menu")
+                    }
+                }
             }
         }
         .animation(.easeInOut, value: connectivity.selectedWorkoutType)
