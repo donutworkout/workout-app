@@ -593,6 +593,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WorkoutApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "HeyLoona!";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "We need your permission for this app to read Health data";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "We need your permission for this app to write Health data";
@@ -629,6 +630,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WorkoutApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "HeyLoona!";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "We need your permission for this app to read Health data";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "We need your permission for this app to write Health data";

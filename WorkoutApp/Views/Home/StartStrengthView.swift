@@ -25,95 +25,120 @@ struct StartStrengthView: View {
     @State private var calories: Int = 0
     @State private var bpm: Int = 90
     @State private var lastExerciseIndex: Int = 0
+    @State private var showPausePopup: Bool = false
     
     var currentExercise: Exercise? {
         sessionManager.currentExercise
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            // MARK: - Page Control + Title + Image
-            VStack(spacing: 16) {
-                // MARK: Page Control (bulatan)
-//                HStack(spacing: 6) {
-//                    ForEach(1...sessionManager.totalPages, id: \.self) { index in
-//                        Circle()
-//                            .fill(index == sessionManager.currentPage ? Color("pinkTextPrimary") : Color.gray.opacity(0.3))
-//                            .frame(width: 8, height: 8)
+        ZStack {
+            VStack(spacing: 0) {
+                // MARK: - Page Control + Title + Image
+                VStack(spacing: 16) {
+                    // MARK: Page Control (bulatan)
+//                    HStack(spacing: 6) {
+//                        ForEach(1...sessionManager.totalPages, id: \.self) { index in
+//                            Circle()
+//                                .fill(index == sessionManager.currentPage ? Color("pinkTextPrimary") : Color.gray.opacity(0.3))
+//                                .frame(width: 8, height: 8)
+//                        }
 //                    }
-//                }
-//                .padding(.top, 24)
-                
-                // MARK: Workout Title
-                Text(currentExercise?.name ?? "Get Ready!")
-                    .font(.system(size: 28, weight: .semibold))
-                    .foregroundColor(Color("pinkTextPrimary"))
-                
-                // MARK: Image
-                if let imageName = currentExercise?.imageName {
-                    Image(imageName)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 320)
-                        .padding(.top, 8)
-                }
-            }
-            
-            Spacer()
-            
-            // MARK: - Timer
-            HStack(spacing: 8) {
-                Image(systemName: "timer")
-                    .font(.system(size: 32, weight: .medium))
-                    .foregroundColor(Color("pinkTextPrimary"))
-                
-                Text(formattedTime)
-                    .font(.system(size: 48, weight: .bold))
-                    .foregroundColor(Color("pinkTextPrimary"))
-                    .monospacedDigit()
-            }
-            .padding(.bottom, 32)
-            
-            // MARK: - Stats Cards
-            HStack(spacing: 12) {
-                StatCardItem(icon: "flame.fill", value: "\(calories)", label: "KCAL")
-                StatCardItem(icon: "heart.fill", value: "\(bpm)", label: "BPM")
-            }
-            .padding(.horizontal)
-            .padding(.bottom, 32)
-            
-            Spacer()
-            
-            // MARK: - Buttons
-            HStack(spacing: 16) {
-                NeutralGlassButton(title: isPaused ? "Resume" : "Pause") {
-                    if isPaused {
-                        phoneConnectivity.resumeWorkoutFromPhone()
-                        isPaused = false
-                    } else {
-                        phoneConnectivity.pauseWorkoutFromPhone()
-                        isPaused = true
+//                    .padding(.top, 24)
+                    
+                    // MARK: Workout Title
+                    Text(currentExercise?.name ?? "Get Ready!")
+                        .font(.system(size: 28, weight: .semibold))
+                        .foregroundColor(Color("pinkTextPrimary"))
+                    
+                    // MARK: Image
+                    if let imageName = currentExercise?.imageName {
+                        Image(imageName)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 320)
+                            .padding(.top, 8)
                     }
                 }
                 
-                NeutralGlassButton(title: "Next") {
-                    //                    phoneConnectivity.stopWorkoutFromPhone()
-                    //                    timer?.invalidate()
-                    //                    router.navigateTo(.restView)
+                Spacer()
+                
+                // MARK: - Timer
+                HStack(spacing: 8) {
+                    Image(systemName: "timer")
+                        .font(.system(size: 32, weight: .medium))
+                        .foregroundColor(Color("pinkTextPrimary"))
                     
-                    if sessionManager.hasNextExercise {
-                        // Go to rest view, then next exercise
-                        router.navigateTo(.restView)
-                    } else {
-                        // Workout complete - go to summary or home
-                        phoneConnectivity.stopWorkoutFromPhone()
-                        sessionManager.reset()
+                    Text(formattedTime)
+                        .font(.system(size: 48, weight: .bold))
+                        .foregroundColor(Color("pinkTextPrimary"))
+                        .monospacedDigit()
+                }
+                .padding(.bottom, 32)
+                
+                // MARK: - Stats Cards
+                HStack(spacing: 12) {
+                    StatCardItem(icon: "flame.fill", value: "\(calories)", label: "KCAL")
+                    StatCardItem(icon: "heart.fill", value: "\(bpm)", label: "BPM")
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 32)
+                
+                Spacer()
+                
+                // MARK: - Buttons
+                HStack(spacing: 16) {
+                    NeutralGlassButton(title: isPaused ? "Resume" : "Pause") {
+                        if isPaused {
+                            // ✅ Resume workout
+//                            connectivity.resumeWorkoutFromPhone()
+                            isPaused = false
+                            showPausePopup = false
+                        } else {
+                            // ✅ Pause workout
+//                            connectivity.pauseWorkoutFromPhone()
+                            
+                            // ✅ Tampilkan alert/popup
+                            isPaused = true
+                            showPausePopup = true
+                        }
+                        isPaused.toggle()
+                    }
+                    
+                    NeutralGlassButton(title: "Next") {
+                        //                    phoneConnectivity.stopWorkoutFromPhone()
+                        //                    timer?.invalidate()
+                        //                    router.navigateTo(.restView)
+                        
+                        if sessionManager.hasNextExercise {
+                            // Go to rest view, then next exercise
+                            router.navigateTo(.restView)
+                        } else {
+                            // Workout complete - go to summary or home
+                            phoneConnectivity.stopWorkoutFromPhone()
+                            sessionManager.reset()
+                            router.navigateTo(.menu)
+                        }
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 40)
+            }
+            if showPausePopup {
+                Alert(
+                    characterImage: "buttercup",
+                    onResume: {
+                        showPausePopup = false
+                        isPaused = false
+                    },
+                    onEndWorkout: {
+                        timer?.invalidate()
                         router.navigateTo(.menu)
                     }
-                }
+                )
+                .transition(.scale.combined(with: .opacity))
+                .zIndex(10)
             }
-            .padding(.horizontal)
-            .padding(.bottom, 40)
         }
         .background(Color.white.ignoresSafeArea())
         .navigationTitle("Workout")
@@ -121,8 +146,8 @@ struct StartStrengthView: View {
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button(action: {
-                    timer?.invalidate()
-                    router.navigateTo(.menu)
+                    showPausePopup = true
+                    isPaused = true
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .semibold))

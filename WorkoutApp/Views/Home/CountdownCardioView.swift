@@ -26,6 +26,7 @@ struct CountdownCardioView: View {
     @State private var bpm: Int = 90
     @State private var isPaused: Bool = false
     @State private var showPausePopup: Bool = false
+    @State private var showExitAlert: Bool = false
     @State private var timer: Timer? = nil
     
     init(activityName: String = "Indoor Walk",
@@ -86,24 +87,22 @@ struct CountdownCardioView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.horizontal)
                     .padding(.bottom, 40)
-                    .blur(radius: showPausePopup ? 3 : 0)
                     .disabled(showPausePopup)
                 }
                 
                 // MARK: - Pause Popup
                 if showPausePopup {
-                    WorkoutPausePopup(
-                        characterImage: "buttercup",
-                        onResume: {
-                            showPausePopup = false
-                            isPaused = false
+                    Alert(
+                        characterImage: "characterFreeze",
+                        onResume:  {
+                                showExitAlert = false
+                            
                         },
                         onEndWorkout: {
                             timer?.invalidate()
                             router.navigateTo(.menu)
                         }
                     )
-                    .transition(.scale.combined(with: .opacity))
                 }
             }
             .background(Color.white.ignoresSafeArea())
@@ -129,6 +128,9 @@ struct CountdownCardioView: View {
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button(action: {
+                    // Instead of navigating directly → show alert first
+                    showPausePopup = true
+                    isPaused = true
                     timer?.invalidate()
                     router.navigateTo(.menu)
                 }) {
@@ -154,13 +156,17 @@ struct CountdownCardioView: View {
     private func startCountdown() {
         countdown = 3
         showCountdown = true
+        SoundManager.shared.playSound("countdownMusic")
+        HapticManager.shared.trigger(.countdownTick)
         
         // Countdown overlay timer
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
             if countdown > 1 {
                 countdown -= 1
+                HapticManager.shared.trigger(.countdownTick)
             } else {
                 t.invalidate()
+                HapticManager.shared.trigger(.countdownEnd)
                 
                 // Start workout on countdown completion
                 if let type = router.selectedWorkoutType {

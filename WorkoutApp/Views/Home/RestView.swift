@@ -103,6 +103,18 @@ struct RestView: View {
             
             HStack(spacing: 16) {
                 NeutralGlassButton(title: "+10s") {
+                                    HapticManager.shared.trigger(.buttonTap)
+                                    timeRemaining += 10
+                                }
+
+
+//                NeutralGlassButton(title: "Next") {
+//                    timeRemaining = 0
+//                    
+//                    DispatchQueue.main.async {
+//                        router.navigateTo(.startStrength)
+//                    }
+//                }
                     switch timeRemaining {
                     case 111...119:
                         timeRemaining += (120 - timeRemaining)
@@ -140,8 +152,9 @@ struct RestView: View {
         .background(Color.white.ignoresSafeArea())
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            startRestTimer()
-        }
+                    HapticManager.shared.trigger(.restStart) // ✅ haptic saat mulai rest
+                    startRestTimer()
+                }
         .onDisappear {
             timer?.invalidate()
             timer = nil
@@ -156,6 +169,7 @@ struct RestView: View {
                 timeRemaining -= 1
             } else if timeRemaining == 0 {
                 t.invalidate()
+                HapticManager.shared.trigger(.countdownEnd)
                 onNext()
                 
                 if nextWorkoutName != nil {
