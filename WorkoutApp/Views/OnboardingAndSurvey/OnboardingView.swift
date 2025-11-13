@@ -61,19 +61,19 @@ struct OnboardingView: View {
                 }
                 .padding(.horizontal, 40)
                 
-                // MARK: - Sign in with Apple
-                SignInWithAppleButton(.signIn) { request in
-                    request.requestedScopes = [.fullName, .email]
-                } onCompletion: { result in
-                    switch result {
-                    case .success:
-                        withAnimation(.easeInOut) {
-                            router.navigateTo(.healthConnect)
-                        }
-                    case .failure(let error):
-                        print("❌ Apple Sign-In failed: \(error.localizedDescription)")
-                    }
-                }
+//                // MARK: - Sign in with Apple
+//                SignInWithAppleButton(.signIn) { request in
+//                    request.requestedScopes = [.fullName, .email]
+//                } onCompletion: { result in
+//                    switch result {
+//                    case .success:
+//                        withAnimation(.easeInOut) {
+//                            router.navigateTo(.healthConnect)
+//                        }
+//                    case .failure(let error):
+//                        print("❌ Apple Sign-In failed: \(error.localizedDescription)")
+//                    }
+//                }
                 .frame(height: 50)
                 .clipShape(RoundedRectangle(cornerRadius: 24))
                 .padding(.horizontal)
