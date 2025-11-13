@@ -14,7 +14,11 @@ struct RestView: View {
     
     private let sessionManager = StrengthSessionManager.shared
     
+    var level: WorkoutLevel
     @State private var timer: Timer? = nil
+    @State private var isTooMuchPaused: Bool = false
+    @State private var timeRemaining: TimeInterval = 0
+    @State private var isPaused: Bool = false
     
     var nextWorkoutName: Exercise? {
         sessionManager.nextExercise
@@ -24,12 +28,18 @@ struct RestView: View {
         sessionManager.currentPage + 1
     }
     
-    var restDuration: TimeInterval = 30
-    //var nextWorkoutNumber: Int = 2
     var totalWorkouts: Int = 7
     
-    @State private var timeRemaining: TimeInterval = 30
-    @State private var isPaused: Bool = false
+    var restDuration: TimeInterval {
+        switch level {
+        case .beginner:
+            return 60  // 60 seconds for beginners
+        case .intermediate:
+            return 45  // 45 seconds for intermediate
+        case .advanced:
+            return 30  // 30 seconds for advanced
+        }
+    }
     
     private var formattedTime: String {
         let minutes = Int(timeRemaining) / 60
@@ -50,6 +60,11 @@ struct RestView: View {
                 Text(formattedTime)
                     .font(.system(size: 72, weight: .bold))
                     .foregroundColor(Color("pinkTextPrimary"))
+                
+                Text(isTooMuchPaused ? "⚠️ You’ve added too much rest time!" : " ")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(isTooMuchPaused ? .red : .clear)
+                    .animation(.easeInOut(duration: 0.3), value: isTooMuchPaused)
             }
             .padding(.vertical, 40)
             
@@ -88,22 +103,27 @@ struct RestView: View {
             
             HStack(spacing: 16) {
                 NeutralGlassButton(title: "+10s") {
-                    timeRemaining += 10
+                    switch timeRemaining {
+                    case 111...119:
+                        timeRemaining += (120 - timeRemaining)
+                    case 120:
+                        isTooMuchPaused = true
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                            isTooMuchPaused = false
+                        }
+                        //add haptic here
+                    default:
+                        timeRemaining += 10
+                    }
                 }
-
-//                NeutralGlassButton(title: "Next") {
-//                    timeRemaining = 0
-//                    
-//                    DispatchQueue.main.async {
-//                        router.navigateTo(.startStrength)
-//                    }
-//                }
+                
                 NeutralGlassButton(title: nextWorkoutName != nil ? "Next" : "Finish") {
-                    timer?.invalidate() // ✅ Stop timer
+                    timer?.invalidate()
                     timer = nil
                     
                     if nextWorkoutName != nil {
-                        sessionManager.moveToNextExercise() // ✅ Move to next BEFORE navigating
+                        sessionManager.moveToNextExercise()
                         print("⏭️ Moving to exercise: \(sessionManager.currentExercise?.name ?? "nil")")
                         router.navigateTo(.startStrength)
                     } else {
@@ -129,7 +149,7 @@ struct RestView: View {
     }
     
     private func startRestTimer() {
-        timeRemaining = 30
+        timeRemaining = restDuration
         
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
             if !isPaused && timeRemaining > 0 {
@@ -153,8 +173,8 @@ struct RestView: View {
     }
 }
 
-#Preview {
-    NavigationStack {
-        RestView()
-    }
-}
+//#Preview {
+//    NavigationStack {
+//        RestView()
+//    }
+//}
