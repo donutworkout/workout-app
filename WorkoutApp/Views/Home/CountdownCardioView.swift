@@ -75,10 +75,8 @@ struct CountdownCardioView: View {
                 if !showCountdown {
                     PrimaryGlassButton(title: isPaused ? "Resume" : "Pause") {
                         if isPaused {
-                            // Resume workout
                             connectivity.resumeWorkoutFromPhone()
                         } else {
-                            // Pause workout
                             connectivity.pauseWorkoutFromPhone()
                         }
                         isPaused.toggle()
