@@ -11,12 +11,14 @@ struct CountdownView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var router: Router
     @EnvironmentObject var sessionManager: StrengthSessionManager
-
+    
     let exercises: [Exercise]
     
     @State private var countdown: Int = 3
     @State private var showCountdown: Bool = true
     @State private var timeRemaining: TimeInterval = 60
+    @State private var showPausePopup: Bool = false
+    @State private var showExitAlert: Bool = false
     @State private var isPaused: Bool = false
     @State private var timer: Timer? = nil
     @State private var calories: Int = 0
@@ -25,7 +27,7 @@ struct CountdownView: View {
     var firstExercise: Exercise? {
         exercises.first
     }
-        
+    
     var totalPages: Int {
         exercises.count
     }
@@ -41,14 +43,14 @@ struct CountdownView: View {
                 // MARK: - Page Control + Title + Image
                 VStack(spacing: 16) {
                     // MARK: Page Control (bulatan)
-//                    HStack(spacing: 6) {
-//                        ForEach(1...totalPages, id: \.self) { index in
-//                            Circle()
-//                                .fill(index == 1 ? Color("pinkTextPrimary") : Color.gray.opacity(0.3))
-//                                .frame(width: 8, height: 8)
-//                        }
-//                    }
-//                    .padding(.top, 24)
+                    //                    HStack(spacing: 6) {
+                    //                        ForEach(1...totalPages, id: \.self) { index in
+                    //                            Circle()
+                    //                                .fill(index == 1 ? Color("pinkTextPrimary") : Color.gray.opacity(0.3))
+                    //                                .frame(width: 8, height: 8)
+                    //                        }
+                    //                    }
+                    //                    .padding(.top, 24)
                     
                     // MARK: Workout Title
                     Text(firstExercise?.name ?? "Get Ready!")
@@ -104,6 +106,22 @@ struct CountdownView: View {
                     }
                     .padding(.horizontal)
                     .padding(.bottom, 40)
+                    .disabled(showPausePopup)
+                }
+                
+                // MARK: - Pause Popup
+                if showPausePopup {
+                    Alert(
+                        characterImage: "characterFreeze",
+                        onResume:  {
+                                showExitAlert = false
+                            
+                        },
+                        onEndWorkout: {
+                            timer?.invalidate()
+                            router.navigateTo(.menu)
+                        }
+                    )
                 }
             }
             .background(Color.white.ignoresSafeArea())
@@ -129,6 +147,9 @@ struct CountdownView: View {
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button(action: {
+                    // Instead of navigating directly → show alert first
+                    showPausePopup = true
+                    isPaused = true
                     timer?.invalidate()
                     router.navigateTo(.menu)
                 }) {
@@ -156,12 +177,15 @@ struct CountdownView: View {
     private func startCountdown() {
         countdown = 3
         showCountdown = true
-
+        SoundManager.shared.playSound("countdownMusic")
+        HapticManager.shared.trigger(.countdownTick)
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
             if countdown > 1 {
                 countdown -= 1
+                HapticManager.shared.trigger(.countdownTick)
             } else {
                 t.invalidate()
+                HapticManager.shared.trigger(.countdownEnd)
                 
                 // Start workout on countdown completion
                 if let type = router.selectedWorkoutType {

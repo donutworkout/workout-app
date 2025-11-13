@@ -53,10 +53,10 @@ struct StartView: View {
     var body: some View {
         VStack(spacing: 10) {
             // MARK: - Time
-            Text(currentTime)
-                .font(.system(size: 16, weight: .regular, design: .rounded))
-                .foregroundColor(.black.opacity(0.8))
-                .padding(.top, 10)
+//            Text(currentTime)
+//                .font(.system(size: 16, weight: .regular, design: .rounded))
+//                .foregroundColor(.black.opacity(0.8))
+//                .padding(.top, 10)
             
             // MARK: - Category
             Text(categoryName)

@@ -67,6 +67,9 @@ struct FinishWorkoutView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.white.ignoresSafeArea())
         .navigationBarBackButtonHidden(true)
+        .onAppear {
+            HapticManager.shared.trigger(.workoutCompleted)
+                }
     }
     
     // MARK: - Reusable Summary Item

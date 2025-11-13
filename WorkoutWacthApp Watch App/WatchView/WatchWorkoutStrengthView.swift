@@ -35,10 +35,10 @@ struct WatchWorkoutStrengthView: View {
                     
                     Spacer()
                     
-                    Text(currentTime)
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white)
-                        .onReceive(clockTimer) { _ in updateTime() }
+//                    Text(currentTime)
+//                        .font(.system(size: 16, weight: .semibold))
+//                        .foregroundColor(.white)
+//                        .onReceive(clockTimer) { _ in updateTime() }
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 20)

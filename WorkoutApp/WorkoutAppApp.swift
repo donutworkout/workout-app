@@ -17,7 +17,6 @@ struct WorkoutAppApp: App {
     @StateObject var sessionManager = StrengthSessionManager.shared
     @State private var connectivity = iPhoneConnectivityManager.shared
     
-    
     static let modelContainer: ModelContainer = {
         do {
             let schema = Schema([
@@ -55,6 +54,8 @@ struct WorkoutAppApp: App {
                 .environmentObject(surveyManager)
                 .environment(connectivity)
                 .environmentObject(sessionManager)
+                .environmentObject(router)
+                .preferredColorScheme(.light)
         }
         .modelContainer(WorkoutAppApp.modelContainer)
     }

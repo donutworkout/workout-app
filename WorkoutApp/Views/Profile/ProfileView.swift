@@ -48,11 +48,11 @@ struct ProfileView: View {
                                 ProfileRow(icon: "figure.arms.open", title: "Body Measurement")
                             }
                             
-//                            NavigationLink {
-//                                EditMotivationView()
-//                            } label: {
-//                                ProfileRow(icon: "face.smiling", title: "Change Goal")
-//                            }
+                            NavigationLink {
+                                EditWorkoutLevelView()
+                            } label: {
+                                ProfileRow(icon: "face.smiling", title: "Change Level")
+                            }
 
                             NavigationLink {
                                 EditProfileView()
@@ -113,8 +113,8 @@ struct ProfileView: View {
                 switch destination {
                 case "editBodyInfo":
                     EditBodyInfoView()
-                case "editMotivation":
-                    EditMotivationView()
+                case "editWorkoutLevel":
+                    EditWorkoutLevelView()
                 case "editProfile":
                     EditProfileView()
                 case "menstrualCycle":

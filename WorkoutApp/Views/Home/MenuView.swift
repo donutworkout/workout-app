@@ -227,7 +227,10 @@ struct CombinedWorkoutCardView: View {
                         .lineSpacing(3)
                 }
                 if (menu?.isCardio ?? false) || (menu?.isStrength ?? false) {
-                    PrimaryGlassButton(title: "Start Workout", action: onStartWorkout)
+                    PrimaryGlassButton(title: "Start Workout", action: {
+                        HapticManager.shared.trigger(.buttonTap)
+                        onStartWorkout()
+                    })
                 }
             }
             .padding(.horizontal, 20)
@@ -242,32 +245,73 @@ struct CombinedWorkoutCardView: View {
     }
 }
 
-// MARK: - Day Selector
+// MARK: - Day Selector (Final Fixed Version)
 struct DaySelectorView: View {
     @Binding var selectedDay: Int
+    
+    private let weekDays = ["M", "T", "W", "T", "F", "S", "S"]
+    private let todayIndex = Calendar.current.component(.weekday, from: Date()) - 1 // 0-based
     
     var body: some View {
         HStack(spacing: 8) {
             ForEach(0..<7) { index in
-                Button {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        selectedDay = index
+                let isPastDay = index < todayIndex
+                let isToday = index == todayIndex
+                let isSelected = selectedDay == index
+                
+                VStack(spacing: 6) {
+                    // Label hari
+                    Text(weekDays[index])
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.black)
+                    
+                    // Tombol hari
+                    Button {
+                        guard !isPastDay else { return }
+                        withAnimation(.easeInOut(duration: 0.25)) {
+                            selectedDay = index
+                        }
+                    } label: {
+                        ZStack {
+                            // Warna background
+                            Circle()
+                                .fill(
+                                    isPastDay
+                                        ? Color.gray.opacity(0.3) // abu
+                                        : (
+                                            isSelected
+                                            ? Color("pinkTextPrimary") // pink tua kalau dipilih
+                                            : (
+                                                isToday
+                                                ? Color("pinkTextTertiary") // pink muda kalau hari ini tapi tdk dipilih
+                                                : Color("pinkTextTertiary") // pink muda default
+                                            )
+                                        )
+                                )
+                                .frame(width: 44, height: 44)
+                            
+                            // Angka
+                            Text("\(index + 1)")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(
+                                    isPastDay
+                                        ? .gray.opacity(0.6)
+                                        : (isSelected ? .white : .black.opacity(0.8))
+                                )
+                        }
                     }
-                } label: {
-                    Circle()
-                        .fill(selectedDay == index ? Color("pinkTextPrimary") : Color("pinkTextTertiary"))
-                        .frame(width: 44, height: 44)
-                        .overlay(
-                            Text(String(Calendar.current.shortWeekdaySymbols[index].prefix(1)))
-                                .font(.system(size: 17, weight: .semibold))
-                                .foregroundColor(.white)
-                        )
+                    .disabled(isPastDay)
                 }
+                .opacity(isPastDay ? 0.6 : 1)
             }
         }
         .padding(.horizontal)
+        .onAppear {
+            selectedDay = todayIndex // default pilih hari ini
+        }
     }
 }
+
 
 // MARK: - Phase Card
 struct PhaseCardView: View {

@@ -11,19 +11,19 @@ struct StartCardioView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var router: Router
     @Environment(iPhoneConnectivityManager.self) private var connectivity
-
+    
     // MARK: - Props
     var activityName: String = "Indoor Walk"
     var imageName: String = "indoorWalk"
-
+    
     @State private var timeElapsed: TimeInterval = 0
     @State private var calories: Int = 0
     @State private var distance: Double = 0.0
     @State private var bpm: Int = 90
     @State private var showPausePopup: Bool = false
-
+    
     @State private var timer: Timer? = nil
-
+    
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
@@ -86,6 +86,12 @@ struct StartCardioView: View {
                         showPausePopup = false
                     } else {
                         connectivity.pauseWorkoutFromPhone()
+<<<<<<< HEAD
+=======
+                        
+                        // ✅ Tampilkan alert/popup
+                        isPaused = true
+>>>>>>> develop
                         showPausePopup = true
                     }
                 }
@@ -96,8 +102,8 @@ struct StartCardioView: View {
             .disabled(showPausePopup)
             
             if showPausePopup {
-                WorkoutPausePopup(
-                    characterImage: "buttercup",
+                Alert(
+                    characterImage: "",
                     onResume: {
                         showPausePopup = false
                         connectivity.resumeWorkoutFromPhone()
@@ -118,8 +124,9 @@ struct StartCardioView: View {
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button(action: {
-                    timer?.invalidate()
-                    router.navigateTo(.menu)
+                    // Instead of navigating directly → show alert first
+                    showPausePopup = true
+                    isPaused = true
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .semibold))
@@ -151,14 +158,14 @@ struct StartCardioView: View {
             }
         }
     }
-
+    
     private var formattedTime: String {
         let hours = Int(connectivity.timeActive) / 3600
         let minutes = (Int(connectivity.timeActive) % 3600) / 60
         let seconds = Int(connectivity.timeActive) % 60
         return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
-
+    
     private func startTimer() {
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) {
@@ -175,6 +182,7 @@ struct StartCardioView: View {
     }
 }
 
+<<<<<<< HEAD
 // MARK: - Reusable Pause Popup
 struct WorkoutPausePopup: View {
     let characterImage: String
@@ -237,6 +245,8 @@ struct WorkoutPausePopup: View {
     }
 }
 
+=======
+>>>>>>> develop
 // #Preview {
 //     NavigationStack {
 //         StartCardioView()
