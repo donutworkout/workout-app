@@ -65,7 +65,7 @@ struct RouterView: View {
                 RestView(onNext: {
                     sessionManager.moveToNextExercise()
                     router.navigateTo(.startStrength)
-                })
+                }, level: surveyManager.tempWorkoutLevel)
                 .environmentObject(router)
                 
             // MARK: - Profile Section (Tetap di dalam TabBar)
