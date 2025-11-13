@@ -307,7 +307,11 @@ extension SurveyCycleView {
     
     private func loadExistingSelections() {
         if selectedMenstrualCycle.isEmpty {
-            selectedMenstrualCycle = [surveyManager.tempIsCycleRegular ? "Yes" : "No"]
+            if let isRegular = surveyManager.tempIsCycleRegular {
+                selectedMenstrualCycle = [isRegular ? "Yes" : "No"]
+            } else {
+                selectedMenstrualCycle = []
+            }
         }
         
         // 2. Load dates (only if they're not the default Date())
@@ -340,12 +344,12 @@ extension SurveyCycleView {
         
         // 4. Load energy level
         if selectedEnergyLevel.isEmpty {
-            selectedEnergyLevel = [surveyManager.tempCycleEnergy.displayName]
+            selectedEnergyLevel = [surveyManager.tempCycleEnergy?.displayName ?? "Not selected"]
         }
         
         // 5. Load mood
         if selectedMoodChanges.isEmpty {
-            selectedMoodChanges = [surveyManager.tempCycleMoodAffectsMotivation.displayName]
+            selectedMoodChanges = [surveyManager.tempCycleMoodAffectsMotivation?.displayName ?? "Not selected"]
         }
     }
     
