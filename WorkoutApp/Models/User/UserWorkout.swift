@@ -125,11 +125,11 @@ enum WorkoutExperience: String, Codable, CaseIterable {
 class UserWorkout: Identifiable {
   
     var id: UUID = UUID()
-    var workoutMotivation: WorkoutMotivation = WorkoutMotivation.keepFit
-    var workoutTimesAWeek: WorkoutTimesAWeek = WorkoutTimesAWeek.twoToThreeTimes // berapa kali olahraga dalam seminggu
-    var workoutDuration: WorkoutDuration = WorkoutDuration.underThirtyMinutes
-    var workoutIntensity: WorkoutIntensity = WorkoutIntensity.light
-    var workoutExperience: WorkoutExperience = WorkoutExperience.underOneMonth // sudah berapa lama berolahraga
+    var workoutMotivation: WorkoutMotivation? = nil
+    var workoutTimesAWeek: WorkoutTimesAWeek? = nil // berapa kali olahraga dalam seminggu
+    var workoutDuration: WorkoutDuration? = nil
+    var workoutIntensity: WorkoutIntensity? = nil
+    var workoutExperience: WorkoutExperience? = nil // sudah berapa lama berolahraga
     var workoutLevel: WorkoutLevel = WorkoutLevel.beginner
     var workoutDaysPreference: [WorkoutDayPreference] = []
     var createdAt: Date = Date()

@@ -19,6 +19,7 @@ enum Route {
     case finishWorkout
 }
 
+@MainActor
 final class Router: ObservableObject {
     @Published var currentRoute: Route = .onboarding
     @Published var isFromProfile: Bool = false
@@ -28,6 +29,15 @@ final class Router: ObservableObject {
     @Published var selectedCardioMenu: String? = nil
     @Published var workoutExercises: [Exercise] = []
     
+    // In your Router class
+    init(surveyManager: SurveyManager? = nil) {
+        if let manager = surveyManager, manager.isSurveyComplete {
+            self.currentRoute = .menu  // ✅ Start at menu if surveys done
+        } else {
+            self.currentRoute = .onboarding  // Start at onboarding if not
+        }
+    }
+    
     func navigateTo(_ route: Route) {
         currentRoute = route
     }
@@ -36,3 +46,4 @@ final class Router: ObservableObject {
         currentRoute = route
     }
 }
+

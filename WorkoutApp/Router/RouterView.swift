@@ -13,8 +13,17 @@ struct RouterView: View {
                 
                 // MARK: - Onboarding & Setup Flow
             case .onboarding:
-                OnboardingView()
-                    .environmentObject(router)
+                if surveyManager.isSurveyComplete {
+                    TabBarView()
+                        .environmentObject(router)
+                        .environmentObject(surveyManager)
+                        .onAppear {
+                            router.currentRoute = .menu
+                        }
+                } else {
+                    OnboardingView()
+                        .environmentObject(router)
+                }
                 
             case .healthConnect:
                 HealthConnectView(
@@ -155,6 +164,12 @@ struct RouterView: View {
                         }
                     }
                 }
+            }
+        }
+        .onAppear {
+            // ✅ Check on first appear and navigate if needed
+            if router.currentRoute == .onboarding && surveyManager.isSurveyComplete {
+                router.currentRoute = .menu
             }
         }
     }
