@@ -46,6 +46,10 @@ class SurveyManager : ObservableObject {
     var isWorkoutComplete: Bool = false
     var isCycleComplete: Bool = false
     
+    var isSurveyComplete: Bool {
+        return isProfileComplete && isWorkoutComplete && isCycleComplete
+    }
+    
     var currentCyclePhase: MenstrualPhase {
         return CyclePhaseCalculator.calculateCurrentPhase(
             lastPeriodStart: tempCycleStartDate,
@@ -258,7 +262,7 @@ class SurveyManager : ObservableObject {
         }
         
         isProfileComplete = true
-        print("UserProfile finalized")
+        print("UserProfile finalized ✅")
         save()
     }
     
@@ -293,6 +297,7 @@ class SurveyManager : ObservableObject {
         
         print("UserWorkout finalized")
         isWorkoutComplete = true
+        print("workout complete true ✅")
         save()
     }
     
@@ -325,6 +330,7 @@ class SurveyManager : ObservableObject {
         }
         
         isCycleComplete = true
+        print("cycle complete true ✅")
         save()
     }
     
@@ -528,4 +534,3 @@ extension ModelContext {
         }
     }
 }
-
