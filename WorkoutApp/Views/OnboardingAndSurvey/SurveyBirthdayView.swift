@@ -113,6 +113,9 @@ struct SurveyBirthdayView: View {
                             .pickerStyle(.wheel)
                             .frame(height: 150)
                             .clipped()
+                            .onChange(of: selectedYear) { _ in
+                                                            HapticManager.shared.trigger(.pickerSelection)
+                                                        }
                         }
                         .frame(height: 180)
                     }

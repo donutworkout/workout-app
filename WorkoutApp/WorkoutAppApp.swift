@@ -55,6 +55,8 @@ struct WorkoutAppApp: App {
                 .environmentObject(surveyManager)
                 .environment(connectivity)
                 .environmentObject(sessionManager)
+                .environmentObject(router)
+                .preferredColorScheme(.light)
         }
         .modelContainer(WorkoutAppApp.modelContainer)
     }

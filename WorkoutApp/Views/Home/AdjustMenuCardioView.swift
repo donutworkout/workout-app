@@ -195,6 +195,7 @@ struct AdjustMenuCardioView: View {
             selectedMenu = nil
         } else {
             selectedMenu = activity
+            HapticManager.shared.trigger(.adjustReps)
             let type = mapActivityToHKType(activity)
             router.selectedWorkoutType = type
             iPhoneConnectivityManager.shared.sendSelectedWorkout(type)

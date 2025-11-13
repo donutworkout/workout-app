@@ -33,13 +33,13 @@ struct WatchWorkoutDoneView: View {
                             .foregroundColor(Color("pinkTextPrimary"))
                     }
 
-                    Spacer()
+//                    Spacer()
 
                     // Tetap update jam di kanan atas
-                    Text(currentTime)
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white)
-                        .onReceive(clockTimer) { _ in updateTime() }
+//                    Text(currentTime)
+//                        .font(.system(size: 16, weight: .semibold))
+//                        .foregroundColor(.white)
+//                        .onReceive(clockTimer) { _ in updateTime() }
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 20)

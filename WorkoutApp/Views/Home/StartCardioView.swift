@@ -11,20 +11,20 @@ struct StartCardioView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var router: Router
     @Environment(iPhoneConnectivityManager.self) private var connectivity
-
+    
     // MARK: - Props
     var activityName: String = "Indoor Walk"
     var imageName: String = "indoorWalk"
-
+    
     @State private var timeElapsed: TimeInterval = 0
     @State private var calories: Int = 0
     @State private var distance: Double = 0.0
     @State private var bpm: Int = 90
     @State private var isPaused: Bool = false
     @State private var showPausePopup: Bool = false
-
+    
     @State private var timer: Timer? = nil
-
+    
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
@@ -34,29 +34,29 @@ struct StartCardioView: View {
                         .font(.system(size: 28, weight: .semibold))
                         .foregroundColor(Color("pinkTextPrimary"))
                         .padding(.top, 16)
-
+                    
                     Image(imageName)
                         .resizable()
                         .scaledToFit()
                         .frame(height: 320)
                         .padding(.top, 8)
                 }
-
+                
                 Spacer()
-
+                
                 // MARK: - Timer
                 HStack(spacing: 8) {
                     Image(systemName: "timer")
                         .font(.system(size: 32, weight: .medium))
                         .foregroundColor(Color("pinkTextPrimary"))
-
+                    
                     Text(formattedTime)
                         .font(.system(size: 48, weight: .bold))
                         .foregroundColor(Color("pinkTextPrimary"))
                         .monospacedDigit()
                 }
                 .padding(.bottom, 32)
-
+                
                 // MARK: - Stats
                 HStack(spacing: 12) {
                     StatCardItem(icon: "flame.fill", value: "\(calories)", label: "KCAL")
@@ -65,9 +65,9 @@ struct StartCardioView: View {
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 32)
-
+                
                 Spacer()
-
+                
                 // MARK: - Button
                 PrimaryGlassButton(title: isPaused ? "Resume" : "Pause") {
                     if isPaused {
@@ -78,7 +78,7 @@ struct StartCardioView: View {
                     } else {
                         // ✅ Pause workout
                         connectivity.pauseWorkoutFromPhone()
-
+                        
                         // ✅ Tampilkan alert/popup
                         isPaused = true
                         showPausePopup = true
@@ -90,10 +90,10 @@ struct StartCardioView: View {
             }
             .blur(radius: showPausePopup ? 3 : 0)
             .disabled(showPausePopup)
-
+            
             if showPausePopup {
-                WorkoutPausePopup(
-                    characterImage: "buttercup",
+                Alert(
+                    characterImage: "",
                     onResume: {
                         showPausePopup = false
                         isPaused = false
@@ -113,8 +113,9 @@ struct StartCardioView: View {
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button(action: {
-                    timer?.invalidate()
-                    router.navigateTo(.menu)
+                    // Instead of navigating directly → show alert first
+                    showPausePopup = true
+                    isPaused = true
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .semibold))
@@ -137,14 +138,14 @@ struct StartCardioView: View {
             }
         }
     }
-
+    
     private var formattedTime: String {
         let hours = Int(connectivity.timeActive) / 3600
         let minutes = (Int(connectivity.timeActive) % 3600) / 60
         let seconds = Int(connectivity.timeActive) % 60
         return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
-
+    
     private func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) {
             _ in
@@ -155,63 +156,6 @@ struct StartCardioView: View {
                 bpm = 90 + Int(timeElapsed.truncatingRemainder(dividingBy: 30))
             }
         }
-    }
-}
-
-// MARK: - Reusable Pause Popup
-struct WorkoutPausePopup: View {
-    let characterImage: String
-    var onResume: () -> Void
-    var onEndWorkout: () -> Void
-    
-    @Environment(iPhoneConnectivityManager.self) private var connectivity
-
-    var body: some View {
-        ZStack {
-            // Background gelap transparan
-            Color.black.opacity(0.4)
-                .ignoresSafeArea()
-                .onTapGesture { onResume() }
-
-            VStack(spacing: 0) {
-                ZStack(alignment: .top) {
-
-                    // MARK: - Kotak Putih
-                    VStack(spacing: 14) {
-                        Spacer().frame(height: 50) // ruang untuk karakter di atas
-
-                        PrimaryGlassButton(title: "Resume") {
-                            onResume()
-                        }
-
-                        NeutralGlassButton(title: "End Workout") {
-                            onEndWorkout()
-                            WorkoutSessionManager().stopWorkout()
-                            connectivity.stopWorkoutFromPhone()
-                        }
-                        Spacer().frame(height: 10)
-                    }
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 20)
-                    .background(
-                        RoundedRectangle(cornerRadius: 24)
-                            .fill(Color.white)
-                            .shadow(color: .black.opacity(0.15), radius: 15, x: 0, y: 8)
-
-                    )
-
-                    // MARK: - Karakter setengah badan di atas kotak
-                    Image(characterImage)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 130, height: 130)
-                        .offset(y: -65) // setengah badannya nongol di atas kotak
-                }
-            }
-            .padding(.horizontal, 40)
-            .transition(.scale.combined(with: .opacity))
-        }
-        .transition(.scale.combined(with: .opacity))
     }
 }
 

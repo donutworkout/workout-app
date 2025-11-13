@@ -43,7 +43,12 @@ struct WorkoutItemCard: View {
             
             // MARK: - Plus & Minus
             HStack(spacing: 12) {
-                Button(action: { if sets > 1 { sets -= 1 } }) {
+                Button(action: {
+                    if sets > 1 {
+                        sets -= 1
+                        HapticManager.shared.trigger(.adjustReps) // 🔊 Getar saat dikurangi
+                    }
+                }) {
                     Image(systemName: "minus")
                         .font(.system(size: 14, weight: .semibold))
                         .frame(width: 28, height: 28)
@@ -52,7 +57,10 @@ struct WorkoutItemCard: View {
                         .foregroundColor(.gray)
                 }
                 
-                Button(action: { sets += 1 }) {
+                Button(action: {
+                    sets += 1
+                    HapticManager.shared.trigger(.adjustReps) // 🔊 Getar saat ditambah
+                }) {
                     Image(systemName: "plus")
                         .font(.system(size: 14, weight: .semibold))
                         .frame(width: 28, height: 28)
