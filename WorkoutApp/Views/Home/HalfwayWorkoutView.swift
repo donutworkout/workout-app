@@ -10,7 +10,7 @@ import SwiftUI
 struct HalfwayWorkoutView: View {
     @EnvironmentObject var router: Router
     
-    var characterImage: String = "buttercup"
+    var characterImage: String = "charHalfwayDone"
     
     var body: some View {
         VStack(spacing: 24) {
@@ -20,7 +20,7 @@ struct HalfwayWorkoutView: View {
             Image(characterImage)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 280, height: 280)
+                .frame(width: 300, height: 300)
             
             // MARK: - Title
             VStack(spacing: 6) {

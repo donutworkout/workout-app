@@ -156,7 +156,9 @@ struct CountdownCardioView: View {
     private func startCountdown() {
         countdown = 3
         showCountdown = true
-        SoundManager.shared.playSound("countdownMusic")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            SoundManager.shared.playSound("countdownMusic", withExtension: "mp3")
+            }
         HapticManager.shared.trigger(.countdownTick)
         
         // Countdown overlay timer

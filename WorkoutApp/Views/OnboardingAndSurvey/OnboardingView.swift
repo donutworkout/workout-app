@@ -47,20 +47,20 @@ struct OnboardingView: View {
                 }
                 .padding(.horizontal)
                 
-                // MARK: - OR Divider
-                HStack {
-                    Rectangle()
-                        .frame(height: 1)
-                        .foregroundColor(.gray.opacity(0.3))
-                    Text("or")
-                        .font(.system(size: 14))
-                        .foregroundColor(.gray)
-                    Rectangle()
-                        .frame(height: 1)
-                        .foregroundColor(.gray.opacity(0.3))
-                }
-                .padding(.horizontal, 40)
-                
+//                // MARK: - OR Divider
+//                HStack {
+//                    Rectangle()
+//                        .frame(height: 1)
+//                        .foregroundColor(.gray.opacity(0.3))
+//                    Text("or")
+//                        .font(.system(size: 14))
+//                        .foregroundColor(.gray)
+//                    Rectangle()
+//                        .frame(height: 1)
+//                        .foregroundColor(.gray.opacity(0.3))
+//                }
+//                .padding(.horizontal, 40)
+//                
 //                // MARK: - Sign in with Apple
 //                SignInWithAppleButton(.signIn) { request in
 //                    request.requestedScopes = [.fullName, .email]
@@ -74,9 +74,9 @@ struct OnboardingView: View {
 //                        print("❌ Apple Sign-In failed: \(error.localizedDescription)")
 //                    }
 //                }
-                .frame(height: 50)
-                .clipShape(RoundedRectangle(cornerRadius: 24))
-                .padding(.horizontal)
+//                .frame(height: 50)
+//                .clipShape(RoundedRectangle(cornerRadius: 24))
+//                .padding(.horizontal)
                 .padding(.bottom, 40)
             }
             .padding()
