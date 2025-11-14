@@ -83,8 +83,8 @@ struct WatchWorkoutControlsView: View {
             .background(Color("grayBackground"))
             .ignoresSafeArea()
             .onChange(of: sessionManager.isPaused) { _, paused in
-                print("🔥 WatchView detected pause change: \(paused)")
                 isPaused = paused
+
             }
 
     }

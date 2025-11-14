@@ -86,12 +86,6 @@ struct StartCardioView: View {
                         showPausePopup = false
                     } else {
                         connectivity.pauseWorkoutFromPhone()
-<<<<<<< HEAD
-=======
-                        
-                        // ✅ Tampilkan alert/popup
-                        isPaused = true
->>>>>>> develop
                         showPausePopup = true
                     }
                 }
@@ -126,7 +120,6 @@ struct StartCardioView: View {
                 Button(action: {
                     // Instead of navigating directly → show alert first
                     showPausePopup = true
-                    isPaused = true
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .semibold))
@@ -181,8 +174,6 @@ struct StartCardioView: View {
         }
     }
 }
-
-<<<<<<< HEAD
 // MARK: - Reusable Pause Popup
 struct WorkoutPausePopup: View {
     let characterImage: String
@@ -245,8 +236,6 @@ struct WorkoutPausePopup: View {
     }
 }
 
-=======
->>>>>>> develop
 // #Preview {
 //     NavigationStack {
 //         StartCardioView()

@@ -126,6 +126,7 @@ class WatchConnectivityManager: NSObject {
                         if let typeRaw = message["workoutType"] as? UInt,
                            let type = HKWorkoutActivityType(rawValue: typeRaw) {
                             self.selectedWorkoutType = type
+                            self.sessionManager.timeActive = 0
                             print("⌚ Received start command from iPhone: \(type.displayName)")
                             self.shouldStartWorkout = true
                         }

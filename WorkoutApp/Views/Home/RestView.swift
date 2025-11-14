@@ -103,28 +103,16 @@ struct RestView: View {
             
             HStack(spacing: 16) {
                 NeutralGlassButton(title: "+10s") {
-                                    HapticManager.shared.trigger(.buttonTap)
-                                    timeRemaining += 10
-                                }
-
-
-//                NeutralGlassButton(title: "Next") {
-//                    timeRemaining = 0
-//                    
-//                    DispatchQueue.main.async {
-//                        router.navigateTo(.startStrength)
-//                    }
-//                }
+                    HapticManager.shared.trigger(.buttonTap)
                     switch timeRemaining {
                     case 111...119:
                         timeRemaining += (120 - timeRemaining)
                     case 120:
                         isTooMuchPaused = true
-                        
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                             isTooMuchPaused = false
                         }
-                        //add haptic here
+                        HapticManager.shared.trigger(.restAdded)
                     default:
                         timeRemaining += 10
                     }
@@ -152,9 +140,9 @@ struct RestView: View {
         .background(Color.white.ignoresSafeArea())
         .navigationBarBackButtonHidden(true)
         .onAppear {
-                    HapticManager.shared.trigger(.restStart) // ✅ haptic saat mulai rest
-                    startRestTimer()
-                }
+            HapticManager.shared.trigger(.restStart) // ✅ haptic saat mulai rest
+            startRestTimer()
+        }
         .onDisappear {
             timer?.invalidate()
             timer = nil
