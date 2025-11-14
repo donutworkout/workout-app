@@ -19,6 +19,8 @@ enum WorkoutCommand: String {
 @Observable
 class WorkoutSessionManager: NSObject {
     
+    static let shared = WorkoutSessionManager()
+
     private var timer: Timer?
     private let healthStore = HKHealthStore()
     private var workoutSession: HKWorkoutSession?
@@ -29,6 +31,24 @@ class WorkoutSessionManager: NSObject {
     var distance: Double = 0.0
     var isRunning: Bool = false
     var timeActive: Double = 0.0
+    var isPaused: Bool = false
+    
+    private var lastMetricsSent: Date = .distantPast
+
+    private func sendMetricsToPhone() {
+        // Throttle locally in case sendMetrics isn't used
+        let now = Date()
+        guard now.timeIntervalSince(lastMetricsSent) >= 1 else { return }
+        lastMetricsSent = now
+
+        let connectivity = WatchConnectivityManager.shared
+        connectivity.sendMetrics(
+            heartRate: self.heartRate,
+            energy: self.energyBurned,
+            distance: self.distance,
+            elapsed: self.timeActive
+        )
+    }
     
     // MARK: - Start Workout
     
@@ -99,11 +119,10 @@ class WorkoutSessionManager: NSObject {
     
     private func startTimer() {
         timer?.invalidate()
-        timeActive = 0
+        //timeActive = 0
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            if self.isRunning {
-                self.timeActive += 1
-            }
+            guard self.isRunning && !self.isPaused else { return }
+            self.timeActive += 1
         }
     }
     
@@ -136,11 +155,18 @@ class WorkoutSessionManager: NSObject {
     }
     
     func pauseWorkout() {
+        guard isRunning else { return }
         workoutSession?.pause()
+        isPaused = true
+        print("⌚️ Workout paused")
     }
 
     func resumeWorkout() {
+        guard isPaused else { return }
         workoutSession?.resume()
+        isPaused = false
+        isRunning = true
+        print("⌚️ Workout resumed")
     }
 
 
@@ -197,17 +223,16 @@ extension WorkoutSessionManager: HKLiveWorkoutBuilderDelegate {
                 default:
                     break
                 }
-//                WatchConnectivityManager.shared.sendMessage([
-//                        "cmd": "updateMetrics",
-//                        "heartRate": self.heartRate,
-//                        "energy": self.energyBurned,
-//                        "distance": self.distance,
-//                        "time": self.timeActive
-//                    ])
+                
+                self.sendMetricsToPhone()
+
             }
         }
     }
 }
+
+
+
 
 func typesToRead(for activity: HKWorkoutActivityType) -> Set<HKObjectType> {
     let readTypes: Set<HKObjectType> = [

@@ -35,7 +35,8 @@ struct ContentView: View {
                             }
                         }
                 } else if workoutStarted && sessionManager.isRunning {
-                    WatchSessionPagingView(                        workoutType: type,
+                    WatchSessionPagingView(
+                        workoutType: type,
                         workoutName: type.displayName
                     )
                 } else {
@@ -59,18 +60,16 @@ struct ContentView: View {
             } else if !newValue && workoutStarted {
                 print("stop workout!!")
                 sessionManager.stopWorkout()
-                WKInterfaceDevice.current().play(.stop) // ✅ Haptic feedback on stop
+                WKInterfaceDevice.current().play(.stop)
                 showDoneView = true
                 workoutStarted = false
             }
         }
         .onChange(of: showDoneView) { _, newValue in
             if newValue {
-                // ketika done view muncul
                 DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
                     withAnimation(.easeInOut) {
                         showDoneView = false
-                        // reset state biar user bisa pilih olahraga lagi
                         connectivity.selectedWorkoutType = nil
                         connectivity.shouldStartWorkout = false
                         print("⌚ Auto-dismiss done view → back to menu")
@@ -80,10 +79,10 @@ struct ContentView: View {
         }
         .animation(.easeInOut, value: connectivity.selectedWorkoutType)
         .animation(.easeInOut, value: workoutStarted)
-        .onAppear {
-            print("appear stop")
-            sessionManager.stopWorkout()
-        }
+//        .onAppear {
+//            print("appear stop")
+//            sessionManager.stopWorkout()
+//        }
     }
     
     private func startCountdown(for type: HKWorkoutActivityType) {
@@ -106,7 +105,7 @@ struct ContentView: View {
                 // Update state
                 showCountdown = false
                 workoutStarted = true
-                print(connectivity.shouldStartWorkout)
+                print("connectivity.shouldStartWorkout\(connectivity.shouldStartWorkout)")
             }
         }
     }

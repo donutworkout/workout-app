@@ -149,26 +149,6 @@ struct AdjustMenuCardioView: View {
             }
             
         }
-        
-        //        .onChange(of: connectivity.isWorkoutPaused) { _, paused in
-        //            if router.currentRoute == .adjustMenuCardio ||
-        //               router.currentRoute == .startCardio {
-        //                if paused {
-        //                    print("⏸️ Watch paused → show rest screen")
-        //                    router.navigateTo(.restView)
-        //                } else if connectivity.isWorkoutActive {
-        //                    print("▶️ Watch resumed → back to active workout")
-        //                    router.navigateTo(.startCardio)
-        //                }
-        //            }
-        //        }
-        //            .onChange(of: connectivity.isWorkoutPaused) { _, paused in
-        //                if paused {
-        //                    router.navigateTo(.restView)
-        //                } else if connectivity.isWorkoutActive {
-        //                    router.navigateTo(.startCardio)
-        //                }
-        //            }
         // MARK: - Native Navigation Title
         .navigationTitle("Today’s Cardio Menu!")
         .navigationBarTitleDisplayMode(.inline)
@@ -181,11 +161,11 @@ struct AdjustMenuCardioView: View {
                 }
             }
         }
-        .onAppear {
-            print("appear stop iphone")
-            iPhoneConnectivityManager.shared.stopWorkoutFromPhone()
-            
-        }
+//        .onAppear {
+//            print("appear stop iphone")
+//            iPhoneConnectivityManager.shared.stopWorkoutFromPhone()
+//            
+//        }
     }
     
     

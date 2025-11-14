@@ -11,7 +11,7 @@ import WatchConnectivity
 
 @Observable
 final class iPhoneConnectivityManager: NSObject {
-    private let sessionManager = WorkoutSessionManager()
+    private let sessionManager = WorkoutSessionManager.shared
     static let shared = iPhoneConnectivityManager()
 
     private let session = WCSession.default
@@ -65,6 +65,8 @@ extension iPhoneConnectivityManager: WCSessionDelegate {
     ) {
         print("iphone received: \(message)")
         self.handleIncomingMessage(message)
+        
+        replyHandler(["status": "received"])
     }
 
     func session(_ session: WCSession,didReceiveUserInfo userInfo: [String: Any]
@@ -198,16 +200,18 @@ extension iPhoneConnectivityManager {
     }
 
     func pauseWorkoutFromPhone() {
+        isWorkoutPaused = true
         if session.isReachable {
-            sendMessage(["cmd": "pause"])  // relay to watch (owner)
+            sendMessage(["cmd": WorkoutCommand.pause.rawValue])
         } else {
             sessionManager.pauseWorkout()
         }
     }
 
     func resumeWorkoutFromPhone() {
+        isWorkoutPaused = false
         if session.isReachable {
-            sendMessage(["cmd": "resume"])  // relay to watch (owner)
+            sendMessage(["cmd": WorkoutCommand.resume.rawValue])
         } else {
             sessionManager.resumeWorkout()
         }
