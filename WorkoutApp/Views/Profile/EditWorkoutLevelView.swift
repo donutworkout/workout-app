@@ -101,10 +101,10 @@ struct EditWorkoutLevelView: View {
         .navigationBarBackButtonHidden(true)
         .onAppear {
             // Initialize from SurveyManager
-            selectedFrequency = surveyManager.tempWorkoutTimesAWeek.displayName
-            selectedDuration = surveyManager.tempWorkoutDuration.displayName
-            selectedIntensity = surveyManager.tempWorkoutIntensity.displayName
-            selectedExperience = surveyManager.tempWorkoutExperience.displayName
+            selectedFrequency = surveyManager.tempWorkoutTimesAWeek?.displayName ?? "Not selected"
+            selectedDuration = surveyManager.tempWorkoutDuration?.displayName ?? "Not selected"
+            selectedIntensity = surveyManager.tempWorkoutIntensity?.displayName ?? "Not selected"
+            selectedExperience = surveyManager.tempWorkoutExperience?.displayName ?? "Not selected"
         }
     }
 }

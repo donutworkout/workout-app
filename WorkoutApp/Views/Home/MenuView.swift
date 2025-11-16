@@ -10,7 +10,7 @@ struct MenuView: View {
     
     @StateObject var cycleViewModel: CycleViewModel
     @StateObject var menuViewModel: MenuViewModel
-    @State private var selectedDay: Int = Calendar.current.component(.weekday, from: Date()) - 1
+    @State private var selectedDayIndex: Int = 0
     
     private var userCycle: UserCycle? {
         userCycles.first
@@ -24,12 +24,14 @@ struct MenuView: View {
         userWorkouts.first
     }
     
-    private var selectedPhase: MenstrualPhase {
-        cycleViewModel.phase(for: cycleViewModel.selectedDayIndex) ?? .menstruation
+    private var selectedDate: Date {
+        dateForIndex(selectedDayIndex)
     }
     
-    private var selectedDate: Date {
-        cycleViewModel.dateForSelectedDay()
+    private var selectedPhase: MenstrualPhase {
+        guard let cycle = userCycle else { return .menstruation }
+        return phaseForDate(selectedDate, cycle: cycle)
+        // cycleViewModel.phase(for: cycleViewModel.selectedDayIndex) ?? .menstruation
     }
     
     private var selectedDayMenu: DailyMenu? {
@@ -68,7 +70,9 @@ struct MenuView: View {
                     .padding(.horizontal, 20)
                 
                 // MARK: - Day Selector
-                DaySelectorView(selectedDay: $cycleViewModel.selectedDayIndex)
+                DaySelectorView(
+                    selectedDayIndex: $cycleViewModel.selectedDayIndex,
+                    userCycle: userCycle )
                 
                 // MARK: - Workout Card
                 CombinedWorkoutCardView(
@@ -107,9 +111,61 @@ struct MenuView: View {
         }
         .background(Color.white.ignoresSafeArea())
         .onAppear {
-            loadWeeklyMenu()
+            if let cycle = userCycle {
+                cycleViewModel.updateCycle(cycle)
+            }
             
+            selectedDayIndex = todayIndex()
+            loadWeeklyMenu()
         }
+    }
+    
+    private func weekDates() -> [Date] {
+        let calendar = Calendar.current
+        let today = Date()
+        let weekday = calendar.component(.weekday, from: today)
+        
+        // Calculate days to Monday (weekday 2)
+        let daysToMonday = weekday == 1 ? -6 : -(weekday - 2)
+        
+        guard let monday = calendar.date(byAdding: .day, value: daysToMonday, to: today) else {
+            return []
+        }
+        
+        return (0..<7).compactMap { day in
+            calendar.date(byAdding: .day, value: day, to: monday)
+        }
+    }
+    
+    // Convert index to date
+    private func dateForIndex(_ index: Int) -> Date {
+        let dates = weekDates()
+        guard index >= 0 && index < dates.count else { return Date() }
+        return dates[index]
+    }
+    
+    // Get today's index (0-6)
+    private func todayIndex() -> Int {
+        let calendar = Calendar.current
+        let weekday = calendar.component(.weekday, from: Date())
+        // Convert: Sunday=1 -> 6, Monday=2 -> 0, ..., Saturday=7 -> 5
+        return weekday == 1 ? 6 : weekday - 2
+    }
+    
+    // Calculate phase for a date
+    private func phaseForDate(_ date: Date, cycle: UserCycle) -> MenstrualPhase {
+        let calendar = Calendar.current
+        let startOfDate = calendar.startOfDay(for: date)
+        let startOfLastPeriod = calendar.startOfDay(for: cycle.cycleStartDate)
+        
+        let daysSinceStart = calendar.dateComponents([.day], from: startOfLastPeriod, to: startOfDate).day ?? 0
+        let currentDayInCycle = (daysSinceStart % cycle.cycleLength) + 1
+        
+        return CyclePhaseCalculator.phaseForDay(
+            currentDayInCycle,
+            cycleLength: cycle.cycleLength,
+            periodDuration: cycle.menstrualDuration
+        )
     }
     
 }
@@ -247,17 +303,60 @@ struct CombinedWorkoutCardView: View {
 
 // MARK: - Day Selector (Final Fixed Version)
 struct DaySelectorView: View {
-    @Binding var selectedDay: Int
+    @Binding var selectedDayIndex: Int
+    let userCycle: UserCycle?
     
     private let weekDays = ["M", "T", "W", "T", "F", "S", "S"]
-    private let todayIndex = Calendar.current.component(.weekday, from: Date()) - 1 // 0-based
+    //private let todayIndex = Calendar.current.component(.weekday, from: Date()) - 1 // 0-based
+    private let calendar = Calendar.current
+    
+    private var weekDates: [Date] {
+        let today = Date()
+        let weekday = calendar.component(.weekday, from: today)
+        let daysToMonday = weekday == 1 ? -6 : -(weekday - 2)
+        
+        guard let monday = calendar.date(byAdding: .day, value: daysToMonday, to: today) else {
+            return []
+        }
+        
+        return (0..<7).compactMap { day in
+            calendar.date(byAdding: .day, value: day, to: monday)
+        }
+    }
+        
+    private var todayIndex: Int {
+        let weekday = calendar.component(.weekday, from: Date())
+        return weekday == 1 ? 6 : weekday - 2
+    }
+        
+    private func dayNumber(for index: Int) -> Int {
+        guard index < weekDates.count else { return index + 1 }
+        return calendar.component(.day, from: weekDates[index])
+    }
+        // Get phase for a specific index
+    private func phaseForIndex(_ index: Int) -> MenstrualPhase? {
+        guard let cycle = userCycle, index < weekDates.count else { return nil }
+        
+        let date = weekDates[index]
+        let startOfDate = calendar.startOfDay(for: date)
+        let startOfLastPeriod = calendar.startOfDay(for: cycle.cycleStartDate)
+        
+        let daysSinceStart = calendar.dateComponents([.day], from: startOfLastPeriod, to: startOfDate).day ?? 0
+        let currentDayInCycle = (daysSinceStart % cycle.cycleLength) + 1
+        
+        return CyclePhaseCalculator.phaseForDay(
+            currentDayInCycle,
+            cycleLength: cycle.cycleLength,
+            periodDuration: cycle.menstrualDuration
+        )
+    }
     
     var body: some View {
         HStack(spacing: 8) {
             ForEach(0..<7) { index in
                 let isPastDay = index < todayIndex
                 let isToday = index == todayIndex
-                let isSelected = selectedDay == index
+                let isSelected = selectedDayIndex == index
                 
                 VStack(spacing: 6) {
                     // Label hari
@@ -269,7 +368,7 @@ struct DaySelectorView: View {
                     Button {
                         guard !isPastDay else { return }
                         withAnimation(.easeInOut(duration: 0.25)) {
-                            selectedDay = index
+                            selectedDayIndex = index
                         }
                     } label: {
                         ZStack {
@@ -291,7 +390,7 @@ struct DaySelectorView: View {
                                 .frame(width: 44, height: 44)
                             
                             // Angka
-                            Text("\(index + 1)")
+                            Text("\(dayNumber(for: index))")
                                 .font(.system(size: 16, weight: .semibold))
                                 .foregroundColor(
                                     isPastDay
@@ -307,7 +406,7 @@ struct DaySelectorView: View {
         }
         .padding(.horizontal)
         .onAppear {
-            selectedDay = todayIndex // default pilih hari ini
+            selectedDayIndex = todayIndex // default pilih hari ini
         }
     }
 }

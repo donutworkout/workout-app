@@ -6,9 +6,9 @@
 //
 
 import Foundation
+import SwiftUI
 
 class CyclePhaseCalculator {
-    
     static func calculateCurrentPhase(
         lastPeriodStart: Date,
         cycleLength: Int = 28,
@@ -53,7 +53,6 @@ class CyclePhaseCalculator {
 
     }
     
-    /// Calculate next phase change date
     static func nextPhaseChangeDate(
         lastPeriodStart: Date,
         currentPhase: MenstrualPhase,
@@ -83,7 +82,6 @@ class CyclePhaseCalculator {
         return calendar.date(byAdding: .day, value: daysUntilNextPhase, to: today)
     }
     
-    /// Predict next period date
     static func predictNextPeriod(lastPeriodStart: Date, cycleLength: Int = 28) -> Date? {
         let calendar = Calendar.current
         return calendar.date(byAdding: .day, value: cycleLength, to: lastPeriodStart)
