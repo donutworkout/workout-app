@@ -10,7 +10,7 @@ struct MenuView: View {
     
     @StateObject var cycleViewModel: CycleViewModel
     @StateObject var menuViewModel: MenuViewModel
-    @State private var selectedDayIndex: Int = 0
+//    @State private var selectedDayIndex: Int = 0
     
     private var userCycle: UserCycle? {
         userCycles.first
@@ -25,13 +25,22 @@ struct MenuView: View {
     }
     
     private var selectedDate: Date {
-        dateForIndex(selectedDayIndex)
+        dateForIndex(cycleViewModel.selectedDayIndex)
     }
     
     private var selectedPhase: MenstrualPhase {
-        guard let cycle = userCycle else { return .menstruation }
-        return phaseForDate(selectedDate, cycle: cycle)
-        // cycleViewModel.phase(for: cycleViewModel.selectedDayIndex) ?? .menstruation
+        let phase = cycleViewModel.phase(for: cycleViewModel.selectedDayIndex) ?? .menstruation
+        
+        print("🔍 selectedDayIndex: \(cycleViewModel.selectedDayIndex)")
+        print("🔍 selectedPhase from ViewModel: \(phase)")
+        print("🔍 phasesForWeek count: \(cycleViewModel.phasesForWeek.count)")
+        
+        // Debug: print all phases
+        for (index, phaseData) in cycleViewModel.phasesForWeek.enumerated() {
+            print("🔍 Index \(index): \(phaseData.date) -> \(phaseData.phase)")
+        }
+        
+        return phase
     }
     
     private var selectedDayMenu: DailyMenu? {
@@ -39,18 +48,32 @@ struct MenuView: View {
     }
     
     init(modelContext: ModelContext) {
-        // Create placeholder ViewModel (will be replaced)
-        let placeholder = UserCycle(
-            isCycleRegular: true,
-            cycleStartDate: Date(),
-            cycleEndDate: Date(),
-            cycleLength: 28,
-            menstrualDuration: 5,
-            cycleSymptoms: [],
-            cycleEnergy: .stable,
-            cycleMoodAffectsMotivation: .never
-        )
-        _cycleViewModel = StateObject(wrappedValue: CycleViewModel(userCycle: placeholder))
+        //self.modelContext = modelContext
+        
+        // Load existing UserCycle from database
+        let cycleFetch = FetchDescriptor<UserCycle>()
+        let cycles = (try? modelContext.fetch(cycleFetch)) ?? []
+        
+        // Use existing cycle or create a default one
+        let existingCycle: UserCycle
+        if let firstCycle = cycles.first {
+            existingCycle = firstCycle
+        } else {
+            // Create default cycle only if none exists
+            existingCycle = UserCycle(
+                isCycleRegular: true,
+                cycleStartDate: Date(),
+                cycleEndDate: Date(),
+                cycleLength: 28,
+                menstrualDuration: 5,
+                cycleSymptoms: [],
+                cycleEnergy: .stable,
+                cycleMoodAffectsMotivation: .sometimes
+            )
+            modelContext.insert(existingCycle)
+        }
+        
+        _cycleViewModel = StateObject(wrappedValue: CycleViewModel(userCycle: existingCycle))
         _menuViewModel = StateObject(wrappedValue: MenuViewModel(modelContext: modelContext))
     }
     
@@ -113,9 +136,10 @@ struct MenuView: View {
         .onAppear {
             if let cycle = userCycle {
                 cycleViewModel.updateCycle(cycle)
+                print("USERCYCLE ON MENUVIEW UPDATED")
             }
             
-            selectedDayIndex = todayIndex()
+            cycleViewModel.selectedDayIndex = todayIndex()
             loadWeeklyMenu()
         }
     }
