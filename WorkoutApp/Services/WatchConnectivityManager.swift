@@ -18,7 +18,7 @@ enum WorkoutCategory: String {
 @Observable
 class WatchConnectivityManager: NSObject {
     static let shared = WatchConnectivityManager()
-    private let sessionManager = WorkoutSessionManager()
+    private let sessionManager = WorkoutSessionManager.shared
 
     private let session = WCSession.default
     var selectedWorkoutType: HKWorkoutActivityType? = nil
@@ -27,6 +27,8 @@ class WatchConnectivityManager: NSObject {
     var shouldStartWorkout = false
     var isReachable: Bool = false
 
+    private var lastMetricsSent: Date = .distantPast
+    
     override init() {
         super.init()
         setupSession()
@@ -60,17 +62,40 @@ class WatchConnectivityManager: NSObject {
                     print("✅ Reply received: \(reply)")
                 },
                 errorHandler: { error in
-                    let nsError = error as NSError
-                    if nsError.code == 7014 {
-                        print(error)
-                        print("⚠️ sendMessage failed (7014: not reachable), retrying via transferUserInfo()")
-                        self.session.transferUserInfo(message)
-                    }
+                    print("error nihh: \(error)")
                 }
             )
         } else {
             print("⚠️ Session not reachable, queueing via transferUserInfo")
             session.transferUserInfo(message)
+        }
+    }
+    
+    func sendMetrics(heartRate: Double, energy: Double, distance: Double, elapsed: Double) {
+        let now = Date()
+        guard now.timeIntervalSince(lastMetricsSent) > 2 else { return } // tiap 1 detik
+        lastMetricsSent = now
+
+        guard session.activationState == .activated else {
+            print("⚠️ WCSession not activated")
+            return
+        }
+
+        guard session.isReachable else {
+            print("📡 iPhone not reachable — skipping metrics this tick")
+            return
+        }
+
+        let message: [String: Any] = [
+            "cmd": "updateMetrics",
+            "heartRate": heartRate,
+            "energy": energy,
+            "distance": distance,
+            "time": elapsed
+        ]
+
+        session.sendMessage(message, replyHandler: nil) { error in
+            print("⚠️ sendMessage failed: \(error.localizedDescription)")
         }
     }
     
@@ -101,20 +126,17 @@ class WatchConnectivityManager: NSObject {
                         if let typeRaw = message["workoutType"] as? UInt,
                            let type = HKWorkoutActivityType(rawValue: typeRaw) {
                             self.selectedWorkoutType = type
+                            self.sessionManager.timeActive = 0
                             print("⌚ Received start command from iPhone: \(type.displayName)")
                             self.shouldStartWorkout = true
-                            
                         }
-
-                    // iPhone → pause
+                        
                     case .pause:
-                        //self.shouldPauseWorkout = true
                         self.sessionManager.pauseWorkout()
                         print("⏸️ Pause command executed on watch")
 
                     // iPhone → resume
                     case .resume:
-                        //self.shouldPauseWorkout = false
                         self.sessionManager.resumeWorkout()
                         print("▶️ Resume command executed on watch")
 

@@ -1,10 +1,3 @@
-//
-//  AdjustMenuCardioView.swift
-//  WorkoutApp
-//
-//  Created by Jennifer Evelyn on 24/10/25.
-//
-
 import HealthKit
 import SwiftUI
 
@@ -18,61 +11,41 @@ struct AdjustMenuCardioView: View {
     @State private var showCustomAlert = false
     var onNext: () -> Void = {}
     
-    // MARK: - Cardio Menu
-    private let cardioMenu = [
+    // MARK: - Cardio Menu (Dipisah per durasi)
+    private let oneHourMenu = [
         "Outdoor Walk", "Indoor Walk",
-        "Cycling", "Swimming",
+        "Cycling", "Swimming"
+    ]
+    
+    private let thirtyMinuteMenu = [
         "Badminton", "Basketball",
         "Volleyball", "Tennis",
-        "Padel", "Soccer",
+        "Outdoor Run", "Indoor Run"
     ]
     
     var body: some View {
         ZStack {
             VStack(spacing: 32) {
-                // MARK: - Menu Grid
-                VStack(spacing: 12) {
-                    let gridItems = [
-                        GridItem(.flexible()), GridItem(.flexible()),
-                    ]
-                    LazyVGrid(columns: gridItems, spacing: 16) {
-                        ForEach(cardioMenu, id: \.self) { activity in
-                            Button(action: {
-                                handleSelection(for: activity)
-                            }) {
-                                Text(activity)
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .foregroundColor(
-                                        selectedMenu == activity
-                                        ? .white : .black
-                                    )
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 70)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 20)
-                                            .fill(
-                                                selectedMenu == activity
-                                                ? Color("pinkTextPrimary")
-                                                : Color.white
-                                            )
-                                            .shadow(
-                                                color: .gray.opacity(0.15),
-                                                radius: 5,
-                                                x: 0,
-                                                y: 3
-                                            )
-                                    )
-                            }
-                            .buttonStyle(ScaleButtonStyle())  // efek ditekan kecil
-                            .animation(
-                                .easeInOut(duration: 0.2),
-                                value: selectedMenu
-                            )
-                        }
-                    }
+                // MARK: - 1 Hour Section
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Duration 1 Hour")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.black)
+                        .padding(.horizontal)
+                    
+                    menuGrid(for: oneHourMenu)
                 }
-                .padding(.horizontal)
-                .padding(.top, 8)
+                .padding(.top, 24)
+                
+                // MARK: - 30 Minute Section
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Duration 30 Minutes")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.black)
+                        .padding(.horizontal)
+                    
+                    menuGrid(for: thirtyMinuteMenu)
+                }
                 
                 Spacer()
                 
@@ -96,80 +69,13 @@ struct AdjustMenuCardioView: View {
                 .opacity(isButtonEnabled ? 1 : 0.5)
                 .disabled(!isButtonEnabled)  // 🔒 disable kalau belum pilih
             }
-            .animation(.easeInOut, value: selectedMenu)
             .background(Color.white.ignoresSafeArea())
             
             // MARK: - Custom Alert Overlay
             if showCustomAlert {
-                Color.white.opacity(0.5)
-                    .ignoresSafeArea()
-                    .transition(.opacity)
-                    .onTapGesture {
-                        withAnimation { showCustomAlert = false }
-                    }
-                
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Oops!")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(.black)
-                        .padding(.horizontal)
-                    
-                    Text("Please pick one cardio activity to begin.")
-                        .multilineTextAlignment(.leading)
-                        .font(.system(size: 15))
-                        .foregroundColor(.black.opacity(0.8))
-                        .padding(.horizontal)
-                    
-                    Button {
-                        withAnimation { showCustomAlert = false }
-                    } label: {
-                        Text("Okay")
-                            .font(.system(size: 17, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(Color("pinkTextPrimary"))
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                    }
-                    .padding(.horizontal, 20)
-                }
-                .padding(.vertical, 24)
-                .frame(maxWidth: 280)
-                .background(.ultraThinMaterial)
-                .cornerRadius(28)
-                .shadow(radius: 10)
-                .transition(.scale.combined(with: .opacity))
+                customAlert
             }
         }
-        .onChange(of: connectivity.isWorkoutActive) { _, active in
-            if active {
-                print("🏋️ Watch started workout → go to countdown/start")
-                router.lastWorkoutSource = .adjustMenuCardio
-                router.navigateTo(.countdownView)
-            }
-            
-        }
-        
-        //        .onChange(of: connectivity.isWorkoutPaused) { _, paused in
-        //            if router.currentRoute == .adjustMenuCardio ||
-        //               router.currentRoute == .startCardio {
-        //                if paused {
-        //                    print("⏸️ Watch paused → show rest screen")
-        //                    router.navigateTo(.restView)
-        //                } else if connectivity.isWorkoutActive {
-        //                    print("▶️ Watch resumed → back to active workout")
-        //                    router.navigateTo(.startCardio)
-        //                }
-        //            }
-        //        }
-        //            .onChange(of: connectivity.isWorkoutPaused) { _, paused in
-        //                if paused {
-        //                    router.navigateTo(.restView)
-        //                } else if connectivity.isWorkoutActive {
-        //                    router.navigateTo(.startCardio)
-        //                }
-        //            }
-        // MARK: - Native Navigation Title
         .navigationTitle("Today’s Cardio Menu!")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -181,11 +87,40 @@ struct AdjustMenuCardioView: View {
                 }
             }
         }
-        .onAppear {
-            print("appear stop iphone")
-            iPhoneConnectivityManager.shared.stopWorkoutFromPhone()
-            
+    }
+    
+    
+    // MARK: - GRID COMPONENT
+    private func menuGrid(for menu: [String]) -> some View {
+        let gridItems = [GridItem(.flexible()), GridItem(.flexible())]
+        
+        return LazyVGrid(columns: gridItems, spacing: 16) {
+            ForEach(menu, id: \.self) { activity in
+                Button(action: {
+                    handleSelection(for: activity)
+                }) {
+                    Text(activity)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(
+                            selectedMenu == activity ? .white : .black
+                        )
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 70)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(
+                                    selectedMenu == activity
+                                    ? Color("pinkTextPrimary")
+                                    : Color.white
+                                )
+                                .shadow(color: .gray.opacity(0.15),
+                                        radius: 5, x: 0, y: 3)
+                        )
+                }
+                .animation(.easeInOut(duration: 0.2), value: selectedMenu)
+            }
         }
+        .padding(.horizontal)
     }
     
     
@@ -205,17 +140,38 @@ struct AdjustMenuCardioView: View {
     private var isButtonEnabled: Bool {
         selectedMenu != nil
     }
-}
-
-// MARK: - Small Scale Effect on Tap
-struct ScaleButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
-            .animation(
-                .spring(response: 0.25, dampingFraction: 0.6),
-                value: configuration.isPressed
-            )
+    
+    
+    // MARK: - Custom Alert
+    private var customAlert: some View {
+        VStack {
+            Color.white.opacity(0.4)
+                .ignoresSafeArea()
+            
+            VStack(spacing: 16) {
+                Text("Oops!")
+                    .font(.system(size: 20, weight: .semibold))
+                
+                Text("Please pick one cardio activity to begin.")
+                    .font(.system(size: 15))
+                    .multilineTextAlignment(.center)
+                
+                Button("Okay") {
+                    withAnimation { showCustomAlert = false }
+                }
+                .foregroundColor(.white)
+                .padding(.vertical, 12)
+                .frame(maxWidth: .infinity)
+                .background(Color("pinkTextPrimary"))
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .padding(.horizontal, 20)
+            }
+            .padding(24)
+            .background(.ultraThinMaterial)
+            .cornerRadius(28)
+            .shadow(radius: 10)
+        }
+        .transition(.opacity)
     }
 }
 
