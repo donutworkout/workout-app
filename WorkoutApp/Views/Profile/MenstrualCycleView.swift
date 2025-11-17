@@ -57,10 +57,8 @@ struct MenstrualCycleView: View {
                             
                             HStack(spacing: 20) {
                                 Button {
-                                    withAnimation {
-                                        if let newMonth = calendar.date(byAdding: .month, value: -1, to: currentMonth) {
-                                            currentMonth = newMonth
-                                        }
+                                    if let newMonth = calendar.date(byAdding: .month, value: -1, to: currentMonth) {
+                                        currentMonth = newMonth
                                     }
                                 } label: {
                                     Image(systemName: "chevron.left")
@@ -69,10 +67,8 @@ struct MenstrualCycleView: View {
                                 }
                                 
                                 Button {
-                                    withAnimation {
-                                        if let newMonth = calendar.date(byAdding: .month, value: 1, to: currentMonth) {
-                                            currentMonth = newMonth
-                                        }
+                                    if let newMonth = calendar.date(byAdding: .month, value: 1, to: currentMonth) {
+                                        currentMonth = newMonth
                                     }
                                 } label: {
                                     Image(systemName: "chevron.right")
@@ -96,7 +92,7 @@ struct MenstrualCycleView: View {
                         .padding(.horizontal, 20)
                         
                         // Calendar grid
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 7), spacing: 6) {
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 7), spacing: 8) {
                             ForEach(0..<daysInMonth.count, id: \.self) { index in
                                 if let date = daysInMonth[index] {
                                     DayCell(
@@ -109,13 +105,17 @@ struct MenstrualCycleView: View {
                                             toggleMenstrualDate(date)
                                         }
                                     )
+                                    .frame(maxWidth: .infinity)
+                                    .aspectRatio(1, contentMode: .fit)
                                 } else {
                                     Color.clear
-                                        .frame(height: 48)
+                                        .frame(maxWidth: .infinity)
+                                        .aspectRatio(1, contentMode: .fit)
                                 }
                             }
                         }
                         .padding(.horizontal, 20)
+                        .frame(height: 7 * 44 + 6 * 8) // 6 rows possible: 6 * cell + 5 spacings; we add a small buffer for consistent height
                         .padding(.bottom, 16)
                     }
                     .background(
@@ -296,19 +296,16 @@ struct DayCell: View {
                 if isMenstrual {
                     Circle()
                         .fill(Color("pinkTextPrimary").opacity(0.3))
-                        .frame(width: 44, height: 44)
                 }
                 
                 if isToday && !isMenstrual {
                     Circle()
                         .fill(Color.blue.opacity(0.2))
-                        .frame(width: 44, height: 44)
                 }
                 
                 if isOvulation && !isMenstrual {
                     Circle()
                         .stroke(Color.blue, lineWidth: 2)
-                        .frame(width: 44, height: 44)
                 }
                 
                 Text(dayNumber)
@@ -318,19 +315,20 @@ struct DayCell: View {
                 if isEditing {
                     Circle()
                         .stroke(Color.gray.opacity(0.3), lineWidth: 1.5)
-                        .frame(width: 44, height: 44)
                     
                     if isMenstrual {
                         Circle()
                             .fill(Color("pinkTextPrimary"))
-                            .frame(width: 44, height: 44)
                         Image(systemName: "checkmark")
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(.white)
                     }
                 }
             }
+            .padding(6) // consistent inner padding
+            .contentShape(Rectangle())
         }
+        .frame(width: 44, height: 44) // consistent outer size used by grid aspect ratio
     }
 }
 

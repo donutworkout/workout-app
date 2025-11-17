@@ -14,6 +14,7 @@ struct SurveyCycleView: View {
     @State private var currentMonth = Date()
     @State private var isFirstClick = true
     
+    private let noneOption = "None of the above"
     private let calendar = Calendar.current
     
     // MARK: - Options
@@ -167,7 +168,28 @@ struct SurveyCycleView: View {
                             title: "What you feel when menstrual?",
                             subtitle: "Physical symptoms before or during",
                             options: physicalSymptoms,
-                            selectedOptions: $selectedPhysicalSymptoms,
+                            selectedOptions: Binding(
+                                get: { selectedPhysicalSymptoms },
+                                set: { newValue in
+                                    let none = "None of the above"
+
+                                    // CASE 1 → user memilih None sekarang
+                                    if newValue.contains(none) && !selectedPhysicalSymptoms.contains(none) {
+                                        selectedPhysicalSymptoms = [none]
+                                        return
+                                    }
+
+                                    // CASE 2 → user sebelumnya pilih None, lalu klik opsi lain
+                                    if selectedPhysicalSymptoms.contains(none) && !newValue.contains(none) {
+                                        // remove none, allow the new selection
+                                        selectedPhysicalSymptoms = newValue.filter { $0 != none }
+                                        return
+                                    }
+
+                                    // CASE 3 → normal multi-select behavior (tanpa None)
+                                    selectedPhysicalSymptoms = newValue.filter { $0 != none }
+                                }
+                            ),
                             allowsMultipleSelection: true
                         )
                         
