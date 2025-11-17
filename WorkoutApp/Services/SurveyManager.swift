@@ -23,6 +23,7 @@ class SurveyManager : ObservableObject {
     var tempIsCycleRegular: Bool? = nil
     var tempCycleStartDate: Date = Date()
     var tempCycleEndDate: Date = Date()
+    var tempMenstrualDuration: Int = 0
     var tempCycleLength: Int = 0
     var tempCycleSymptoms: [CycleSymptoms] = []
     var tempCycleEnergy: CycleEnergy? = nil
@@ -153,6 +154,7 @@ class SurveyManager : ObservableObject {
                 tempIsCycleRegular = existingCycle.isCycleRegular
                 tempCycleStartDate = existingCycle.cycleStartDate
                 tempCycleEndDate = existingCycle.cycleEndDate
+                tempMenstrualDuration = existingCycle.menstrualDuration
                 tempCycleLength = existingCycle.cycleLength
                 tempCycleSymptoms = existingCycle.cycleSymptoms
                 tempCycleEnergy = existingCycle.cycleEnergy ?? .stable
@@ -310,7 +312,7 @@ class SurveyManager : ObservableObject {
                 cycleStartDate: tempCycleStartDate,
                 cycleEndDate: tempCycleEndDate,
                 cycleLength: tempCycleLength,
-                menstrualDuration: 5,
+                menstrualDuration: tempMenstrualDuration,
                 cycleSymptoms: tempCycleSymptoms,
                 cycleEnergy: tempCycleEnergy ?? .stable,
                 cycleMoodAffectsMotivation: tempCycleMoodAffectsMotivation ?? .never
@@ -323,6 +325,7 @@ class SurveyManager : ObservableObject {
             userCycle?.isCycleRegular = tempIsCycleRegular
             userCycle?.cycleStartDate = tempCycleStartDate
             userCycle?.cycleEndDate = tempCycleEndDate
+            userCycle?.menstrualDuration = tempMenstrualDuration
             userCycle?.cycleLength = tempCycleLength
             userCycle?.cycleSymptoms = tempCycleSymptoms
             userCycle?.cycleEnergy = tempCycleEnergy
@@ -394,6 +397,10 @@ class SurveyManager : ObservableObject {
     
     func updateTempCycleEndDate(_ end_date: Date) {
         tempCycleEndDate = end_date
+    }
+    
+    func updateTempMenstrualDuration(_ duration: Int) {
+        tempMenstrualDuration = duration
     }
     
     func updateTempCycleLength(_ length: Int) {

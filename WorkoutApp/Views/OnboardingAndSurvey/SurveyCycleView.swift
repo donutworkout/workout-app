@@ -362,20 +362,28 @@ extension SurveyCycleView {
         }
         
         // 2. Save dates (start and end)
-        if let sortedDates = selectedDates.sorted().first {
-            surveyManager.updateTempCycleStartDate(sortedDates)
-            print("✅ Start date saved: \(sortedDates)")
+        if let firstPeriodDate = selectedDates.sorted().first {
+            surveyManager.updateTempCycleStartDate(firstPeriodDate)
+            print("✅ Start date saved: \(firstPeriodDate)")
         }
         
-        if let sortedDates = selectedDates.sorted().last {
-            surveyManager.updateTempCycleEndDate(sortedDates)
-            print("✅ End date saved: \(sortedDates)")
+        if let lastPeriodDate = selectedDates.sorted().last {
+            surveyManager.updateTempCycleEndDate(lastPeriodDate)
+            print("✅ End date saved: \(lastPeriodDate)")
         }
         
         // Calculate cycle length
-        let cycleLength = selectedDates.count
-        surveyManager.updateTempCycleLength(cycleLength)
-        print("✅ Cycle length saved: \(cycleLength) days")
+        let menstrualDuration = selectedDates.count
+        surveyManager.updateTempMenstrualDuration(menstrualDuration)
+        print("✅ Cycle length saved: \(menstrualDuration) days")
+        
+        
+        if surveyManager.tempCycleLength == 0 {
+            surveyManager.updateTempCycleLength(28) // Default cycle length
+            print("✅ Cycle length set to default: 28 days")
+        } else {
+            print("✅ Using existing cycle length: \(surveyManager.tempCycleLength) days")
+        }
         
         // 3. Save symptoms (handle multiple selections if needed)
         let selectedSymptoms: [CycleSymptoms] = selectedPhysicalSymptoms.compactMap { name in
