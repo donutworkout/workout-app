@@ -164,6 +164,9 @@ struct RouterView: View {
                         }
                     }
                 }
+            case .afterSurvey:
+                AfterSurveyView()
+                    .environmentObject(router)
             }
         }
         .onAppear {
