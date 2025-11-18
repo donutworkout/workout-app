@@ -29,6 +29,8 @@ final class Router: ObservableObject {
     @Published var selectedCardioMenu: String? = nil
     @Published var workoutExercises: [Exercise] = []
     
+    @Published var selectedDailyMenu: DailyMenu? = nil
+    
     // In your Router class
     init(surveyManager: SurveyManager? = nil) {
         if let manager = surveyManager, manager.isSurveyComplete {

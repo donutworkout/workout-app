@@ -39,6 +39,8 @@ class Exercise{
             .joined()
     }
     
+    var dailyMenu: DailyMenu?
+    
     init(
         id: UUID = UUID(),
         name: String,

@@ -30,15 +30,15 @@ struct MenuView: View {
     
     private var selectedPhase: MenstrualPhase {
         let phase = cycleViewModel.phase(for: cycleViewModel.selectedDayIndex) ?? .menstruation
-        
-        print("🔍 selectedDayIndex: \(cycleViewModel.selectedDayIndex)")
-        print("🔍 selectedPhase from ViewModel: \(phase)")
-        print("🔍 phasesForWeek count: \(cycleViewModel.phasesForWeek.count)")
+//        
+//        print("🔍 selectedDayIndex: \(cycleViewModel.selectedDayIndex)")
+//        print("🔍 selectedPhase from ViewModel: \(phase)")
+//        print("🔍 phasesForWeek count: \(cycleViewModel.phasesForWeek.count)")
         
         // Debug: print all phases
-        for (index, phaseData) in cycleViewModel.phasesForWeek.enumerated() {
-            print("🔍 Index \(index): \(phaseData.date) -> \(phaseData.phase)")
-        }
+//        for (index, phaseData) in cycleViewModel.phasesForWeek.enumerated() {
+//            print("🔍 Index \(index): \(phaseData.date) -> \(phaseData.phase)")
+//        }
         
         return phase
     }
@@ -106,13 +106,7 @@ struct MenuView: View {
                             if menu.isCardio {
                                 router.navigateTo(.adjustMenuCardio)
                             } else if menu.isStrength {
-                                router.navigateTo(.adjustMenuStrength)
-                            }
-                        } else {
-                            // Fallback based on phase
-                            if selectedPhase == .menstruation {
-                                router.navigateTo(.adjustMenuCardio)
-                            } else {
+                                router.selectedDailyMenu = menu
                                 router.navigateTo(.adjustMenuStrength)
                             }
                         }

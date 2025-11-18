@@ -24,9 +24,13 @@ struct AdjustMenuStrengthView: View {
     
     private let sessionManager = StrengthSessionManager.shared
     
+    let dailyMenu: DailyMenu?
+    
     var onNext: (() -> Void)? = nil
     
-    init() {
+    init(dailyMenu: DailyMenu? = nil) {
+        self.dailyMenu = dailyMenu
+        
         // Warna segmented control kustom (pink)
         let pinkColor = UIColor(named: "pinkTextPrimary") ?? UIColor.systemPink
         let selectedAttrs: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.white]
@@ -35,6 +39,7 @@ struct AdjustMenuStrengthView: View {
         appearance.selectedSegmentTintColor = pinkColor
         appearance.setTitleTextAttributes(selectedAttrs, for: .selected)
         appearance.setTitleTextAttributes(normalAttrs, for: .normal)
+        
     }
     
     var body: some View {
@@ -112,15 +117,19 @@ struct AdjustMenuStrengthView: View {
             }
         }
         .onAppear {
-            DummyExerciseProvider.shared.clearAllExercises(from: modelContext)
             DummyExerciseProvider.shared.insertDummyData(into: modelContext)
-            
             loadBodyWeightExercises()
         }
         .environmentObject(sessionManager)
     }
     
     private func loadBodyWeightExercises() {
+        if let menu = dailyMenu, let savedExercises = menu.strengthExercises, !savedExercises.isEmpty {
+            print("✅ Loading \(savedExercises.count) saved exercises from DailyMenu")
+            workouts = savedExercises
+            return
+        }
+        
         guard let cycle = userCycle, let profile = userWorkout else { return }
         
         let repo = ExerciseRepository(context: modelContext)
@@ -148,6 +157,12 @@ struct AdjustMenuStrengthView: View {
         }
         
         workouts = exercises
+        
+        if let menu = dailyMenu {
+            menu.strengthExercises = exercises
+            try? modelContext.save()
+            print("💾 Saved \(exercises.count) exercises to DailyMenu")
+        }
     }
 }
 

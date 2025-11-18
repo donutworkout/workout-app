@@ -57,16 +57,16 @@ enum RestActivities: String, CaseIterable, Codable {
 @Model
 class DailyMenu: Identifiable {
     var id: UUID = UUID()
-    var dayNumber: Int //1-7
-    var dayName: String
-    var date: Date?
+    var dayNumber: Int = 1
+    var dayName: String = ""
+    var date: Date = Date()
     
-    var category: MenuCategory
+    var category: MenuCategory = MenuCategory.rest
     var cardioExercisesOption: [CardioOptions]?
     
     var strengthType: StrengthType?
-    //var strengthExercises: [Exercise]?
-//    @Relationship(deleteRule: .cascade)
+    
+    @Relationship(deleteRule: .cascade, inverse: \Exercise.dailyMenu)
     var strengthExercises: [Exercise]?
 
     var intensity: String?
@@ -74,7 +74,7 @@ class DailyMenu: Identifiable {
     
     var restActivities: [RestActivities]?
     
-    var isMenuComplete: Bool
+    var isMenuComplete: Bool = false
     
     // for cardio
     var vigorousDuration: Int?
@@ -88,7 +88,7 @@ class DailyMenu: Identifiable {
     init(
         dayNumber: Int,
         dayName: String,
-        date: Date? = nil,
+        date: Date,
         category: MenuCategory,
         cardioExercisesOption: [CardioOptions]? = nil,
         strengthExercises: [Exercise]? = nil,
@@ -115,7 +115,7 @@ class DailyMenu: Identifiable {
             self.targetHeartRate = targetHeartRate
     }
     
-    static func cardioDay(dayNumber: Int, dayName: String, date: Date? = nil, cardioExercisesOption: [CardioOptions]? = nil, isMenuComplete: Bool = false, intensity: String, estimatedDuration: Int) -> DailyMenu {
+    static func cardioDay(dayNumber: Int, dayName: String, date: Date, cardioExercisesOption: [CardioOptions]? = nil, isMenuComplete: Bool = false, intensity: String, estimatedDuration: Int) -> DailyMenu {
         return DailyMenu(
             dayNumber: dayNumber,
             dayName: dayName,
@@ -129,7 +129,7 @@ class DailyMenu: Identifiable {
             )
     }
     
-    static func strengthDay(dayNumber: Int, dayName: String, date: Date? = nil, strengthType: StrengthType, strengthExercises: [Exercise]? = nil, isMenuComplete: Bool = false, intensity: String, estimatedDuration: Int) -> DailyMenu {
+    static func strengthDay(dayNumber: Int, dayName: String, date: Date, strengthType: StrengthType, strengthExercises: [Exercise]? = nil, isMenuComplete: Bool = false, intensity: String, estimatedDuration: Int) -> DailyMenu {
         return DailyMenu(
             dayNumber: dayNumber,
             dayName: dayName,
@@ -142,10 +142,11 @@ class DailyMenu: Identifiable {
             )
     }
     
-    static func restDay(dayNumber: Int, dayName: String, restActivities: [RestActivities]? = nil) -> DailyMenu {
+    static func restDay(dayNumber: Int, dayName: String, date: Date, restActivities: [RestActivities]? = nil) -> DailyMenu {
         return DailyMenu(
             dayNumber: dayNumber,
             dayName: dayName,
+            date: date,
             category: .rest,
             restActivities: restActivities,
             intensity: "None",

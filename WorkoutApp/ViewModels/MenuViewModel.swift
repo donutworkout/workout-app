@@ -19,36 +19,215 @@ class MenuViewModel: ObservableObject {
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
         self.generator = WorkoutMenuGenerator(context: modelContext)
+        
+        let existingMenus = fetchMenusForCurrentWeek()
+        if !existingMenus.isEmpty {
+            self.weeklyMenu = existingMenus
+            print("📥 Loaded \(existingMenus.count) existing menus on init")
+        }
     }
     
-    // MARK: - Generate Weekly Menu
+    private func loadSavedMenus() {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        
+        // Get Monday of this week
+        let weekday = calendar.component(.weekday, from: today)
+        let daysToMonday = weekday == 1 ? -6 : -(weekday - 2)
+        guard let monday = calendar.date(byAdding: .day, value: daysToMonday, to: today) else {
+            return
+        }
+        
+        // Precompute end of week (next Monday) outside of the predicate since complex date ops aren't supported in #Predicate
+        guard let endOfWeek = calendar.date(byAdding: .day, value: 7, to: monday) else {
+            return
+        }
+        
+        // Fetch menus for this week
+        let descriptor = FetchDescriptor<DailyMenu>(
+            predicate: #Predicate<DailyMenu> { menu in
+                menu.date >= monday && menu.date < endOfWeek
+            },
+            sortBy: [SortDescriptor(\.date)]
+        )
+        
+        do {
+            weeklyMenu = try modelContext.fetch(descriptor)
+            print("📥 Loaded \(weeklyMenu.count) saved menus from database")
+        } catch {
+            print("❌ Failed to load menus: \(error)")
+            weeklyMenu = []
+        }
+    }
+    
     func generateWeeklyMenu(
-        userCycle: UserCycle,
-        userLevel: WorkoutLevel,
-        chosenDays: [WorkoutDayPreference]
+            userCycle: UserCycle,
+            userLevel: WorkoutLevel,
+            chosenDays: [WorkoutDayPreference]
     ) async {
         isLoading = true
         
-        weeklyMenu = generator.generateWeeklyMenu(
+        if !weeklyMenu.isEmpty {
+            print("✅ Already have \(weeklyMenu.count) menus loaded in memory")
+            return
+        }
+        
+        let existingMenus = fetchMenusForCurrentWeek()
+        
+        if !existingMenus.isEmpty {
+            print("✅ Using existing weekly menu (\(existingMenus.count) days)")
+            weeklyMenu = existingMenus
+            isLoading = false
+            return
+        }
+        
+        print("🎯 === GENERATING NEW WEEKLY MENU ===")
+        
+        // Step 2: Generate new menus (business logic)
+        let newMenus = generator.generateWeeklyMenu(
             level: userLevel,
             chosenDays: chosenDays,
             userCycle: userCycle,
-            strengthType: .bodyWeight // Default, user can switch in detail view
+            strengthType: .bodyWeight,
+            startDate: nil
         )
         
+        for menu in newMenus {
+            modelContext.insert(menu)
+        }
+        
+        // Step 4: Save to database
+        do {
+            try modelContext.save()
+            print("✅ Saved \(newMenus.count) menus to database")
+            
+            for menu in newMenus {
+                print("   💾 Saved: \(menu.date) - \(menu.dayName)")
+            }
+        } catch {
+            print("❌ Failed to save menus: \(error)")
+        }
+        
+        weeklyMenu = newMenus
         isLoading = false
+    }
+        
+        // MARK: - Fetch Menus for Current Week
+    private func fetchMenusForCurrentWeek() -> [DailyMenu] {
+        var calendar = Calendar.current
+        calendar.timeZone = TimeZone.current
+        
+        let today = calendar.startOfDay(for: Date())
+        let weekday = calendar.component(.weekday, from: today)
+        let daysToMonday = weekday == 1 ? -6 : -(weekday - 2)
+        
+//        guard let monday = calendar.date(byAdding: .day, value: daysToMonday, to: today),
+//              let sunday = calendar.date(byAdding: .day, value: 6, to: monday) else {
+//            return []
+//        }
+        
+        guard let monday = calendar.date(byAdding: .day, value: daysToMonday, to: today),
+              let nextMonday = calendar.date(byAdding: .day, value: 7, to: monday) else {
+            return []
+        }
+        
+        print("🔍 Fetching menus for current week:")
+        print("   Today: \(today)")
+        print("   Monday: \(monday)")
+        print("   Next Monday: \(nextMonday)")
+        
+        
+        let allMenusDescriptor = FetchDescriptor<DailyMenu>(
+            sortBy: [SortDescriptor(\.date)]
+        )
+        
+        do {
+            let allMenus = try modelContext.fetch(allMenusDescriptor)
+            print("📊 Total menus in database: \(allMenus.count)")
+            for menu in allMenus {
+                print("   - \(menu.date): \(menu.dayName)")
+            }
+        } catch {
+            print("❌ Failed to fetch all menus: \(error)")
+        }
+        
+        // Now fetch for this week
+        let descriptor = FetchDescriptor<DailyMenu>(
+            predicate: #Predicate { menu in
+                menu.date >= monday && menu.date < nextMonday
+            },
+            sortBy: [SortDescriptor(\.date)]
+        )
+        
+        do {
+            let menus = try modelContext.fetch(descriptor)
+            print("🔍 Found \(menus.count) existing menus in database for this week")
+            for menu in menus {
+                print("   ✅ \(menu.date): \(menu.dayName)")
+            }
+            return menus
+        } catch {
+            print("❌ Failed to fetch menus: \(error)")
+            return []
+        }
+//        let descriptor = FetchDescriptor<DailyMenu>(
+//            predicate: #Predicate<DailyMenu> { menu in
+//                menu.date >= monday && menu.date <= sunday
+//            },
+//            sortBy: [SortDescriptor(\.date)]
+//        )
+//        
+//        do {
+//            let menus = try modelContext.fetch(descriptor)
+//            print("🔍 Found \(menus.count) existing menus in database")
+//            for menu in menus {
+//                print("   - \(menu.date): \(menu.dayName)")
+//            }
+//            return menus
+//        } catch {
+//            print("❌ Failed to fetch menus: \(error)")
+//            return []
+//        }
     }
     
     // MARK: - Get Menu for Specific Day
-    func getMenu(for dayNumber: Int) -> DailyMenu? {
-        return weeklyMenu.first { $0.dayNumber == dayNumber }
-    }
+//    func getMenu(for dayNumber: Int) -> DailyMenu? {
+//        return weeklyMenu.first { $0.dayNumber == dayNumber }
+//    }
     
     // MARK: - Get Menu for Date
     func getMenuForDate(_ date: Date) -> DailyMenu? {
         let calendar = Calendar.current
-        let weekday = calendar.component(.weekday, from: date)
-        let dayNumber = weekday == 1 ? 7 : weekday - 1 // Convert to Monday=1 system
-        return getMenu(for: dayNumber)
+        let startOfDate = calendar.startOfDay(for: date)
+        
+        // Try in-memory first
+        if let menu = weeklyMenu.first(where: {
+            calendar.isDate($0.date, inSameDayAs: startOfDate)
+        }) {
+            return menu
+        }
+        
+        // Fallback to database using supported predicate operations
+        let endOfDate = calendar.date(byAdding: .day, value: 1, to: startOfDate)!
+        let descriptor = FetchDescriptor<DailyMenu>(
+            predicate: #Predicate<DailyMenu> { menu in
+                menu.date >= startOfDate && menu.date < endOfDate
+            }
+        )
+        
+        do {
+            let results = try modelContext.fetch(descriptor)
+            return results.first
+        } catch {
+            print("❌ Failed to fetch menu for date: \(error)")
+            return nil
+        }
+    }
+        
+        // MARK: - Helper
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM dd"
+        return formatter.string(from: date)
     }
 }

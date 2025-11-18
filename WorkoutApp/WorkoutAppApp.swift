@@ -23,13 +23,14 @@ struct WorkoutAppApp: App {
                 UserProfile.self,
                 UserWorkout.self,
                 UserCycle.self,
-                Exercise.self
+                Exercise.self,
+                DailyMenu.self
             ])
             
             let modelConfiguration = ModelConfiguration(
                 schema: schema,
                 isStoredInMemoryOnly: false,
-                cloudKitDatabase: .automatic // This enables CloudKit!
+                //cloudKitDatabase: .automatic // This enables CloudKit!
             )
             
             let container = try ModelContainer(

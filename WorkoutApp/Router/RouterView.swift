@@ -57,7 +57,7 @@ struct RouterView: View {
                 //.environment(connectivity)
                 
             case .adjustMenuStrength:
-                AdjustMenuStrengthView()
+                AdjustMenuStrengthView(dailyMenu: router.selectedDailyMenu)
                     .environmentObject(router)
                 //.environment(connectivity)
                 

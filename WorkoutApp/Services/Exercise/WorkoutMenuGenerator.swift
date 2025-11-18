@@ -23,7 +23,8 @@ class WorkoutMenuGenerator {
         level: WorkoutLevel,
         chosenDays: [WorkoutDayPreference],
         userCycle: UserCycle,
-        strengthType: StrengthType
+        strengthType: StrengthType,
+        startDate: Date? = nil
     ) -> [DailyMenu] {
         
         print("\n🎯 === GENERATING WEEKLY MENU ===")
@@ -41,6 +42,24 @@ class WorkoutMenuGenerator {
         
         print("Current Phase: \(currentPhase.rawValue)")
         
+        var calendar = Calendar.current
+        calendar.timeZone = TimeZone.current
+        let baseDate: Date
+        
+        if let startDate = startDate {
+                baseDate = calendar.startOfDay(for: startDate)
+        } else {
+            let today = calendar.startOfDay(for: Date())
+            let weekday = calendar.component(.weekday, from: today)
+            let daysToMonday = weekday == 1 ? -6 : -(weekday - 2)
+            baseDate = calendar.date(byAdding: .day, value: daysToMonday, to: today) ?? today
+        }
+            
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
+        formatter.timeZone = TimeZone.current
+        print("📅 Base date (Monday): \(formatter.string(from: baseDate))")
+        
         var weeklyMenus: [DailyMenu] = []
         var strengthDayCounter: Int = 0
         var cardioDayCounter: Int = 0
@@ -49,12 +68,19 @@ class WorkoutMenuGenerator {
             let dayName = generator.getDayName(day)
             let category = schedule[day] ?? .rest
             
+            guard let menuDate = calendar.date(byAdding: .day, value: day - 1, to: baseDate) else {
+                continue
+            }
+            
+            let normalizedDate = calendar.startOfDay(for: menuDate)
+            
             let menu: DailyMenu
             
             if category == .strength {
                 menu = generateDailyMenu(
                     dayNumber: day,
                     dayName: dayName,
+                    date: normalizedDate,
                     category: category,
                     level: level,
                     phase: currentPhase,
@@ -67,6 +93,7 @@ class WorkoutMenuGenerator {
                 menu = generateDailyMenu(
                     dayNumber: day,
                     dayName: dayName,
+                    date: normalizedDate,
                     category: category,
                     level: level,
                     phase: currentPhase,
@@ -79,6 +106,7 @@ class WorkoutMenuGenerator {
                 menu = generateDailyMenu(
                     dayNumber: day,
                     dayName: dayName,
+                    date: normalizedDate,
                     category: category,
                     level: level,
                     phase: currentPhase,
@@ -90,6 +118,7 @@ class WorkoutMenuGenerator {
             
             
             weeklyMenus.append(menu)
+            print("📆 Generated menu for \(dayName) (\(formatDate(normalizedDate)))")
         }
         
         print("✅ Generated \(weeklyMenus.count) days\n")
@@ -100,6 +129,7 @@ class WorkoutMenuGenerator {
     private func generateDailyMenu(
         dayNumber: Int,
         dayName: String,
+        date: Date,
         category: MenuCategory,
         level: WorkoutLevel,
         phase: MenstrualPhase,
@@ -113,6 +143,7 @@ class WorkoutMenuGenerator {
             return generateCardioMenu(
                 dayNumber: dayNumber,
                 dayName: dayName,
+                date: date,
                 level: level,
                 phase: phase,
                 cardioDayIndex: cardioDayIndex
@@ -122,6 +153,7 @@ class WorkoutMenuGenerator {
             return generateStrengthMenu(
                 dayNumber: dayNumber,
                 dayName: dayName,
+                date: date,
                 level: level,
                 phase: phase,
                 strengthType: strengthType,
@@ -131,7 +163,8 @@ class WorkoutMenuGenerator {
         case .rest:
             return .restDay(
                 dayNumber: dayNumber,
-                dayName: dayName
+                dayName: dayName,
+                date: date
             )
         }
     }
@@ -139,6 +172,7 @@ class WorkoutMenuGenerator {
     func generateCardioMenu( //sesuai list, nambah duration aja per level
         dayNumber: Int,
         dayName: String,
+        date: Date,
         level: WorkoutLevel,
         phase: MenstrualPhase,
         cardioDayIndex: Int
@@ -149,6 +183,7 @@ class WorkoutMenuGenerator {
         return .cardioDay(
             dayNumber: dayNumber,
             dayName: dayName,
+            date: date,
             intensity: cardioDetails.intensityLabel,
             estimatedDuration: cardioDetails.vigorousDuration
         )
@@ -157,6 +192,7 @@ class WorkoutMenuGenerator {
     func generateStrengthMenu(
             dayNumber: Int,
             dayName: String,
+            date: Date,
             level: WorkoutLevel,
             phase: MenstrualPhase,
             strengthType: StrengthType,
@@ -193,6 +229,7 @@ class WorkoutMenuGenerator {
             return .strengthDay(
                 dayNumber: dayNumber,
                 dayName: dayName,
+                date: date,
                 strengthType: strengthType,
                 strengthExercises: exercises,
                 intensity: intensity,

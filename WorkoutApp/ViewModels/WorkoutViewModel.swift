@@ -68,6 +68,7 @@ class WorkoutViewModel: ObservableObject {
     func generateStrengthWorkoutsForDay(
         dayNumber: Int,
         dayName: String,
+        date: Date,
         userCycle: UserCycle,
         userLevel: WorkoutLevel
     ) async {
@@ -87,6 +88,7 @@ class WorkoutViewModel: ObservableObject {
             async let bodyweightMenu = generator.generateStrengthMenu(
                 dayNumber: dayNumber,
                 dayName: dayName,
+                date: date,
                 level: userLevel,
                 phase: currentPhase,
                 strengthType: .bodyWeight,
@@ -96,6 +98,7 @@ class WorkoutViewModel: ObservableObject {
             async let gymMenu = generator.generateStrengthMenu(
                 dayNumber: dayNumber,
                 dayName: dayName,
+                date: date,
                 level: userLevel,
                 phase: currentPhase,
                 strengthType: .gym,
