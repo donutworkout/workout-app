@@ -67,7 +67,7 @@ struct SurveyBirthdayView: View {
                             .bold()
                             .foregroundColor(Color("pinkTextSecondary"))
                         
-                        TextField("Answer", text: $name)
+                        TextField("fill your name", text: $name)
                             .textInputAutocapitalization(.words)
                             .foregroundStyle(.black)
                             .padding(.horizontal, 16)
