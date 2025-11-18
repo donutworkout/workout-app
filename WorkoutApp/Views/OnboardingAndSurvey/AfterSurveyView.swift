@@ -6,13 +6,33 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct AfterSurveyView: View {
     @EnvironmentObject var router: Router
+    @Environment(\.modelContext) private var modelContext
     
-    var userName: String = "........"         // dari survey
-    var phaseText: String = "Menstrual Phase" // dari survey
-    var levelText: String = "Beginner Level"  // dari survey
+    @Query(sort: \UserProfile.createdAt, order: .reverse)
+    private var profiles: [UserProfile]
+    
+    // Computed properties untuk data dari survey
+    private var userName: String {
+        profiles.first?.name ?? "User"
+    }
+    
+    private var phaseText: String {
+        guard let userCycle = profiles.first?.userCycle?.first else {
+            return "Menstrual Phase"
+        }
+        return getCurrentCyclePhase(from: userCycle)
+    }
+    
+    private var levelText: String {
+        guard let workoutLevel = profiles.first?.userWorkouts?.first?.workoutLevel else {
+            return "Beginner"
+        }
+        return workoutLevel.displayName
+    }
     
     var body: some View {
         NavigationStack {
@@ -34,7 +54,7 @@ struct AfterSurveyView: View {
                             .foregroundColor(Color("pinkTextPrimary"))
                         
                         (
-                            Text("You’re in your ")
+                            Text("You're in your ")
                                 .foregroundColor(.black)
                                 .fontWeight(.semibold)
                             +
@@ -42,7 +62,7 @@ struct AfterSurveyView: View {
                                 .foregroundColor(Color("pinkTextPrimary"))
                                 .fontWeight(.bold)
                             +
-                            Text(", you’re starting at the ")
+                            Text(", you're starting at the ")
                                 .foregroundColor(.black)
                                 .fontWeight(.semibold)
                             +
@@ -50,7 +70,7 @@ struct AfterSurveyView: View {
                                 .foregroundColor(Color("pinkTextPrimary"))
                                 .fontWeight(.bold)
                             +
-                            Text(". We’ll guide you consistency and confidence!")
+                            Text(" Level. We'll guide you to consistency and confidence!")
                                 .foregroundColor(.black)
                                 .fontWeight(.semibold)
                         )
@@ -59,7 +79,6 @@ struct AfterSurveyView: View {
                         .padding(.trailing, 12)
                     }
                     .padding(.horizontal)
-
                     
                     Spacer()
                     
@@ -75,9 +94,34 @@ struct AfterSurveyView: View {
             }
         }
     }
+    
+    // MARK: - Helper Functions
+    
+    /// Menghitung fase siklus berdasarkan tanggal
+    private func getCurrentCyclePhase(from cycle: UserCycle) -> String {
+        let today = Date()
+        let calendar = Calendar.current
+        
+        // Hitung hari ke berapa dalam siklus
+        let daysSinceStart = calendar.dateComponents([.day], from: cycle.cycleStartDate, to: today).day ?? 0
+        let currentDay = daysSinceStart % cycle.cycleLength
+        
+        // Tentukan fase berdasarkan hari
+        switch currentDay {
+        case 0..<cycle.menstrualDuration:
+            return "Menstrual Phase"
+        case cycle.menstrualDuration..<14:
+            return "Follicular Phase"
+        case 14..<16:
+            return "Ovulation Phase"
+        default:
+            return "Luteal Phase"
+        }
+    }
 }
 
 #Preview {
     AfterSurveyView()
         .environmentObject(Router())
+        .modelContainer(for: [UserProfile.self, UserWorkout.self, UserCycle.self])
 }
