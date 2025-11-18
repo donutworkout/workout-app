@@ -28,14 +28,11 @@ struct ConnectWatchView: View {
                 
                 // MARK: - Watch Icon Box
                 ZStack {
-                    Image(systemName: "applewatch")
+                    Image("charConnectWatch")
                         .resizable()
-                        .scaledToFit()
-                        .frame(width: 100, height: 100)
-                        .foregroundColor(Color("pinkTextSecondary"))
+                        .scaledToFill()
+                        .frame(width: 300, height: 300)
                 }
-                .padding(.top, 10)
-                
                 Spacer()
                 
                 // MARK: - Allow Button

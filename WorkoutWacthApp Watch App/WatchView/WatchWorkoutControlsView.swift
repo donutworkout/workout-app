@@ -54,20 +54,13 @@ struct WatchWorkoutControlsView: View {
                         title: isPaused ? "RESUME" : "PAUSE",
                         icon: isPaused ? "play.fill" : "pause.fill"
                     ) {
-                        isPaused.toggle()
-                        if sessionManager.isRunning {
-                            // 🔸 Pause the session
-                            sessionManager.pauseWorkout()
-                            connectivity.sendMessage([
-                                "cmd": WorkoutCommand.pause.rawValue
-                            ])
-                        } else {
-                            // 🔸 Resume the session
+                        if isPaused {
                             sessionManager.resumeWorkout()
-                            connectivity.sendMessage([
-                                "cmd": WorkoutCommand.resume.rawValue
-                            ])
-                        }
+                            connectivity.sendMessage(["cmd": "resume"])
+                           } else {
+                               sessionManager.pauseWorkout()
+                               connectivity.sendMessage(["cmd": "pause"])
+                           }
                     }
                     .frame(height: 50)
 
@@ -89,6 +82,10 @@ struct WatchWorkoutControlsView: View {
             .padding(.bottom, 20)
             .background(Color("grayBackground"))
             .ignoresSafeArea()
+            .onChange(of: sessionManager.isPaused) { _, paused in
+                isPaused = paused
+
+            }
 
     }
 

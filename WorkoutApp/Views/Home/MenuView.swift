@@ -213,21 +213,21 @@ struct CombinedWorkoutCardView: View {
         // Determine card content
         if isCardioDay {
             return (
-                "buttercup",
+                "menuCardio",
                 "Today's Cardio Menu!",
                 "Don't worry about being perfect! just move and let your body wake up!",
                 duration
             )
         } else if isStrengthDay {
             return (
-                "bubbles",
+                "menuStrength",
                 "Today's Strength Menu!",
                 "Let's wake up those muscles just good vibes and sweat!",
                 duration
             )
         } else {
             return (
-                "bubbles",
+                "menuRest",
                 "Time to rest",
                 "Take your time to relax and enjoy the day!",
                 duration
@@ -257,19 +257,18 @@ struct CombinedWorkoutCardView: View {
                 )
             
             // MARK: - Abu-abu dan Gambar
-            ZStack {
-                // Abu-abu full kiri-kanan
-                Color.gray.opacity(0.15)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 180)
-                    .clipShape(Rectangle())
+//            ZStack {
+//                // Abu-abu full kiri-kanan
+//                Color.gray.opacity(0.15)
+//                    .frame(maxWidth: .infinity)
+//                    .frame(height: 180)
+//                    .clipShape(Rectangle())
                 
                 // Gambar di tengah
-                Image(cardInfo.image)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 150)
-            }
+            Image(cardInfo.image)
+                .frame(maxWidth: .infinity)
+//                                    .frame(height: 180)
+//            }
             
             // MARK: - Konten bawah (judul, deskripsi, tombol)
             VStack(alignment: .leading, spacing: 20) {

@@ -17,6 +17,7 @@ enum Route {
     case startWorkout
     case countdownView
     case finishWorkout
+    case afterSurvey
 }
 
 @MainActor

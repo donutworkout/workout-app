@@ -71,7 +71,6 @@ struct StartView: View {
                 Image(systemName: workoutInfo.icon)
                     .font(.system(size: 40))
                     .foregroundColor(Color("pinkTextPrimary"))
-                    .multilineTextAlignment(.center)
                 
                 Text(workoutInfo.name)
                     .font(.system(size: 15, weight: .bold, design: .rounded))
@@ -80,9 +79,14 @@ struct StartView: View {
                     .lineLimit(2)
             }
             
-            Spacer(minLength: 8)
-            
-            // MARK: - START Button
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.black)
+        .edgesIgnoringSafeArea(.all)
+        
+        // MARK: - Always-Anchored Bottom Button
+        .safeAreaInset(edge: .bottom) {
             Button(action: {
                 connectivity.sendMessage([
                     "cmd": WorkoutCommand.start.rawValue,
@@ -101,10 +105,11 @@ struct StartView: View {
                             .fill(Color("pinkTextPrimary"))
                     )
             }
+            .padding(.horizontal, 6)
+            .padding(.bottom, 4) 
+            .background(Color.black)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color("pinkTextTertiary"))
-        .edgesIgnoringSafeArea(.all)
+        
         .onReceive(timer) { _ in updateTime() }
         .onAppear { updateTime() }
     }

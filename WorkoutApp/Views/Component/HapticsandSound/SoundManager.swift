@@ -20,7 +20,12 @@ final class SoundManager {
         }
 
         do {
-            try AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default, options: [.mixWithOthers])
+            // ✅ Gunakan .playback untuk prioritas lebih tinggi
+            try AVAudioSession.sharedInstance().setCategory(
+                .playback,
+                mode: .default,
+                options: [.mixWithOthers]
+            )
             try AVAudioSession.sharedInstance().setActive(true)
             
             player = try AVAudioPlayer(contentsOf: url)
@@ -30,6 +35,25 @@ final class SoundManager {
         } catch {
             print("❌ Error playing sound: \(error.localizedDescription)")
         }
+    }
+    func prepareSound(_ name: String, withExtension ext: String = "mp3") {
+        guard let url = Bundle.main.url(forResource: name, withExtension: ext) else {
+            return
+        }
+        
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
+            try AVAudioSession.sharedInstance().setActive(true)
+            
+            player = try AVAudioPlayer(contentsOf: url)
+            player?.prepareToPlay() // ✅ Prepare without playing
+        } catch {
+            print("❌ Error preparing sound: \(error)")
+        }
+    }
+
+    func play() {
+        player?.play()
     }
 
     func stop() {

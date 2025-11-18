@@ -18,6 +18,7 @@ struct WatchWorkoutCardioView: View {
     
     @State private var elapsedTime: Int = 0
     @State private var currentTime: String = Self.formatCurrentTime()
+    @State private var clockActive = true
     
     private let clockTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -81,7 +82,11 @@ struct WatchWorkoutCardioView: View {
             }
         }
         .onReceive(clockTimer) { _ in
+            guard clockActive else { return }
             updateTime()
+        }
+        .onChange(of: sessionManager.isPaused) { _, paused in
+            clockActive = !paused
         }
         .onAppear {
             // Reset or continue as desired; keeping current value
