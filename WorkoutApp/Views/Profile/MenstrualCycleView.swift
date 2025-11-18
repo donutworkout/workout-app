@@ -24,17 +24,17 @@ struct MenstrualCycleView: View {
                 title: "Menstrual Cycle",
                 isEditing: isEditing,
                 onClose: {
-                    dismiss() // ✅ kembali ke ProfileView dengan TabBar
+                    dismiss()      // ⬅️ close tombol silang tetap dismiss
                 },
                 onEditToggle: {
                     withAnimation(.spring()) {
                         if isEditing {
-                            // ✅ Simpan perubahan lalu balik ke Profile
+                            // SAVE CHANGES — NO DISMISS
                             menstrualDates = tempMenstrualDates
                             calculateOvulationDates()
-                            dismiss()
+                            isEditing = false
                         } else {
-                            // Masuk mode edit
+                            // MASUK EDIT MODE
                             tempMenstrualDates = menstrualDates
                             isEditing = true
                             isFirstClick = true

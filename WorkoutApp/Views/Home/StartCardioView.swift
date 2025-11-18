@@ -13,8 +13,8 @@ struct StartCardioView: View {
     @Environment(iPhoneConnectivityManager.self) private var connectivity
     
     // MARK: - Props
-    var activityName: String = "Indoor Walk"
-    var imageName: String = "indoorWalk"
+    var activityName: String = "Badminton"
+    var imageName: String = "charBadminton"
     
     @State private var timeElapsed: TimeInterval = 0
     @State private var calories: Int = 0
