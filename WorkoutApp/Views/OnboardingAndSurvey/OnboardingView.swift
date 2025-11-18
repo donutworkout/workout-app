@@ -21,7 +21,7 @@ struct OnboardingView: View {
                     
                     // MARK: - Character
                     CharLogin()
-                        .frame(height: 350)
+                        .frame(height: 300)
                     
                     // MARK: - Title
                     VStack(spacing: 8) {

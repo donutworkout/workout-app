@@ -10,7 +10,7 @@ import SwiftUI
 struct FinishWorkoutView: View {
     @EnvironmentObject var router: Router
     
-    var characterImage: String = "charLogin"
+    var characterImage: String = "charCongrats"
     
     var body: some View {
         VStack(spacing: 24) {

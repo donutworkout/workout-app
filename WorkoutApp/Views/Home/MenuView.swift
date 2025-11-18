@@ -219,21 +219,21 @@ struct CombinedWorkoutCardView: View {
         // Determine card content
         if isCardioDay {
             return (
-                "charWithBg",
+                "menuCardio",
                 "Today's Cardio Menu!",
                 "Don't worry about being perfect! just move and let your body wake up!",
                 duration
             )
         } else if isStrengthDay {
             return (
-                "charWithBg",
+                "menuStrength",
                 "Today's Strength Menu!",
                 "Let's wake up those muscles just good vibes and sweat!",
                 duration
             )
         } else {
             return (
-                "charWithBg",
+                "menuRest",
                 "Time to rest",
                 "Take your time to relax and enjoy the day!",
                 duration

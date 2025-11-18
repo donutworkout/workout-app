@@ -24,7 +24,7 @@ struct AfterSurveyView: View {
                     
                     // MARK: - Character
                     CharLogin()
-                        .frame(height: 350)
+                        .frame(height: 300)
                     
                     // MARK: - Title Section
                     VStack(alignment: .leading, spacing: 12) {

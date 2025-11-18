@@ -97,7 +97,7 @@ struct SurveyBirthdayView: View {
                                 Rectangle()
                                     .fill(Color("pinkTextPrimary").opacity(0.7))
                                     .frame(height: 30)
-                                    .frame(width: 350)
+                                    .frame(width: 300)
                                     .cornerRadius(16)
                                 Spacer()
                             }
