@@ -6,16 +6,25 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct EditWorkoutLevelView: View {
     @Environment(\.dismiss) var dismiss
-    @EnvironmentObject var surveyManager: SurveyManager
+    @Environment(\.modelContext) private var modelContext
+    
+    @Query(sort: \UserProfile.createdAt, order: .reverse)
+    private var profiles: [UserProfile]
+    
+    private var currentProfile: UserProfile? {
+        profiles.first
+    }
     
     // MARK: - States
     @State private var selectedFrequency: String? = nil
     @State private var selectedDuration: String? = nil
     @State private var selectedIntensity: String? = nil
     @State private var selectedExperience: String? = nil
+    @State private var showSaveAlert = false
     
     // MARK: - Options
     let workoutFrequency = WorkoutTimesAWeek.allCases.map { $0.displayName }
@@ -23,15 +32,24 @@ struct EditWorkoutLevelView: View {
     let workoutIntensity = WorkoutIntensity.allCases.map { $0.displayName }
     let workoutExperience = WorkoutExperience.allCases.map { $0.displayName }
     
+    var hasChanges: Bool {
+        selectedFrequency != nil && selectedDuration != nil &&
+        selectedIntensity != nil && selectedExperience != nil
+    }
+    
     // MARK: - Body
     var body: some View {
         VStack(spacing: 0) {
             // MARK: - Header (anchored)
             HeaderButton(
                 title: "Workout Level",
-                isEditing: true,
+                isEditing: hasChanges,
                 onClose: { dismiss() },
-                onEditToggle: { dismiss() }
+                onEditToggle: {
+                    if hasChanges {
+                        saveWorkoutPreferences()
+                    }
+                }
             )
             .padding(.horizontal)
             .padding(.top, 0)
@@ -100,11 +118,84 @@ struct EditWorkoutLevelView: View {
         .background(Color.white.ignoresSafeArea())
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            // Initialize from SurveyManager
-            selectedFrequency = surveyManager.tempWorkoutTimesAWeek?.displayName ?? "Not selected"
-            selectedDuration = surveyManager.tempWorkoutDuration?.displayName ?? "Not selected"
-            selectedIntensity = surveyManager.tempWorkoutIntensity?.displayName ?? "Not selected"
-            selectedExperience = surveyManager.tempWorkoutExperience?.displayName ?? "Not selected"
+            loadWorkoutData()
+        }
+        .alert("Preferences Updated", isPresented: $showSaveAlert) {
+            Button("OK") {
+                dismiss()
+            }
+        } message: {
+            Text("Your workout preferences have been successfully updated.")
+        }
+    }
+    
+    // MARK: - Backend Functions
+    
+    private func loadWorkoutData() {
+        guard let profile = currentProfile,
+              let workout = profile.userWorkouts?.first else {
+            print("⚠️ No workout data found")
+            return
+        }
+        
+        selectedFrequency = workout.workoutTimesAWeek?.displayName
+        selectedDuration = workout.workoutDuration?.displayName
+        selectedIntensity = workout.workoutIntensity?.displayName
+        selectedExperience = workout.workoutExperience?.displayName
+        
+        print("✅ Workout data loaded")
+    }
+    
+    private func saveWorkoutPreferences() {
+        guard let profile = currentProfile else {
+            print("❌ Cannot save: No profile found")
+            return
+        }
+        
+        // Get or create workout
+        let workout: UserWorkout
+        if let existingWorkout = profile.userWorkouts?.first {
+            workout = existingWorkout
+        } else {
+            workout = UserWorkout(
+                workoutMotivation: .keepFit,
+                workoutTimesAWeek: .twoToThreeTimes,
+                workoutDuration: .thirtyToSixtyMinutes,
+                workoutIntensity: .moderate,
+                workoutExperience: .underOneMonth,
+                workoutLevel: .beginner,
+                workoutDaysPreference: []
+            )
+            profile.userWorkouts = [workout]
+        }
+        
+        // Update workout preferences
+        if let frequency = selectedFrequency,
+           let freq = WorkoutTimesAWeek.allCases.first(where: { $0.displayName == frequency }) {
+            workout.workoutTimesAWeek = freq
+        }
+        
+        if let duration = selectedDuration,
+           let dur = WorkoutDuration.allCases.first(where: { $0.displayName == duration }) {
+            workout.workoutDuration = dur
+        }
+        
+        if let intensity = selectedIntensity,
+           let intens = WorkoutIntensity.allCases.first(where: { $0.displayName == intensity }) {
+            workout.workoutIntensity = intens
+        }
+        
+        if let experience = selectedExperience,
+           let exp = WorkoutExperience.allCases.first(where: { $0.displayName == experience }) {
+            workout.workoutExperience = exp
+        }
+        
+        do {
+            try modelContext.save()
+            print("✅ Workout preferences saved successfully")
+            showSaveAlert = true
+        } catch {
+            print("❌ Error saving: \(error.localizedDescription)")
         }
     }
 }
@@ -144,9 +235,9 @@ struct EditWorkoutSection: View {
     }
 }
 
-//#Preview {
-//    NavigationStack {
-//        EditWorkoutLevelView()
-//            .environmentObject(SurveyManager())
-//    }
-//}
+#Preview {
+    NavigationStack {
+        EditWorkoutLevelView()
+            .modelContainer(for: [UserProfile.self, UserWorkout.self, UserCycle.self])
+    }
+}
