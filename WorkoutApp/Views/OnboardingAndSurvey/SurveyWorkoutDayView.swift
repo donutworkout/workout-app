@@ -35,6 +35,7 @@ struct WorkoutDayView: View {
     
     var body: some View {
         ZStack {
+            // MARK: - Main Content
             VStack(spacing: 32) {
                 
                 // MARK: - Title
@@ -90,6 +91,7 @@ struct WorkoutDayView: View {
                         .foregroundColor(.gray)
                 }
                 .padding(.top, -4)
+                .padding(.leading, -16)
                 
                 Spacer()
                 
@@ -98,7 +100,9 @@ struct WorkoutDayView: View {
                     if selectedDays.contains("Flexible") {
                         saveAndNext()
                     } else if selectedDays.count < minimumDays {
-                        showCustomAlert = true
+                        withAnimation(.spring()) {
+                            showCustomAlert = true
+                        }
                     } else {
                         saveAndNext()
                     }
@@ -109,6 +113,8 @@ struct WorkoutDayView: View {
             }
             .animation(.easeInOut, value: selectedDays)
             .background(Color.white.ignoresSafeArea())
+            .blur(radius: showCustomAlert ? 3 : 0) // ✅ Blur background saat alert muncul
+            .allowsHitTesting(!showCustomAlert) // ✅ Disable interaction saat alert muncul
             .onAppear {
                 if selectedDays.isEmpty {
                     let savedDays = surveyManager.tempWorkoutDaysPreference
@@ -120,38 +126,69 @@ struct WorkoutDayView: View {
                 }
             }
             
-            // MARK: - Custom Alert (HIG Style + Glass Button)
+            // MARK: - Custom Alert Overlay (FULL COVER)
             if showCustomAlert {
-                Color.white.opacity(0.7)
-                    .ignoresSafeArea()
-                    .onTapGesture {
-                        withAnimation(.spring()) { showCustomAlert = false }
-                    }
-                
-                VStack(spacing: 20) {
-                    Text("Too chill")
-                        .font(.system(size: 22, weight: .semibold))
-                        .foregroundColor(.black)
+                ZStack {
+                    // ✅ Full screen overlay
+                    Color.white.opacity(0.5)
+                        .ignoresSafeArea(.all) // ✅ Cover everything including safe areas
+                        .onTapGesture {
+                            withAnimation(.spring()) {
+                                showCustomAlert = false
+                            }
+                        }
                     
-                    Text("Pick at least \(String(minimumDays)) days so we can get that streak going!")
-                        .multilineTextAlignment(.leading)
-                        .font(.system(size: 15))
-                        .foregroundColor(.black.opacity(0.8))
-                        .padding(.horizontal)
-                    
-                    PrimaryGlassButton(title: "OK") {
-                        withAnimation(.spring()) {
-                            showCustomAlert = false
+                    // ✅ Alert Dialog
+                    VStack(spacing: 0) {
+                        // MARK: - Content Area
+                        VStack(spacing: 12) {
+                            // Title
+                            Text("Too Chill")
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundColor(.primary)
+                                .multilineTextAlignment(.center)
+                            
+                            // Message
+                            Text("Pick at least \(minimumDays) days so we can get that streak going!")
+                                .font(.system(size: 13))
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .lineLimit(nil)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 20)
+                        .padding(.bottom, 20)
+                        
+                        Divider()
+                        
+                        // MARK: - Button
+                        Button(action: {
+                            withAnimation(.spring()) {
+                                showCustomAlert = false
+                            }
+                        }) {
+                            Text("OK")
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundColor(Color("pinkTextPrimary"))
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 44)
+                                .contentShape(Rectangle())
                         }
                     }
-                    .frame(height: 54)
-                    .padding(.horizontal)
+                    .frame(width: 270)
+                    .background(
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(.ultraThinMaterial)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(Color.black.opacity(0.1), lineWidth: 0.5)
+                    )
+                    .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
                 }
-                .padding(.vertical, 24)
-                .frame(maxWidth: 300)
-                .background(.ultraThinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 26))
-                .transition(.scale.combined(with: .opacity))
+                .transition(.opacity.combined(with: .scale(scale: 1.1)))
+                .zIndex(999) // ✅ Ensure it's on top
             }
         }
     }

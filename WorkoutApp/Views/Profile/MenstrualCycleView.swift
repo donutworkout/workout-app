@@ -6,9 +6,23 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct MenstrualCycleView: View {
     @Environment(\.dismiss) var dismiss
+    @Environment(\.modelContext) private var modelContext
+    
+    @Query(sort: \UserProfile.createdAt, order: .reverse)
+    private var profiles: [UserProfile]
+    
+    private var currentProfile: UserProfile? {
+        profiles.first
+    }
+    
+    private var cycle: UserCycle? {
+        currentProfile?.userCycle?.first
+    }
+    
     @State private var isEditing: Bool = false
     @State private var tempMenstrualDates: Set<Date> = []
     @State private var menstrualDates: Set<Date> = []
@@ -24,17 +38,18 @@ struct MenstrualCycleView: View {
                 title: "Menstrual Cycle",
                 isEditing: isEditing,
                 onClose: {
-                    dismiss() // ✅ kembali ke ProfileView dengan TabBar
+                    dismiss()
                 },
                 onEditToggle: {
                     withAnimation(.spring()) {
                         if isEditing {
-                            // ✅ Simpan perubahan lalu balik ke Profile
+                            // SAVE CHANGES
                             menstrualDates = tempMenstrualDates
+                            saveCycleDates()
                             calculateOvulationDates()
-                            dismiss()
+                            isEditing = false
                         } else {
-                            // Masuk mode edit
+                            // ENTER EDIT MODE
                             tempMenstrualDates = menstrualDates
                             isEditing = true
                             isFirstClick = true
@@ -115,7 +130,7 @@ struct MenstrualCycleView: View {
                             }
                         }
                         .padding(.horizontal, 20)
-                        .frame(height: 7 * 44 + 6 * 8) // 6 rows possible: 6 * cell + 5 spacings; we add a small buffer for consistent height
+                        .frame(height: 7 * 44 + 6 * 8)
                         .padding(.bottom, 16)
                     }
                     .background(
@@ -127,7 +142,6 @@ struct MenstrualCycleView: View {
                     
                     // MARK: - Legend or Info
                     if isEditing {
-                        // Info box saat editing
                         HStack(alignment: .top, spacing: 12) {
                             Image(systemName: "info.circle")
                                 .font(.system(size: 20))
@@ -153,7 +167,6 @@ struct MenstrualCycleView: View {
                         )
                         .padding(.horizontal, 16)
                     } else {
-                        // Legend saat tidak editing
                         HStack(spacing: 24) {
                             HStack(spacing: 8) {
                                 Circle()
@@ -181,9 +194,9 @@ struct MenstrualCycleView: View {
             }
         }
         .background(Color(UIColor.systemGroupedBackground).ignoresSafeArea())
-        .navigationBarBackButtonHidden(true) // ✅ hilangkan back bawaan
+        .navigationBarBackButtonHidden(true)
         .onAppear {
-            initializeDates()
+            loadCycleDates()
         }
     }
     
@@ -241,24 +254,48 @@ struct MenstrualCycleView: View {
         }
     }
     
-    private func initializeDates() {
-        if let date1 = createDate(year: 2025, month: 4, day: 1),
-           let date2 = createDate(year: 2025, month: 4, day: 2),
-           let date3 = createDate(year: 2025, month: 4, day: 3),
-           let date4 = createDate(year: 2025, month: 4, day: 4),
-           let date5 = createDate(year: 2025, month: 4, day: 5),
-           let date6 = createDate(year: 2025, month: 4, day: 6) {
-            menstrualDates = [date1, date2, date3, date4, date5, date6]
+    // MARK: - Backend Functions
+    
+    private func loadCycleDates() {
+        guard let cycle = cycle else {
+            print("⚠️ No cycle data found")
+            return
         }
+        
+        // Load menstrual dates from cycle
+        let daysBetween = calendar.dateComponents([.day], from: cycle.cycleStartDate, to: cycle.cycleEndDate).day ?? 0
+        
+        for i in 0...daysBetween {
+            if let date = calendar.date(byAdding: .day, value: i, to: cycle.cycleStartDate) {
+                menstrualDates.insert(date)
+            }
+        }
+        
         calculateOvulationDates()
+        print("✅ Cycle dates loaded: \(menstrualDates.count) days")
     }
     
-    private func createDate(year: Int, month: Int, day: Int) -> Date? {
-        var components = DateComponents()
-        components.year = year
-        components.month = month
-        components.day = day
-        return calendar.date(from: components)
+    private func saveCycleDates() {
+        guard let cycle = cycle else {
+            print("❌ Cannot save: No cycle found")
+            return
+        }
+        
+        let sortedDates = menstrualDates.sorted()
+        
+        if let firstDate = sortedDates.first,
+           let lastDate = sortedDates.last {
+            cycle.cycleStartDate = firstDate
+            cycle.cycleEndDate = lastDate
+            cycle.menstrualDuration = menstrualDates.count
+            
+            do {
+                try modelContext.save()
+                print("✅ Cycle dates saved successfully")
+            } catch {
+                print("❌ Error saving cycle: \(error.localizedDescription)")
+            }
+        }
     }
     
     private func calculateOvulationDates() {
@@ -325,15 +362,16 @@ struct DayCell: View {
                     }
                 }
             }
-            .padding(6) // consistent inner padding
+            .padding(6)
             .contentShape(Rectangle())
         }
-        .frame(width: 44, height: 44) // consistent outer size used by grid aspect ratio
+        .frame(width: 44, height: 44)
     }
 }
 
 #Preview {
     NavigationStack {
         MenstrualCycleView()
+            .modelContainer(for: [UserProfile.self, UserWorkout.self, UserCycle.self])
     }
 }

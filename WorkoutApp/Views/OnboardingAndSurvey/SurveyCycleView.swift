@@ -49,12 +49,6 @@ struct SurveyCycleView: View {
             ScrollView {
                 VStack(spacing: 32) {
                     
-                    // MARK: - Header
-//                    Text("Survey")
-//                        .font(.headline)
-//                        .foregroundColor(.black)
-//                        .padding(.top, 20)
-                    
                     // MARK: - Title & Character
                     HStack(alignment: .top) {
                         VStack(alignment: .leading, spacing: 8) {
@@ -145,6 +139,7 @@ struct SurveyCycleView: View {
                                             CalendarDayButton(
                                                 date: date,
                                                 isSelected: isDateSelected(date),
+                                                isFutureDate: isFutureDate(date),
                                                 onTap: {
                                                     toggleDate(date)
                                                 }
@@ -222,8 +217,6 @@ struct SurveyCycleView: View {
                 .padding(.vertical)
                 .disabled(!isAllAnswered)
                 .opacity(isAllAnswered ? 1 : 0.5)
-            
-
         }
         .background(Color.white.ignoresSafeArea())
         .onAppear {
@@ -265,7 +258,19 @@ struct SurveyCycleView: View {
         selectedDates.contains { calendar.isDate($0, inSameDayAs: date) }
     }
     
+    // ✅ NEW: Check if date is in the future
+    private func isFutureDate(_ date: Date) -> Bool {
+        let today = calendar.startOfDay(for: Date())
+        let checkDate = calendar.startOfDay(for: date)
+        return checkDate > today
+    }
+    
     private func toggleDate(_ date: Date) {
+        // ✅ Prevent selecting future dates
+        if isFutureDate(date) {
+            return
+        }
+        
         if let existingDate = selectedDates.first(where: { calendar.isDate($0, inSameDayAs: date) }) {
             // Unselect - delete this date
             selectedDates.remove(existingDate)
@@ -276,7 +281,8 @@ struct SurveyCycleView: View {
             // Auto-select 5 days only on first click
             if isFirstClick {
                 for i in 1...4 {
-                    if let nextDay = calendar.date(byAdding: .day, value: i, to: date) {
+                    if let nextDay = calendar.date(byAdding: .day, value: i, to: date),
+                       !isFutureDate(nextDay) { // ✅ Only add if not future date
                         selectedDates.insert(nextDay)
                     }
                 }
@@ -290,6 +296,7 @@ struct SurveyCycleView: View {
 struct CalendarDayButton: View {
     let date: Date
     let isSelected: Bool
+    let isFutureDate: Bool // ✅ NEW
     let onTap: () -> Void
     
     private let calendar = Calendar.current
@@ -318,10 +325,14 @@ struct CalendarDayButton: View {
                 
                 Text(dayNumber)
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(isSelected ? .white : (isToday ? Color("pinkTextPrimary") : .black))
+                    .foregroundColor(
+                        isFutureDate ? .gray.opacity(0.3) : // ✅ Grayed out for future dates
+                        (isSelected ? .white : (isToday ? Color("pinkTextPrimary") : .black))
+                    )
             }
             .frame(height: 40)
         }
+        .disabled(isFutureDate) // ✅ Disable button for future dates
     }
 }
 
@@ -439,4 +450,3 @@ extension SurveyCycleView {
 #Preview {
     SurveyCycleView(onFinish: {})
 }
-

@@ -30,11 +30,9 @@ struct ConnectWatchView: View {
                 ZStack {
                     Image("charConnectWatch")
                         .resizable()
-                        .scaledToFit()
+                        .scaledToFill()
                         .frame(width: 300, height: 300)
                 }
-//                .padding(.top, 10)
-                
                 Spacer()
                 
                 // MARK: - Allow Button
