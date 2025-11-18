@@ -58,14 +58,14 @@ enum CycleMoodAffectsMotivation: String, Codable, CaseIterable {
 class UserCycle: Identifiable {
   
   var id: UUID = UUID()
-  var isCycleRegular: Bool = true
+  var isCycleRegular: Bool? = nil
   var cycleStartDate: Date = Date()
   var cycleEndDate: Date = Date()
   var cycleLength: Int = 0
   var menstrualDuration: Int = 0
   var cycleSymptoms: [CycleSymptoms] = []
-  var cycleEnergy: CycleEnergy = CycleEnergy.stable
-  var cycleMoodAffectsMotivation: CycleMoodAffectsMotivation = CycleMoodAffectsMotivation.never
+  var cycleEnergy: CycleEnergy? = nil
+  var cycleMoodAffectsMotivation: CycleMoodAffectsMotivation? = nil
   var hasCrampsToday: Bool = false
   var createdAt: Date = Date()
 
@@ -73,16 +73,27 @@ class UserCycle: Identifiable {
   @Relationship(deleteRule: .nullify)
   var user: UserProfile?
   
-    init(isCycleRegular: Bool, cycleStartDate: Date, cycleEndDate: Date, cycleLength: Int, menstrualDuration: Int, cycleSymptoms: [CycleSymptoms], cycleEnergy: CycleEnergy, cycleMoodAffectsMotivation: CycleMoodAffectsMotivation, hasCrampsToday: Bool = false, createdAt: Date = .now) {
-    self.isCycleRegular = isCycleRegular
-    self.cycleStartDate = cycleStartDate
-    self.cycleEndDate = cycleEndDate
-    self.cycleLength = cycleLength
-    self.menstrualDuration = menstrualDuration
-    self.cycleSymptoms = cycleSymptoms
-    self.cycleEnergy = cycleEnergy
-    self.cycleMoodAffectsMotivation = cycleMoodAffectsMotivation
-    self.hasCrampsToday = hasCrampsToday
-    self.createdAt = createdAt
+    init(
+        isCycleRegular: Bool,
+        cycleStartDate: Date,
+        cycleEndDate: Date,
+        cycleLength: Int,
+        menstrualDuration: Int,
+        cycleSymptoms: [CycleSymptoms],
+        cycleEnergy: CycleEnergy,
+        cycleMoodAffectsMotivation: CycleMoodAffectsMotivation,
+        hasCrampsToday: Bool = false,
+        createdAt: Date = .now
+    ) {
+            self.isCycleRegular = isCycleRegular
+            self.cycleStartDate = cycleStartDate
+            self.cycleEndDate = cycleEndDate
+            self.cycleLength = cycleLength
+            self.menstrualDuration = menstrualDuration
+            self.cycleSymptoms = cycleSymptoms
+            self.cycleEnergy = cycleEnergy
+            self.cycleMoodAffectsMotivation = cycleMoodAffectsMotivation
+            self.hasCrampsToday = hasCrampsToday
+            self.createdAt = createdAt
   }
 }

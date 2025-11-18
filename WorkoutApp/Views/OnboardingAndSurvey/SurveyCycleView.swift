@@ -14,6 +14,7 @@ struct SurveyCycleView: View {
     @State private var currentMonth = Date()
     @State private var isFirstClick = true
     
+    private let noneOption = "None of the above"
     private let calendar = Calendar.current
     
     // MARK: - Options
@@ -47,12 +48,6 @@ struct SurveyCycleView: View {
         VStack {
             ScrollView {
                 VStack(spacing: 32) {
-                    
-                    // MARK: - Header
-//                    Text("Survey")
-//                        .font(.headline)
-//                        .foregroundColor(.black)
-//                        .padding(.top, 20)
                     
                     // MARK: - Title & Character
                     HStack(alignment: .top) {
@@ -144,6 +139,7 @@ struct SurveyCycleView: View {
                                             CalendarDayButton(
                                                 date: date,
                                                 isSelected: isDateSelected(date),
+                                                isFutureDate: isFutureDate(date),
                                                 onTap: {
                                                     toggleDate(date)
                                                 }
@@ -167,7 +163,28 @@ struct SurveyCycleView: View {
                             title: "What you feel when menstrual?",
                             subtitle: "Physical symptoms before or during",
                             options: physicalSymptoms,
-                            selectedOptions: $selectedPhysicalSymptoms,
+                            selectedOptions: Binding(
+                                get: { selectedPhysicalSymptoms },
+                                set: { newValue in
+                                    let none = "None of the above"
+
+                                    // CASE 1 → user memilih None sekarang
+                                    if newValue.contains(none) && !selectedPhysicalSymptoms.contains(none) {
+                                        selectedPhysicalSymptoms = [none]
+                                        return
+                                    }
+
+                                    // CASE 2 → user sebelumnya pilih None, lalu klik opsi lain
+                                    if selectedPhysicalSymptoms.contains(none) && !newValue.contains(none) {
+                                        // remove none, allow the new selection
+                                        selectedPhysicalSymptoms = newValue.filter { $0 != none }
+                                        return
+                                    }
+
+                                    // CASE 3 → normal multi-select behavior (tanpa None)
+                                    selectedPhysicalSymptoms = newValue.filter { $0 != none }
+                                }
+                            ),
                             allowsMultipleSelection: true
                         )
                         
@@ -200,8 +217,6 @@ struct SurveyCycleView: View {
                 .padding(.vertical)
                 .disabled(!isAllAnswered)
                 .opacity(isAllAnswered ? 1 : 0.5)
-            
-
         }
         .background(Color.white.ignoresSafeArea())
         .onAppear {
@@ -243,7 +258,19 @@ struct SurveyCycleView: View {
         selectedDates.contains { calendar.isDate($0, inSameDayAs: date) }
     }
     
+    // ✅ NEW: Check if date is in the future
+    private func isFutureDate(_ date: Date) -> Bool {
+        let today = calendar.startOfDay(for: Date())
+        let checkDate = calendar.startOfDay(for: date)
+        return checkDate > today
+    }
+    
     private func toggleDate(_ date: Date) {
+        // ✅ Prevent selecting future dates
+        if isFutureDate(date) {
+            return
+        }
+        
         if let existingDate = selectedDates.first(where: { calendar.isDate($0, inSameDayAs: date) }) {
             // Unselect - delete this date
             selectedDates.remove(existingDate)
@@ -254,7 +281,8 @@ struct SurveyCycleView: View {
             // Auto-select 5 days only on first click
             if isFirstClick {
                 for i in 1...4 {
-                    if let nextDay = calendar.date(byAdding: .day, value: i, to: date) {
+                    if let nextDay = calendar.date(byAdding: .day, value: i, to: date),
+                       !isFutureDate(nextDay) { // ✅ Only add if not future date
                         selectedDates.insert(nextDay)
                     }
                 }
@@ -268,6 +296,7 @@ struct SurveyCycleView: View {
 struct CalendarDayButton: View {
     let date: Date
     let isSelected: Bool
+    let isFutureDate: Bool // ✅ NEW
     let onTap: () -> Void
     
     private let calendar = Calendar.current
@@ -296,10 +325,14 @@ struct CalendarDayButton: View {
                 
                 Text(dayNumber)
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(isSelected ? .white : (isToday ? Color("pinkTextPrimary") : .black))
+                    .foregroundColor(
+                        isFutureDate ? .gray.opacity(0.3) : // ✅ Grayed out for future dates
+                        (isSelected ? .white : (isToday ? Color("pinkTextPrimary") : .black))
+                    )
             }
             .frame(height: 40)
         }
+        .disabled(isFutureDate) // ✅ Disable button for future dates
     }
 }
 
@@ -307,7 +340,11 @@ extension SurveyCycleView {
     
     private func loadExistingSelections() {
         if selectedMenstrualCycle.isEmpty {
-            selectedMenstrualCycle = [surveyManager.tempIsCycleRegular ? "Yes" : "No"]
+            if let isRegular = surveyManager.tempIsCycleRegular {
+                selectedMenstrualCycle = [isRegular ? "Yes" : "No"]
+            } else {
+                selectedMenstrualCycle = []
+            }
         }
         
         // 2. Load dates (only if they're not the default Date())
@@ -340,12 +377,12 @@ extension SurveyCycleView {
         
         // 4. Load energy level
         if selectedEnergyLevel.isEmpty {
-            selectedEnergyLevel = [surveyManager.tempCycleEnergy.displayName]
+            selectedEnergyLevel = [surveyManager.tempCycleEnergy?.displayName ?? "Not selected"]
         }
         
         // 5. Load mood
         if selectedMoodChanges.isEmpty {
-            selectedMoodChanges = [surveyManager.tempCycleMoodAffectsMotivation.displayName]
+            selectedMoodChanges = [surveyManager.tempCycleMoodAffectsMotivation?.displayName ?? "Not selected"]
         }
     }
     
@@ -358,20 +395,28 @@ extension SurveyCycleView {
         }
         
         // 2. Save dates (start and end)
-        if let sortedDates = selectedDates.sorted().first {
-            surveyManager.updateTempCycleStartDate(sortedDates)
-            print("✅ Start date saved: \(sortedDates)")
+        if let firstPeriodDate = selectedDates.sorted().first {
+            surveyManager.updateTempCycleStartDate(firstPeriodDate)
+            print("✅ Start date saved: \(firstPeriodDate)")
         }
         
-        if let sortedDates = selectedDates.sorted().last {
-            surveyManager.updateTempCycleEndDate(sortedDates)
-            print("✅ End date saved: \(sortedDates)")
+        if let lastPeriodDate = selectedDates.sorted().last {
+            surveyManager.updateTempCycleEndDate(lastPeriodDate)
+            print("✅ End date saved: \(lastPeriodDate)")
         }
         
         // Calculate cycle length
-        let cycleLength = selectedDates.count
-        surveyManager.updateTempCycleLength(cycleLength)
-        print("✅ Cycle length saved: \(cycleLength) days")
+        let menstrualDuration = selectedDates.count
+        surveyManager.updateTempMenstrualDuration(menstrualDuration)
+        print("✅ Cycle length saved: \(menstrualDuration) days")
+        
+        
+        if surveyManager.tempCycleLength == 0 {
+            surveyManager.updateTempCycleLength(28) // Default cycle length
+            print("✅ Cycle length set to default: 28 days")
+        } else {
+            print("✅ Using existing cycle length: \(surveyManager.tempCycleLength) days")
+        }
         
         // 3. Save symptoms (handle multiple selections if needed)
         let selectedSymptoms: [CycleSymptoms] = selectedPhysicalSymptoms.compactMap { name in
@@ -405,4 +450,3 @@ extension SurveyCycleView {
 #Preview {
     SurveyCycleView(onFinish: {})
 }
-

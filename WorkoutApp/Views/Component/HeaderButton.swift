@@ -18,62 +18,65 @@ struct HeaderButton: View {
             Button(action: onClose) {
                 ZStack {
                     Circle()
-                        .fill(Color.secondary)
+                        .fill(Color(.systemGray5))
                         .glassEffect(.regular)
-                        .frame(width: 36, height: 36)
+                        .frame(width: 30, height: 30)    // lebih kecil natural iOS
+                    
                     Image(systemName: "xmark")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(.grayTextPrimary)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(.gray)
                 }
             }
             
             Spacer()
             
-            // Title
+            // MARK: - Title (iOS size default)
             Text(title)
-                .font(.system(size: 20, weight: .medium))
+                .font(.headline)                     // default iPhone style
                 .foregroundColor(.black)
             
             Spacer()
             
-            // Edit / Save Button (lingkaran saat editing)
+            // MARK: - Edit / Save Button
             if isEditing {
                 Button(action: onEditToggle) {
                     ZStack {
                         Circle()
                             .fill(Color("pinkTextPrimary"))
                             .glassEffect(.regular)
-                            .frame(width: 36, height: 36)
+                            .frame(width: 30, height: 30)  // lebih kecil
+                        
                         Image(systemName: "checkmark")
-                            .font(.title3)
-                            .foregroundStyle(.white)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.white)
                     }
                 }
             } else {
                 Button(action: onEditToggle) {
                     Text("Edit")
-                        .font(.title3)
+                        .font(.callout)                 // lebih kecil, seperti iOS
                         .foregroundColor(Color("pinkTextPrimary"))
-                        .padding(.vertical, 6)
+                        .padding(.vertical, 4)
                 }
             }
         }
         .padding(.horizontal)
-        .padding(.top, 8)
-        .padding(.bottom, 12)
+        .padding(.top, 6)
+        .padding(.bottom, 10)
     }
 }
 
-#Preview("Editing") {
+#Preview("HeaderButton") {
     VStack(spacing: 20) {
         HeaderButton(
-            title: "About Me",
+            title: "Menstrual Cycle",
             isEditing: false,
             onClose: {},
             onEditToggle: {}
         )
+        
         HeaderButton(
-            title: "About Me",
+            title: "Menstrual Cycle",
             isEditing: true,
             onClose: {},
             onEditToggle: {}

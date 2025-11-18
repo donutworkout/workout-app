@@ -12,7 +12,7 @@ struct FinishWorkoutView: View {
     @Environment(iPhoneConnectivityManager.self) private var connectivity
 
     
-    var characterImage: String = "buttercup"
+    var characterImage: String = "charCongrats"
     
     func formatTime(_ seconds: Double) -> String {
         let s = Int(seconds)
@@ -30,7 +30,7 @@ struct FinishWorkoutView: View {
             Image(characterImage)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 280, height: 280)
+                .frame(width: 300, height: 300)
             
             // MARK: - Title
             VStack(spacing: 6) {

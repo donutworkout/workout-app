@@ -27,11 +27,12 @@ struct SummaryView: View {
                 DaySelectorSummaryView(selectedDay: $selectedDay, weekDays: weekDays, progress: progress)
                     .padding(.horizontal, 20)
                 
-                // MARK: - Character Animation (Placeholder)
+                // MARK: - Character (Static)
                 VStack {
-                    LottieView(name: "characterAnimation", loopMode: .loop)
+                    Image("charLogin")
+                        .resizable()
+                        .scaledToFit()
                         .frame(width: 300, height: 300)
-                        .scaleEffect(0.3)
                         .padding(.vertical, 8)
                 }
                 .frame(maxWidth: .infinity)
@@ -135,11 +136,7 @@ struct DaySelectorSummaryView: View {
                             // Angka hari (1–7)
                             Text("\(index + 1)")
                                 .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(
-                                    progress[index] > 0.0
-                                    ? .white
-                                    : (selectedDay == index ? .black : .black.opacity(0.6))
-                                )
+                                .foregroundColor(.black)
                         }
                     }
                 }

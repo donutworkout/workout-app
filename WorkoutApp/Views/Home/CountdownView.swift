@@ -177,7 +177,9 @@ struct CountdownView: View {
     private func startCountdown() {
         countdown = 3
         showCountdown = true
-        SoundManager.shared.playSound("countdownMusic")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            SoundManager.shared.playSound("countdownMusic", withExtension: "mp3")
+            }
         HapticManager.shared.trigger(.countdownTick)
         
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
