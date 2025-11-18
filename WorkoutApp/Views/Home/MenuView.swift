@@ -272,10 +272,8 @@ struct CombinedWorkoutCardView: View {
                 
                 // Gambar di tengah
             Image(cardInfo.image)
-                .resizable()
-                .aspectRatio(16.0/9.0, contentMode: .fill)
                 .frame(maxWidth: .infinity)
-                .clipped()
+//                                    .frame(height: 180)
 //            }
             
             // MARK: - Konten bawah (judul, deskripsi, tombol)
