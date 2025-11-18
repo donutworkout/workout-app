@@ -179,11 +179,15 @@ struct CountdownView: View {
         showCountdown = true
         SoundManager.shared.playSound("countdownMusic")
         HapticManager.shared.trigger(.countdownTick)
+        
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
-            if countdown > 1 {
-                countdown -= 1
+            countdown -= 1  // ✅ 3→2→1→0
+            
+            if countdown > 0 {
+                // Still counting
                 HapticManager.shared.trigger(.countdownTick)
             } else {
+                // ✅ countdown = 0 → STOP IMMEDIATELY
                 t.invalidate()
                 HapticManager.shared.trigger(.countdownEnd)
                 
@@ -196,8 +200,7 @@ struct CountdownView: View {
                     showCountdown = false
                 }
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {  // ✅ Match animation duration
                     // Navigate to StartStrengthView
                     print("🚀 Navigating to StartStrengthView")
                     sessionManager.startWorkout(with: exercises)

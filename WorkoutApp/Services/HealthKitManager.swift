@@ -23,6 +23,7 @@ final class HealthKitManager {
             static let toRead: Set<HKObjectType> = [
                 HKObjectType.quantityType(forIdentifier: .heartRate)!,
                 HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!,
+                HKObjectType.quantityType(forIdentifier: .basalEnergyBurned)!,
                 HKObjectType.quantityType(forIdentifier: .appleExerciseTime)!,
                 HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning)!,
                 HKObjectType.quantityType(forIdentifier: .stepCount)!,

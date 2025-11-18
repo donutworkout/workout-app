@@ -9,8 +9,18 @@ import SwiftUI
 
 struct FinishWorkoutView: View {
     @EnvironmentObject var router: Router
+    @Environment(iPhoneConnectivityManager.self) private var connectivity
+
     
     var characterImage: String = "buttercup"
+    
+    func formatTime(_ seconds: Double) -> String {
+        let s = Int(seconds)
+        let h = s / 3600
+        let m = (s % 3600) / 60
+        let sec = s % 60
+        return String(format: "%02d:%02d:%02d", h, m, sec)
+    }
     
     var body: some View {
         VStack(spacing: 24) {
@@ -35,15 +45,19 @@ struct FinishWorkoutView: View {
             // MARK: - Summary Card
             VStack(spacing: 12) {
                 HStack {
-                    summaryItem(title: "Workout Time", value: "0:15:18")
+                    summaryItem(title: "Workout Time",
+                                value: formatTime(connectivity.summaryDuration))
                     Divider()
-                    summaryItem(title: "Active Calories", value: "100 kcal")
+                    summaryItem(title: "Active Calories",
+                                value: "\(Int(connectivity.summaryActiveEnergy)) kcal")
                 }
                 Divider()
                 HStack {
-                    summaryItem(title: "Total Calories", value: "130 kcal")
+                    summaryItem(title: "Total Calories",
+                                value: "\(Int(connectivity.summaryTotalEnergy)) kcal")
                     Divider()
-                    summaryItem(title: "Avg. Heart Rate", value: "118 bpm")
+                    summaryItem(title: "Avg. Heart Rate",
+                                value: "\(Int(connectivity.summaryAvgHeartRate)) bpm")
                 }
             }
             .padding()

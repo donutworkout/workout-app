@@ -37,11 +37,6 @@ struct WatchWorkoutControlsView: View {
                     }
 
                     Spacer()
-
-//                    Text(currentTime)
-//                        .font(.system(size: 16, weight: .semibold))
-//                        .foregroundColor(.white)
-//                        .onReceive(clockTimer) { _ in updateTime() }
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 20)
@@ -55,9 +50,11 @@ struct WatchWorkoutControlsView: View {
                         icon: isPaused ? "play.fill" : "pause.fill"
                     ) {
                         if isPaused {
+                            isPaused = false
                             sessionManager.resumeWorkout()
                             connectivity.sendMessage(["cmd": "resume"])
                            } else {
+                               isPaused = true
                                sessionManager.pauseWorkout()
                                connectivity.sendMessage(["cmd": "pause"])
                            }

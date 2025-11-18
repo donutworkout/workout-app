@@ -65,12 +65,12 @@ struct StartCardioView: View {
                     )
                     StatCardItem(
                         icon: "figure.walk",
-                        value: String(format: "%.1f", distance),
+                        value: String(format: "%.2f", distance),
                         label: "KILOMETERS"
                     )
                     StatCardItem(
                         icon: "heart.fill",
-                        value: "\(bpm)",
+                        value: connectivity.heartRate > 0 ? "\(bpm)" : "--",
                         label: "BPM"
                     )
                 }
@@ -105,7 +105,7 @@ struct StartCardioView: View {
                     onEndWorkout: {
                         timer?.invalidate()
                         connectivity.stopWorkoutFromPhone()
-                        router.navigateTo(.menu)
+                        router.navigateTo(.finishWorkout)
                     }
                 )
                 .transition(.scale.combined(with: .opacity))
@@ -143,34 +143,47 @@ struct StartCardioView: View {
         }
         .onChange(of: connectivity.isWorkoutPaused) { _, paused in
             if paused {
-                // Pause from WATCH → show popup
                 print("⌚ Pause from watch → show popup")
                 showPausePopup = true
             } else {
                 showPausePopup = false
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .startLocalTimer)) { _ in
+            timeElapsed = 0
+            startTimer()
+        }
+
+        .onReceive(NotificationCenter.default.publisher(for: .pauseLocalTimer)) { _ in
+            timer?.invalidate()
+        }
+
+        .onReceive(NotificationCenter.default.publisher(for: .resumeLocalTimer)) { _ in
+            startTimer()
+        }
+
     }
     
     private var formattedTime: String {
-        let hours = Int(connectivity.timeActive) / 3600
-        let minutes = (Int(connectivity.timeActive) % 3600) / 60
-        let seconds = Int(connectivity.timeActive) % 60
+        let total = Int(timeElapsed)
+        let hours = total / 3600
+        let minutes = (total % 3600) / 60
+        let seconds = total % 60
         return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
     
     private func startTimer() {
         timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) {
-            _ in
-            guard !connectivity.isWorkoutPaused else { return }
-            connectivity.timeActive += 1
 
-            // UI update — tapi *tanpa kirim apa pun ke watch*
-            timeElapsed = connectivity.timeActive
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            if !connectivity.isWorkoutPaused {
+                timeElapsed += 1    // ⬅️ TIMER LOKAL
+            }
+
+            // metrics dari Watch tetap realtime
             calories = Int(connectivity.energyBurned)
             distance = connectivity.distance / 1000
-            bpm = Int(connectivity.heartRate)
+            bpm = connectivity.heartRate > 0 ? Int(connectivity.heartRate) : 0
         }
     }
 }
@@ -181,6 +194,7 @@ struct WorkoutPausePopup: View {
     var onEndWorkout: () -> Void
 
     @Environment(iPhoneConnectivityManager.self) private var connectivity
+    @EnvironmentObject var router: Router
 
     var body: some View {
         ZStack {
@@ -204,6 +218,7 @@ struct WorkoutPausePopup: View {
                         NeutralGlassButton(title: "End Workout") {
                             onEndWorkout()
                             connectivity.stopWorkoutFromPhone()
+                            router.navigateTo(.finishWorkout)
                         }
                         Spacer().frame(height: 10)
                     }
@@ -236,9 +251,17 @@ struct WorkoutPausePopup: View {
     }
 }
 
+
+extension Notification.Name {
+    static let startLocalTimer = Notification.Name("startLocalTimer")
+    static let pauseLocalTimer = Notification.Name("pauseLocalTimer")
+    static let resumeLocalTimer = Notification.Name("resumeLocalTimer")
+}
+
 // #Preview {
 //     NavigationStack {
 //         StartCardioView()
 //             .environmentObject(Router())
 //     }
 // }
+

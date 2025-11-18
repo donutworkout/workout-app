@@ -35,7 +35,8 @@ struct WatchWorkoutCardioView: View {
                             .fill(Color.white.opacity(0.15))
                             .frame(width: 36, height: 36)
                         
-                        Image(systemName: getWorkoutIcon(for: connectivity.selectedWorkoutType ?? .running))   .font(.system(size: 18))
+                        Image(systemName: getWorkoutIcon(for: connectivity.selectedWorkoutType ?? .running))
+                            .font(.system(size: 18))
                             .foregroundColor(Color("pinkTextPrimary"))
                     }
                     
@@ -67,11 +68,14 @@ struct WatchWorkoutCardioView: View {
                         .padding(.bottom, 4)
 
                     StatRow(icon: "flame.fill",
-                            text: String(format: "%.0f kcal", sessionManager.energyBurned))
+                            text: String(format: "%.0f kcal", sessionManager.activeEnergy))
                     StatRow(icon: "figure.walk",
                             text: String(format: "%.2f km", sessionManager.distance / 1000))
-                    StatRow(icon: "heart.fill",
-                            text: String(format: "%.0f bpm", sessionManager.heartRate))
+                    StatRow(
+                        icon: "heart.fill",
+                        text: sessionManager.heartRate > 0
+                            ? String(format: "%.0f bpm", sessionManager.heartRate): "-- bpm"
+                    )
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, 16)
@@ -143,6 +147,8 @@ struct WatchWorkoutCardioView: View {
         // Selalu tampil jam:menit:detik (00:00:00)
         return String(format: "%02d:%02d:%02d", h, m, s)
     }
+    
+    
 }
 
 // MARK: - Small row component

@@ -60,7 +60,7 @@ struct WatchWorkoutStrengthView: View {
                         .foregroundColor(.white)
                         .padding(.bottom, 4)
 
-                    StatRow(icon: "flame.fill", text: String(format: "%.0f kcal", sessionManager.energyBurned))
+                    StatRow(icon: "flame.fill", text: String(format: "%.0f kcal", sessionManager.activeEnergy))
                     StatRow(icon: "heart.fill", text: String(format: "%.0f bpm", sessionManager.heartRate))
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)

@@ -159,8 +159,9 @@ struct CountdownCardioView: View {
         
         // Countdown overlay timer
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
-            if countdown > 1 {
-                countdown -= 1
+            countdown -= 1  // ✅ 3→2→1→0
+            
+            if countdown > 0 {
                 HapticManager.shared.trigger(.countdownTick)
             } else {
                 t.invalidate()
@@ -171,10 +172,11 @@ struct CountdownCardioView: View {
                     connectivity.startWorkoutFromPhone(type: type)
                 }
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    withAnimation(.easeOut(duration: 0.3)) {
-                        showCountdown = false
-                    }
+                withAnimation(.easeOut(duration: 0.3)) {
+                    showCountdown = false
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {  // ✅ Match animation duration
                     onCountdownComplete()
                     startTimer()
                 }
