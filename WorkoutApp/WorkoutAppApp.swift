@@ -30,7 +30,7 @@ struct WorkoutAppApp: App {
             let modelConfiguration = ModelConfiguration(
                 schema: schema,
                 isStoredInMemoryOnly: false,
-                //cloudKitDatabase: .automatic // This enables CloudKit!
+                cloudKitDatabase: .none // This enables CloudKit!
             )
             
             let container = try ModelContainer(
@@ -48,6 +48,10 @@ struct WorkoutAppApp: App {
     
     var iPhoneConnect = iPhoneConnectivityManager.shared
     
+    init() {
+        checkFirstLaunchAndCleanup()
+    }
+    
     var body: some Scene {
         WindowGroup {
             RouterView()
@@ -59,5 +63,38 @@ struct WorkoutAppApp: App {
                 .preferredColorScheme(.light)
         }
         .modelContainer(WorkoutAppApp.modelContainer)
+    }
+    
+    private func checkFirstLaunchAndCleanup() {
+        let hasLaunchedBefore = UserDefaults.standard.bool(forKey: "HasLaunchedBefore")
+        
+        if !hasLaunchedBefore {
+            print("🆕 First launch detected - setting up fresh data")
+            
+            let context = WorkoutAppApp.modelContainer.mainContext
+            
+            // Clear everything
+            DummyExerciseProvider.shared.clearAllExercises(from: context)
+            clearOldMenus(from: context)
+            
+            // Insert fresh exercises (will work because database is empty)
+            DummyExerciseProvider.shared.insertDummyData(into: context)
+            
+            // Mark as launched
+            UserDefaults.standard.set(true, forKey: "HasLaunchedBefore")
+            print("✅ First launch setup complete")
+        } else {
+            print("✅ App has been launched before - skipping cleanup")
+        }
+    }
+    
+    private func clearOldMenus(from context: ModelContext) {
+        do {
+            try context.delete(model: DailyMenu.self)
+            try context.save()
+            print("✅ Cleared all old menus from database")
+        } catch {
+            print("❌ Failed to clear menus: \(error)")
+        }
     }
 }

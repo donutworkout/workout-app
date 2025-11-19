@@ -11,15 +11,12 @@ import SwiftData
 class DummyExerciseProvider {
     static let shared = DummyExerciseProvider()
     
-    // MARK: - Create Dummy Exercises
     func createDummyExercises() -> [Exercise] {
         return [
-            // MARK: - MENSTRUAL PHASE (Gentle & Low Impact)
-            
             Exercise(
                 name: "Wall Press",
                 bodyPart: [.fullBody, .upperPush],
-                time: nil
+                time: 30
             ),
             
             Exercise(
@@ -31,19 +28,19 @@ class DummyExerciseProvider {
             Exercise(
                 name: "Bent Over Row",
                 bodyPart: [.fullBody],
-                time: nil
+                time: 30
             ),
             
-            Exercise(
-                name: "Bodyweight Squat",
-                bodyPart: [.fullBody],
-                time: nil
-            ),
+//            Exercise(
+//                name: "Bodyweight Squat",
+//                bodyPart: [.fullBody],
+//                time: nil
+//            ),
             
             Exercise(
                 name: "Glute Bridge",
                 bodyPart: [.fullBody],
-                time: nil
+                time: 30
             ),
             
             Exercise(
@@ -55,7 +52,7 @@ class DummyExerciseProvider {
             Exercise(
                 name: "Plank With Knee Dip",
                 bodyPart: [.fullBody, .upperPush],
-                time: nil
+                time: 30
             ),
             
             Exercise(
@@ -67,7 +64,7 @@ class DummyExerciseProvider {
             Exercise(
                 name: "Tricep Dip",
                 bodyPart: [.upperPush],
-                time: nil
+                time: 30
             ),
             
             Exercise(
@@ -85,7 +82,7 @@ class DummyExerciseProvider {
             Exercise(
                 name: "Plank Row",
                 bodyPart: [.upperPull],
-                time: nil
+                time: 30
             ),
             
 //            Exercise(
@@ -109,7 +106,7 @@ class DummyExerciseProvider {
             Exercise(
                 name: "Walking Lunge",
                 bodyPart: [.upperPull],
-                time: nil
+                time: 30
             ),
             
             Exercise(
@@ -148,10 +145,18 @@ class DummyExerciseProvider {
     
     // MARK: - Clear All Exercises (for testing)
     func clearAllExercises(from context: ModelContext) {
+        let exercises = createDummyExercises()
+        
+        for exercise in exercises {
+            context.insert(exercise)
+        }
+        
         do {
             try context.delete(model: Exercise.self)
+            try context.delete(model: DailyMenu.self)
             try context.save()
             print("✅ Cleared all exercises from database")
+            print("there's \(exercises.count) left in the database")
         } catch {
             print("❌ Failed to clear exercises: \(error)")
         }

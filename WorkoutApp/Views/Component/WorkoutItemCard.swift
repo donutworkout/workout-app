@@ -34,9 +34,15 @@ struct WorkoutItemCard: View {
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.black)
                 
-                Text("\(sets) x \(reps)")
-                    .font(.system(size: 14))
-                    .foregroundColor(.gray)
+                if let time = workout.time {
+                    Text("\(time) seconds")
+                        .font(.system(size: 14))
+                        .foregroundColor(.gray)
+                } else {
+                    Text("\(sets) x \(reps)")
+                        .font(.system(size: 14))
+                        .foregroundColor(.gray)
+                }
             }
             
             Spacer()

@@ -181,17 +181,31 @@ struct StartStrengthView: View {
     private func startTimer() {
         timer?.invalidate()
         
-        let duration: TimeInterval = TimeInterval(currentExercise?.time ?? 60)
-        timeRemaining = duration
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
-            if !isPaused {
-                if timeRemaining > 0 {
-                    timeRemaining -= 1
-                    calories = Int((duration - timeRemaining) / 6)
+        if let duration = currentExercise?.time {
+            // ⏬ COUNT DOWN: Exercise has a time limit
+            timeRemaining = TimeInterval(duration)
+                
+            timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
+                if !isPaused {
+                    if timeRemaining > 0 {
+                        timeRemaining -= 1
+                        calories = Int((TimeInterval(duration) - timeRemaining) / 6)
+                        bpm = 90 + Int.random(in: -4...6)
+                    } else {
+                        t.invalidate()
+                        handleTimerComplete()
+                    }
+                }
+            }
+        } else {
+            // ⏫ COUNT UP: Exercise is rep-based (no time limit)
+            timeRemaining = 0
+            
+            timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
+                if !isPaused {
+                    timeRemaining += 1 // Count up instead of down
+                    calories = Int(timeRemaining / 6)
                     bpm = 90 + Int.random(in: -4...6)
-                } else {
-                    t.invalidate()
-                    handleTimerComplete()
                 }
             }
         }
@@ -202,6 +216,7 @@ struct StartStrengthView: View {
     }
     
     private func handleTimerComplete() {
+        timer?.invalidate()
         router.navigateTo(.restView)
     }
 }
