@@ -182,7 +182,6 @@ struct StartStrengthView: View {
         timer?.invalidate()
         
         if let duration = currentExercise?.time {
-            // ⏬ COUNT DOWN: Exercise has a time limit
             timeRemaining = TimeInterval(duration)
                 
             timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
@@ -198,12 +197,11 @@ struct StartStrengthView: View {
                 }
             }
         } else {
-            // ⏫ COUNT UP: Exercise is rep-based (no time limit)
             timeRemaining = 0
             
             timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
                 if !isPaused {
-                    timeRemaining += 1 // Count up instead of down
+                    timeRemaining += 1
                     calories = Int(timeRemaining / 6)
                     bpm = 90 + Int.random(in: -4...6)
                 }

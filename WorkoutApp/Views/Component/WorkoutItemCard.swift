@@ -11,11 +11,13 @@ struct WorkoutItemCard: View {
     let workout: Exercise
     @State private var sets: Int
     let reps: Int
+    @State private var time: Int
     
     init(workout: Exercise) {
         self.workout = workout
         _sets = State(initialValue: workout.sets ?? 1)
         self.reps = workout.reps ?? 0
+        _time = State(initialValue: workout.time ?? 0)
     }
     
     var body: some View {
@@ -34,7 +36,7 @@ struct WorkoutItemCard: View {
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.black)
                 
-                if let time = workout.time {
+                if workout.time != nil {
                     Text("\(time) seconds")
                         .font(.system(size: 14))
                         .foregroundColor(.gray)
@@ -50,9 +52,20 @@ struct WorkoutItemCard: View {
             // MARK: - Plus & Minus
             HStack(spacing: 12) {
                 Button(action: {
-                    if sets > 1 {
-                        sets -= 1
-                        HapticManager.shared.trigger(.adjustReps) // 🔊 Getar saat dikurangi
+                    if workout.time != nil {
+                        if time <= workout.time ?? 0 {
+                            HapticManager.shared.trigger(.adjustReps)
+                        } else {
+                            time -= 10
+                            HapticManager.shared.trigger(.adjustReps)
+                        }
+                    } else {
+                        if sets <= workout.sets ?? 0 {
+                            HapticManager.shared.trigger(.adjustReps)
+                        } else {
+                            sets -= 1
+                            HapticManager.shared.trigger(.adjustReps)
+                        }
                     }
                 }) {
                     Image(systemName: "minus")
@@ -64,8 +77,13 @@ struct WorkoutItemCard: View {
                 }
                 
                 Button(action: {
-                    sets += 1
-                    HapticManager.shared.trigger(.adjustReps) // 🔊 Getar saat ditambah
+                    if workout.time != nil {
+                        time += 10
+                        HapticManager.shared.trigger(.adjustReps)
+                    } else {
+                        sets += 1
+                        HapticManager.shared.trigger(.adjustReps)
+                    }
                 }) {
                     Image(systemName: "plus")
                         .font(.system(size: 14, weight: .semibold))
