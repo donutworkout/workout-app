@@ -86,7 +86,6 @@ struct AdjustMenuStrengthView: View {
             }
         }
         .safeAreaInset(edge: .bottom) {
-            // MARK: - Bottom anchored button
             VStack {
                 PrimaryGlassButton(title: "Start Now") {
                     

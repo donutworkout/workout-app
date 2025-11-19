@@ -169,7 +169,7 @@ class WorkoutMenuGenerator {
         }
     }
 
-    func generateCardioMenu( //sesuai list, nambah duration aja per level
+    func generateCardioMenu(
         dayNumber: Int,
         dayName: String,
         date: Date,
@@ -178,7 +178,7 @@ class WorkoutMenuGenerator {
         cardioDayIndex: Int
     ) -> DailyMenu {
         
-        let cardioDetails = getCardioDetails(for: level, phase: phase)
+        let cardioDetails = getCardioSpecs(for: level, phase: phase)
         
         return .cardioDay(
             dayNumber: dayNumber,
@@ -256,7 +256,7 @@ extension WorkoutMenuGenerator {
         }
     }
     
-    private func getCardioDetails(for level: WorkoutLevel, phase: MenstrualPhase) -> CardioDetails {
+    func getCardioSpecs(for level: WorkoutLevel, phase: MenstrualPhase) -> CardioDetails {
         switch (level, phase) {
             // BEGINNER
         case (.beginner, .menstruation):
