@@ -37,7 +37,7 @@ struct WorkoutItemCard: View {
                     .foregroundColor(.black)
                 
                 if workout.time != nil {
-                    Text("\(time) seconds")
+                    Text("\(sets) x \(time) sec")
                         .font(.system(size: 14))
                         .foregroundColor(.gray)
                 } else {
@@ -51,46 +51,44 @@ struct WorkoutItemCard: View {
             
             // MARK: - Plus & Minus
             HStack(spacing: 12) {
-                Button(action: {
-                    if workout.time != nil {
-                        if time <= workout.time ?? 0 {
-                            HapticManager.shared.trigger(.adjustReps)
-                        } else {
-                            time -= 10
-                            HapticManager.shared.trigger(.adjustReps)
-                        }
-                    } else {
-                        if sets <= workout.sets ?? 0 {
-                            HapticManager.shared.trigger(.adjustReps)
-                        } else {
-                            sets -= 1
-                            HapticManager.shared.trigger(.adjustReps)
-                        }
-                    }
-                }) {
+                if sets <= workout.sets ?? 0 {
                     Image(systemName: "minus")
                         .font(.system(size: 14, weight: .semibold))
                         .frame(width: 28, height: 28)
                         .background(Color.gray.opacity(0.1))
                         .clipShape(Circle())
                         .foregroundColor(.gray)
+                } else {
+                    Button(action: {
+                        sets -= 1
+                        HapticManager.shared.trigger(.adjustReps)
+                    }) {
+                        Image(systemName: "minus")
+                            .font(.system(size: 14, weight: .semibold))
+                            .frame(width: 28, height: 28)
+                            .background(Color("pinkTextSecondary").opacity(0.15))
+                            .clipShape(Circle())
+                            .foregroundColor(Color("pinkTextPrimary"))
+                    }
                 }
                 
                 Button(action: {
-                    if workout.time != nil {
-                        time += 10
-                        HapticManager.shared.trigger(.adjustReps)
-                    } else {
-                        sets += 1
-                        HapticManager.shared.trigger(.adjustReps)
-                    }
+//                    if workout.time != nil {
+//                        time += 10
+//                        HapticManager.shared.trigger(.adjustReps)
+//                    } else {
+//                        sets += 1
+//                        HapticManager.shared.trigger(.adjustReps)
+//                    }
+                    sets += 1
+                    HapticManager.shared.trigger(.adjustReps)
                 }) {
                     Image(systemName: "plus")
                         .font(.system(size: 14, weight: .semibold))
                         .frame(width: 28, height: 28)
-                        .background(Color("pinkTextPrimary").opacity(0.15))
+                        .background(Color("pinkTextPrimary"))
                         .clipShape(Circle())
-                        .foregroundColor(Color("pinkTextPrimary"))
+                        .foregroundColor(Color(.white))
                 }
             }
         }
