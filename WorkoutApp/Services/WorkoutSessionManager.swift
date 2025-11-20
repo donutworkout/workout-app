@@ -25,18 +25,28 @@ class WorkoutSessionManager: NSObject {
     private let healthStore = HKHealthStore()
     private var workoutSession: HKWorkoutSession?
     private var workoutBuilder: HKLiveWorkoutBuilder?
+    private var heartRateSamples: [Double] = []
     
     var heartRate: Double = 0.0
-    var energyBurned: Double = 0.0
+    var activeEnergy: Double = 0.0
+    var basalEnergy: Double = 0.0
     var distance: Double = 0.0
     var isRunning: Bool = false
     var timeActive: Double = 0.0
     var isPaused: Bool = false
     
+    var totalEnergy: Double {
+        return activeEnergy + basalEnergy
+    }
+    
     private var lastMetricsSent: Date = .distantPast
+    
+    var averageHeartRate: Double {
+        let sum = heartRateSamples.reduce(0, +)
+        return heartRateSamples.isEmpty ? 0 : sum / Double(heartRateSamples.count)
+    }
 
     private func sendMetricsToPhone() {
-        // Throttle locally in case sendMetrics isn't used
         let now = Date()
         guard now.timeIntervalSince(lastMetricsSent) >= 1 else { return }
         lastMetricsSent = now
@@ -44,9 +54,8 @@ class WorkoutSessionManager: NSObject {
         let connectivity = WatchConnectivityManager.shared
         connectivity.sendMetrics(
             heartRate: self.heartRate,
-            energy: self.energyBurned,
-            distance: self.distance,
-            elapsed: self.timeActive
+            energy: self.activeEnergy,
+            distance: self.distance
         )
     }
     
@@ -78,6 +87,8 @@ class WorkoutSessionManager: NSObject {
     //MARK: - Begin Workout
     
     private func beginWorkout(of type: HKWorkoutActivityType) {
+        self.heartRateSamples.removeAll()
+        resetWorkoutData()
         let config = HKWorkoutConfiguration()
         config.activityType = type
         
@@ -106,6 +117,8 @@ class WorkoutSessionManager: NSObject {
                 DispatchQueue.main.async {
                     self.isRunning = true
                     self.startTimer()
+                    self.sendMetricsToPhone()
+                    self.lastMetricsSent = .distantPast
                     print("Workout started (\(type.rawValue))")
                 }
             }
@@ -127,8 +140,6 @@ class WorkoutSessionManager: NSObject {
     }
     
     func stopWorkout() {
-//        print("workout session", workoutSession?.activityType.rawValue ?? "nil")
-//        print("workout builder", workoutBuilder?.workoutSession?.activityType.rawValue ?? "nil")
         guard let session = workoutSession, let builder = workoutBuilder else {
             print("⚠️ No active workout to stop")
             return
@@ -143,7 +154,18 @@ class WorkoutSessionManager: NSObject {
                     self.workoutSession = nil
                     self.workoutBuilder = nil
                     if let workout = workout {
-                        print("✅ Workout finished cleanly: \(workout)")
+                        let summary: [String: Any] = [
+                                "cmd": "workoutSummary",
+                                "duration": workout.duration,
+                                "activeEnergy": workout.totalEnergyBurned?.doubleValue(for: .kilocalorie()) ?? 0,
+                                "totalEnergy": workout.totalEnergyBurned?.doubleValue(for: .kilocalorie()) ?? 0,
+                                "distance": workout.totalDistance?.doubleValue(for: .meter()) ?? 0,
+                                "avgHeartRate": self.averageHeartRate
+                            ]
+                            WatchConnectivityManager.shared.sendMessage(summary)
+                        
+                        self.workoutSession = nil
+                        self.workoutBuilder = nil
                     } else if let error {
                         print("❌ Error finishing workout: \(error.localizedDescription)")
                     }
@@ -166,7 +188,29 @@ class WorkoutSessionManager: NSObject {
         workoutSession?.resume()
         isPaused = false
         isRunning = true
+        self.lastMetricsSent = .distantPast
+        self.sendMetricsToPhone()
         print("⌚️ Workout resumed")
+    }
+    
+    func resetWorkoutData() {
+        // Stop & clear timer
+        timer?.invalidate()
+        timer = nil
+
+        // Reset state and stats
+        timeActive = 0
+        heartRate = 0
+        activeEnergy = 0
+        basalEnergy = 0
+        distance = 0
+        heartRateSamples.removeAll()
+
+        // ensure flags
+        isRunning = false
+        isPaused = false
+
+        lastMetricsSent = .distantPast
     }
 
 
@@ -212,10 +256,17 @@ extension WorkoutSessionManager: HKLiveWorkoutBuilderDelegate {
                 switch quantityType {
                 case HKQuantityType.quantityType(forIdentifier: .heartRate):
                     let heartRateUnit = HKUnit.count().unitDivided(by: HKUnit.minute())
-                    self.heartRate = statistics?.mostRecentQuantity()?.doubleValue(for: heartRateUnit) ?? 0
+                    let hrValue = statistics?.mostRecentQuantity()?.doubleValue(for: heartRateUnit)
+                    if let hr = hrValue, hr > 0 {
+                        self.heartRate = hr
+                        self.heartRateSamples.append(hr)
+                    }
                     
                 case HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned):
-                    self.energyBurned = statistics?.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
+                    self.activeEnergy = statistics?.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
+                    
+                case HKQuantityType.quantityType(forIdentifier: .basalEnergyBurned):
+                    self.basalEnergy = statistics?.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
                     
                 case HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning):
                     self.distance = statistics?.sumQuantity()?.doubleValue(for: .meter()) ?? 0

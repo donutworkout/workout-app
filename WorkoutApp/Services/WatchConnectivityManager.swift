@@ -43,6 +43,15 @@ class WatchConnectivityManager: NSObject {
         session.activate()
         isReachable = session.isReachable
     }
+    
+    func resetState() {
+        // Reset connectivity-related transient flags
+        shouldStartWorkout = false
+        selectedWorkoutType = nil
+        phoneReady = false
+        isReachable = session.isReachable
+        lastMetricsSent = .distantPast
+    }
 
     func sendMessage(_ message: [String: Any]) {
         guard session.activationState == .activated else {
@@ -55,12 +64,10 @@ class WatchConnectivityManager: NSObject {
                     shouldStartWorkout = true
                 }
             }
-            print("message: \(message["cmd"] ?? "nil")")
+            print("send message: \(message["cmd"] ?? "nil")")
             session.sendMessage(
                 message,
-                replyHandler: { reply in
-                    print("✅ Reply received: \(reply)")
-                },
+                replyHandler: nil,
                 errorHandler: { error in
                     print("error nihh: \(error)")
                 }
@@ -71,9 +78,9 @@ class WatchConnectivityManager: NSObject {
         }
     }
     
-    func sendMetrics(heartRate: Double, energy: Double, distance: Double, elapsed: Double) {
+    func sendMetrics(heartRate: Double, energy: Double, distance: Double) {
         let now = Date()
-        guard now.timeIntervalSince(lastMetricsSent) > 2 else { return } // tiap 1 detik
+        guard now.timeIntervalSince(lastMetricsSent) >= 1 else { return }
         lastMetricsSent = now
 
         guard session.activationState == .activated else {
@@ -81,22 +88,15 @@ class WatchConnectivityManager: NSObject {
             return
         }
 
-        guard session.isReachable else {
-            print("📡 iPhone not reachable — skipping metrics this tick")
-            return
-        }
-
-        let message: [String: Any] = [
+        let payload: [String: Any] = [
             "cmd": "updateMetrics",
             "heartRate": heartRate,
             "energy": energy,
-            "distance": distance,
-            "time": elapsed
+            "distance": distance
         ]
 
-        session.sendMessage(message, replyHandler: nil) { error in
-            print("⚠️ sendMessage failed: \(error.localizedDescription)")
-        }
+        print("📤 Sending metrics via transferUserInfo: \(payload)")
+        session.transferUserInfo(payload)
     }
     
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any]) {
@@ -104,8 +104,17 @@ class WatchConnectivityManager: NSObject {
         handleIncomingMessage(userInfo)
     }
 
-    func session(_ session: WCSession, didReceiveMessage message: [String: Any])
-    {
+    func session(
+        _ session: WCSession,
+        didReceiveMessage message: [String: Any],
+        replyHandler: @escaping ([String: Any]) -> Void
+    ) {
+        print("📩 Received message with reply: \(message)")
+        handleIncomingMessage(message)
+        replyHandler(["status": "received"])
+    }
+
+    func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
         print("📩 Received message: \(message)")
         handleIncomingMessage(message)
     }
@@ -145,6 +154,7 @@ class WatchConnectivityManager: NSObject {
                         DispatchQueue.main.async {
                             self.shouldStartWorkout = false
                             self.sessionManager.stopWorkout()
+                            self.resetState()
                             print("🛑 Stop command executed on watch")
 
                         }
