@@ -14,6 +14,15 @@ struct AfterSurveyView: View {
     @State private var bgBreath = false
     @State private var charBounce = false
     
+    // MARK: - Entrance Animation States
+    @State private var showContent: Bool = false
+    @State private var characterScale: CGFloat = 0.5
+    @State private var characterOpacity: Double = 0
+    @State private var textOpacity: Double = 0
+    @State private var textOffset: CGFloat = 20
+    @State private var buttonOpacity: Double = 0
+    @State private var buttonScale: CGFloat = 0.8
+    
     @Query(sort: \UserProfile.createdAt, order: .reverse)
     private var profiles: [UserProfile]
     
@@ -46,24 +55,31 @@ struct AfterSurveyView: View {
                             bgBreath = true
                         }
                     }
-
                 
                 VStack(spacing: 24) {
                     Spacer()
                     
-                    // MARK: - Character
+                    // MARK: - Character with Entrance Animation
                     CharLogin()
                         .frame(height: 300)
+                        .scaleEffect(characterScale)
+                        .opacity(characterOpacity)
+                        .rotation3DEffect(
+                            .degrees(showContent ? 0 : 15),
+                            axis: (x: 0, y: 1, z: 0)
+                        )
                         .offset(y: charBounce ? -12 : 0)
                         .onAppear {
-                            withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
-                                charBounce = true
+                            // Continuous bounce after entrance
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                                withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
+                                    charBounce = true
+                                }
                             }
                         }
                     
-                    // MARK: - Title Section
+                    // MARK: - Title Section with Fade In
                     VStack(alignment: .leading, spacing: 12) {
-                        
                         Text("Hey, \(userName)!")
                             .font(.largeTitle.bold())
                             .foregroundColor(Color("pinkTextPrimary"))
@@ -94,19 +110,48 @@ struct AfterSurveyView: View {
                         .padding(.trailing, 12)
                     }
                     .padding(.horizontal)
+                    .opacity(textOpacity)
+                    .offset(y: textOffset)
                     
                     Spacer()
                     
-                    // MARK: - Button
+                    // MARK: - Button with Pop Animation
                     PrimaryGlassButton(title: "Okay") {
                         router.navigateTo(.menu)
                     }
                     .padding(.horizontal)
                     .padding(.bottom, 40)
+                    .opacity(buttonOpacity)
+                    .scaleEffect(buttonScale)
                 }
                 .padding()
                 .navigationBarBackButtonHidden(true)
             }
+        }
+        .onAppear {
+            startEntranceAnimation()
+        }
+    }
+    
+    // MARK: - Entrance Animation Sequence
+    private func startEntranceAnimation() {
+        // Step 1: Character pop in with bounce (0.3s delay)
+        withAnimation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.3)) {
+            characterScale = 1.0
+            characterOpacity = 1.0
+            showContent = true
+        }
+        
+        // Step 2: Text fade in + slide up (0.6s delay)
+        withAnimation(.easeOut(duration: 0.6).delay(0.6)) {
+            textOpacity = 1.0
+            textOffset = 0
+        }
+        
+        // Step 3: Button pop in (0.9s delay)
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.7).delay(0.9)) {
+            buttonOpacity = 1.0
+            buttonScale = 1.0
         }
     }
     

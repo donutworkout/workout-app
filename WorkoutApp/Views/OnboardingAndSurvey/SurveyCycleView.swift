@@ -68,7 +68,6 @@ struct SurveyCycleView: View {
                             .offset(x: move ? 9 : -54)
                     }
                     .padding(.horizontal)
-//                    .padding(.top, 10)
                     
                     // MARK: - Question Sections
                     Group {
@@ -104,13 +103,14 @@ struct SurveyCycleView: View {
                                         }
                                     }) {
                                         Image(systemName: "chevron.left")
+                                            .font(.system(size: 16, weight: .semibold))
                                             .foregroundColor(Color("pinkTextPrimary"))
                                     }
                                     
                                     Spacer()
                                     
                                     Text(monthYearString)
-                                        .font(.system(size: 18, weight: .semibold))
+                                        .font(.system(size: 22, weight: .semibold))
                                     
                                     Spacer()
                                     
@@ -120,46 +120,56 @@ struct SurveyCycleView: View {
                                         }
                                     }) {
                                         Image(systemName: "chevron.right")
+                                            .font(.system(size: 16, weight: .semibold))
                                             .foregroundColor(Color("pinkTextPrimary"))
                                     }
                                 }
-                                .padding(.horizontal)
+                                .padding(.horizontal, 20)
+                                .padding(.top, 8)
                                 
                                 // Days of Week
                                 HStack(spacing: 0) {
-                                    ForEach(["S", "M", "T", "W", "T", "F", "S"], id: \.self) { day in
+                                    ForEach(["SUN","MON","TUE","WED","THU","FRI","SAT"], id: \.self) { day in
                                         Text(day)
-                                            .font(.system(size: 12, weight: .medium))
+                                            .font(.system(size: 11, weight: .medium))
                                             .foregroundColor(.gray)
                                             .frame(maxWidth: .infinity)
                                     }
                                 }
-                                .padding(.horizontal)
+                                .padding(.horizontal, 20)
                                 
                                 // Calendar Grid
-                                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 7), spacing: 8) {
+                                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 7), spacing: 8) {
                                     ForEach(0..<daysInMonth.count, id: \.self) { index in
                                         if let date = daysInMonth[index] {
                                             CalendarDayButton(
                                                 date: date,
-                                                isSelected: isDateSelected(date),
+                                                isMenstrual: isDateSelected(date),
+                                                isToday: calendar.isDateInToday(date),
                                                 isFutureDate: isFutureDate(date),
                                                 onTap: {
                                                     toggleDate(date)
                                                 }
                                             )
+                                            .frame(maxWidth: .infinity)
+                                            .aspectRatio(1, contentMode: .fit)
                                         } else {
                                             Color.clear
-                                                .frame(height: 40)
+                                                .frame(maxWidth: .infinity)
+                                                .aspectRatio(1, contentMode: .fit)
                                         }
                                     }
                                 }
-                                .padding(.horizontal)
+                                .padding(.horizontal, 20)
+                                .frame(height: 7 * 44 + 6 * 8)
+                                .padding(.bottom, 16)
                             }
-                            .padding()
-                            .background(.ultraThinMaterial)
-                            .clipShape(RoundedRectangle(cornerRadius: 25))
-                            .padding(.horizontal)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color.white)
+                                    .shadow(color: .gray.opacity(0.1), radius: 8, x: 0, y: 2)
+                            )
+                            .padding(.horizontal, 16)
                         }
                         
                         // 3. Physical Symptoms
@@ -301,10 +311,11 @@ struct SurveyCycleView: View {
     }
 }
 
-// MARK: - Calendar Day Button
+// MARK: - Calendar Day Button - SIMPLIFIED WITHOUT OVULATION
 struct CalendarDayButton: View {
     let date: Date
-    let isSelected: Bool
+    let isMenstrual: Bool
+    let isToday: Bool
     let isFutureDate: Bool
     let onTap: () -> Void
     
@@ -315,32 +326,33 @@ struct CalendarDayButton: View {
         return "\(day)"
     }
     
-    var isToday: Bool {
-        calendar.isDateInToday(date)
-    }
-    
     var body: some View {
         Button(action: onTap) {
             ZStack {
-                if isSelected {
+                // Menstrual date styling
+                if isMenstrual {
                     Circle()
-                        .fill(Color("pinkTextPrimary"))
-                        .frame(width: 40, height: 40)
-                } else if isToday {
-                    Circle()
-                        .stroke(Color("pinkTextPrimary"), lineWidth: 1.5)
-                        .frame(width: 40, height: 40)
+                        .fill(Color("pinkTextPrimary").opacity(0.3))
                 }
                 
+                // Today indicator (if not menstrual)
+                if isToday && !isMenstrual {
+                    Circle()
+                        .fill(Color.blue.opacity(0.2))
+                }
+                
+                // Day number
                 Text(dayNumber)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.system(size: 17, weight: .medium))
                     .foregroundColor(
                         isFutureDate ? .gray.opacity(0.3) :
-                        (isSelected ? .white : (isToday ? Color("pinkTextPrimary") : .black))
+                        ((isToday && !isMenstrual) ? .blue : .black)
                     )
             }
-            .frame(height: 40)
+            .padding(6)
+            .contentShape(Rectangle())
         }
+        .frame(width: 44, height: 44)
         .disabled(isFutureDate)
     }
 }
@@ -360,25 +372,22 @@ extension SurveyCycleView {
             let startDate = surveyManager.tempCycleStartDate
             let endDate = surveyManager.tempCycleEndDate
             
-            // Calculate days between start and end
             let daysBetween = calendar.dateComponents([.day],
                                                       from: startDate,
                                                       to: endDate).day ?? 0
             
-            // Add all dates in the range
             for i in 0...daysBetween {
                 if let date = calendar.date(byAdding: .day, value: i, to: startDate) {
                     selectedDates.insert(date)
                 }
             }
             
-            // Set current month to the start date's month
             if !selectedDates.isEmpty {
                 currentMonth = startDate
             }
         }
         
-        // 3. Load symptoms (enum -> String conversion) HANYA jika ada
+        // 3. Load symptoms
         if selectedPhysicalSymptoms.isEmpty {
             let symptoms = surveyManager.tempCycleSymptoms.map { $0.displayName }
             if !symptoms.isEmpty {
@@ -386,14 +395,14 @@ extension SurveyCycleView {
             }
         }
         
-        // 4. Load energy level HANYA jika ada nilai valid
+        // 4. Load energy level
         if selectedEnergyLevel.isEmpty {
             if let energy = surveyManager.tempCycleEnergy {
                 selectedEnergyLevel = [energy.displayName]
             }
         }
         
-        // 5. Load mood HANYA jika ada nilai valid
+        // 5. Load mood
         if selectedMoodChanges.isEmpty {
             if let mood = surveyManager.tempCycleMoodAffectsMotivation {
                 selectedMoodChanges = [mood.displayName]
@@ -425,15 +434,14 @@ extension SurveyCycleView {
         surveyManager.updateTempMenstrualDuration(menstrualDuration)
         print("✅ Cycle length saved: \(menstrualDuration) days")
         
-        
         if surveyManager.tempCycleLength == 0 {
-            surveyManager.updateTempCycleLength(28) // Default cycle length
+            surveyManager.updateTempCycleLength(28)
             print("✅ Cycle length set to default: 28 days")
         } else {
             print("✅ Using existing cycle length: \(surveyManager.tempCycleLength) days")
         }
         
-        // 3. Save symptoms (handle multiple selections if needed)
+        // 3. Save symptoms
         let selectedSymptoms: [CycleSymptoms] = selectedPhysicalSymptoms.compactMap { name in
             symptomFromDisplayName(name)
         }
@@ -460,8 +468,4 @@ extension SurveyCycleView {
         
         onFinish()
     }
-}
-
-#Preview {
-    SurveyCycleView(onFinish: {})
 }

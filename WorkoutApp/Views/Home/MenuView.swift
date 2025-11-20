@@ -18,6 +18,12 @@ struct MenuView: View {
     @State private var vigorousDuration: Int = 0
     @State private var moderateDuration: Int = 0
     
+    // MARK: - Animation States
+    @State private var showContent: Bool = false
+    @State private var workoutCardScale: CGFloat = 0.5
+    @State private var workoutCardOpacity: Double = 0
+    @State private var streakCardOffset: CGFloat = 50
+    
     private var userCycle: UserCycle? {
         userCycles.first
     }
@@ -97,11 +103,15 @@ struct MenuView: View {
                     .foregroundColor(.black)
                     .padding(.top, 32)
                     .padding(.horizontal, 20)
+                    .opacity(showContent ? 1 : 0)
+                    .offset(y: showContent ? 0 : -20)
                 
                 // MARK: - Day Selector
                 DaySelectorView(
                     selectedDayIndex: $cycleViewModel.selectedDayIndex,
-                    userCycle: userCycle )
+                    userCycle: userCycle)
+                    .opacity(showContent ? 1 : 0)
+                    .offset(y: showContent ? 0 : -20)
                 
                 // MARK: - Workout Card
                 CombinedWorkoutCardView(
@@ -124,6 +134,12 @@ struct MenuView: View {
                             }
                         }
                     })
+                    .scaleEffect(workoutCardScale)
+                    .opacity(workoutCardOpacity)
+                    .rotation3DEffect(
+                        .degrees(showContent ? 0 : 15),
+                        axis: (x: 0, y: 1, z: 0)
+                    )
                 
                 // MARK: - Streak Section
                 VStack(spacing: 8) {
@@ -134,6 +150,8 @@ struct MenuView: View {
                         .padding(.horizontal, 20)
                     StreakCardView()
                 }
+                .opacity(showContent ? 1 : 0)
+                .offset(y: streakCardOffset)
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 40)
@@ -148,6 +166,28 @@ struct MenuView: View {
             cycleViewModel.selectedDayIndex = todayIndex()
             loadWeeklyMenu()
             calculateCardioSpecs()
+            
+            // Start entrance animation
+            startEntranceAnimation()
+        }
+    }
+    
+    // MARK: - Entrance Animation Sequence
+    private func startEntranceAnimation() {
+        // Step 1: Show header and day selector (0.3s delay)
+        withAnimation(.easeOut(duration: 0.5).delay(0.3)) {
+            showContent = true
+        }
+        
+        // Step 2: Workout card pop in with bounce (0.5s delay)
+        withAnimation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.5)) {
+            workoutCardScale = 1.0
+            workoutCardOpacity = 1.0
+        }
+        
+        // Step 3: Streak card slide up (0.8s delay)
+        withAnimation(.easeOut(duration: 0.5).delay(0.8)) {
+            streakCardOffset = 0
         }
     }
     
@@ -528,29 +568,12 @@ struct PhaseCardView: View {
                         .fill(Color("pinkTextPrimary").opacity(0.15))
                 )
         }
-        .padding(20)
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color.white)
-                .shadow(color: .black.opacity(0.06), radius: 10, x: 0, y: 4)
-        )
-        .padding(.horizontal)
     }
 }
 
 // MARK: - Streak Card
 struct StreakCardView: View {
     @State private var fireAnim = false
-    //    let phase: PhaseType
-    //
-    //    private var streakInfo: (title: String, desc: String) {
-    //        switch phase {
-    //        case .menstrual:
-    //            return ("You're on a roll!", "Another checkmark for the consistency queen!")
-    //        case .follicular:
-    //            return ("Go Girl!", "Don’t break it, bestie! You’re killing it!")
-    //        }
-    //    }
     
     var body: some View {
         HStack(spacing: 16) {
