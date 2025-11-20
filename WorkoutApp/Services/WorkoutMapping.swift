@@ -7,21 +7,45 @@
 
 import HealthKit
 
-func mapActivityToHKType(_ activity: String) -> HKWorkoutActivityType {
-    switch activity {
-    case "Outdoor Walk", "Indoor Walk": return .walking
-    case "Cycling": return .cycling
-    case "Swimming": return .swimming
-    case "Badminton": return .badminton
-    case "Basketball": return .basketball
-    case "Volleyball": return .volleyball
-    case "Tennis", "Padel": return .tennis
-    case "Soccer": return .soccer
-    case "Bodyweight": return .functionalStrengthTraining
-    case "Gym": return .traditionalStrengthTraining
-    default: return .other
+func mapActivityToHKType(_ activity: String) -> (type: HKWorkoutActivityType, isIndoor: Bool) {
+    let name = activity.lowercased()
+    
+    if name.contains("walk") {
+        return (.walking, name.contains("indoor"))
     }
+    if name.contains("run") {
+        return (.running, name.contains("indoor"))
+    }
+    if name.contains("cycling") {
+        return (.cycling, false)
+    }
+    if name.contains("swimming") {
+        return (.swimming, true)
+    }
+    if name.contains("badminton") {
+        return (.badminton, true)
+    }
+    if name.contains("basketball") {
+        return (.basketball, false)
+    }
+    if name.contains("volleyball") {
+        return (.volleyball, false)
+    }
+    if name.contains("tennis") {
+        return (.tennis, false)
+    }
+    if name.contains("soccer") {
+        return (.soccer, false)
+    }
+    if name.contains("bodyweight") {
+        return (.functionalStrengthTraining, true)
+    }
+    if name.contains("gym") {
+        return (.traditionalStrengthTraining, true)
+    }
+    return (.other, false)
 }
+
 
 extension HKWorkoutActivityType {
     var displayName: String {

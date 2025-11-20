@@ -87,11 +87,13 @@ struct WatchWorkoutCardioView: View {
             clockActive = !paused
         }
         .onAppear {
-            if !sessionManager.isRunning {
+            if connectivity.shouldStartWorkout,
+               !sessionManager.isRunning {
+
                 if let type = connectivity.selectedWorkoutType {
-                    sessionManager.startWorkout(of: type)
-                } else {
-                    sessionManager.startWorkout(of: .walking)
+                    sessionManager.startWorkout(of: type,
+                                                isIndoor: connectivity.selectedIsIndoor)
+                    print("⌚ Auto-start workout from iPhone: \(type.displayName)")
                 }
             }
         }

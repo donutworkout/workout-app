@@ -182,7 +182,7 @@ struct CountdownView: View {
                 HapticManager.shared.trigger(.countdownEnd)
                 
                 if let type = router.selectedWorkoutType {
-                    iPhoneConnectivityManager.shared.startWorkoutFromPhone(type: type)
+                    iPhoneConnectivityManager.shared.startWorkoutFromPhone(type: type, isIndoor: true)
                 }
                 
                 StrengthSessionManager.shared.beginWorkout()

@@ -61,7 +61,7 @@ class WorkoutSessionManager: NSObject {
     
     // MARK: - Start Workout
     
-    func startWorkout(of type: HKWorkoutActivityType) {
+    func startWorkout(of type: HKWorkoutActivityType, isIndoor: Bool) {
         guard HKHealthStore.isHealthDataAvailable() else { return }
         
         let typesToShare: Set = [HKQuantityType.workoutType()]
@@ -73,7 +73,7 @@ class WorkoutSessionManager: NSObject {
         ) { (success, error) in
             if success {
                 DispatchQueue.main.async {
-                    self.beginWorkout(of: type)
+                    self.beginWorkout(of: type, isIndoor: isIndoor)
                 }
             } else {
                 print(
@@ -86,11 +86,14 @@ class WorkoutSessionManager: NSObject {
     
     //MARK: - Begin Workout
     
-    private func beginWorkout(of type: HKWorkoutActivityType) {
-        self.heartRateSamples.removeAll()
-        resetWorkoutData()
+    private func beginWorkout(of type: HKWorkoutActivityType, isIndoor: Bool) {
         let config = HKWorkoutConfiguration()
         config.activityType = type
+        config.locationType = isIndoor ? .indoor : .outdoor
+
+        print("🎽 Workout Config:")
+        print("   • type         = \(config.activityType)")
+        print("   • locationType = \(config.locationType.rawValue)")
         
         do {
             workoutSession = try HKWorkoutSession(

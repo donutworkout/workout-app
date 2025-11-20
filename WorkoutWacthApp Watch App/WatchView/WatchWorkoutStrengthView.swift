@@ -79,9 +79,9 @@ struct WatchWorkoutStrengthView: View {
         .onAppear {
             if !sessionManager.isRunning {
                 if let type = connectivity.selectedWorkoutType {
-                    sessionManager.startWorkout(of: type)
+                    sessionManager.startWorkout(of: type, isIndoor: connectivity.selectedIsIndoor)
                 } else {
-                    sessionManager.startWorkout(of: .functionalStrengthTraining)
+                    sessionManager.startWorkout(of: .functionalStrengthTraining, isIndoor: true)
                 }
             }
         }

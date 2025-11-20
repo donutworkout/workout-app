@@ -39,12 +39,12 @@ struct WatchSessionPagingView: View {
                 .tag(Tab.controls)
         }
         .tabViewStyle(.page)
-        .onAppear {
-            if !sessionManager.isRunning {
-                sessionManager.startWorkout(of: workoutType)
-                print("🏋️ Starting workout: \(workoutName)")
-            }
-        }
+//        .onAppear {
+//            if !sessionManager.isRunning {
+//                sessionManager.startWorkout(of: type, isIndoor: connectivity.selectedIsIndoor)
+//                print("🏋️ Starting workout: \(workoutName)")
+//            }
+//        }
     }
 
     private func isStrengthWorkout(_ type: HKWorkoutActivityType) -> Bool {
