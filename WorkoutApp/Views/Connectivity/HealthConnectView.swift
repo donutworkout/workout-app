@@ -11,14 +11,16 @@ import HealthKit
 struct HealthConnectView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var router: Router
+    @State private var pulse = false
+
     
     var onAllow: () -> Void = {}
     var onSkip: () -> Void = {}
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 28) {
-                Spacer()
+            VStack(spacing: 32) {
+//                Spacer()
                 
                 // MARK: - Title Text
                 Text("Automatically track your health metrics")
@@ -26,6 +28,7 @@ struct HealthConnectView: View {
                     .foregroundColor(Color("pinkTextPrimary"))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
+                Spacer()
                 
                 // MARK: - Heart Icon Box
                 ZStack {
@@ -38,12 +41,11 @@ struct HealthConnectView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 60, height: 60)
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [.pink, .red],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
+                        .foregroundColor(Color.pink)     // warna pink solid
+                        .scaleEffect(pulse ? 1.08 : 1.0)
+                        .animation(
+                            .easeInOut(duration: 0.8).repeatForever(autoreverses: true),
+                            value: pulse
                         )
                 }
                 .padding(.top, 10)
@@ -82,6 +84,10 @@ struct HealthConnectView: View {
                 
                
             }
+            .onAppear {
+                pulse = true
+            }
+
         }
     }
 }

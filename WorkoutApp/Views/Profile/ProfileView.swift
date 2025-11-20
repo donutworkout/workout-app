@@ -178,7 +178,6 @@ struct ProfileView: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 40)
             }
-            .background(Color(.systemGroupedBackground).ignoresSafeArea())
             .navigationBarHidden(true)
             
             // MARK: - Navigation destinations

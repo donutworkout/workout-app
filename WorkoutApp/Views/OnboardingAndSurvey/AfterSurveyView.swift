@@ -11,6 +11,8 @@ import SwiftData
 struct AfterSurveyView: View {
     @EnvironmentObject var router: Router
     @Environment(\.modelContext) private var modelContext
+    @State private var bgBreath = false
+    @State private var charBounce = false
     
     @Query(sort: \UserProfile.createdAt, order: .reverse)
     private var profiles: [UserProfile]
@@ -38,6 +40,13 @@ struct AfterSurveyView: View {
         NavigationStack {
             ZStack {
                 BackgroundPink()
+                    .scaleEffect(bgBreath ? 1.09 : 1)
+                    .onAppear {
+                        withAnimation(.easeInOut(duration: 3).repeatForever(autoreverses: true)) {
+                            bgBreath = true
+                        }
+                    }
+
                 
                 VStack(spacing: 24) {
                     Spacer()
@@ -45,6 +54,12 @@ struct AfterSurveyView: View {
                     // MARK: - Character
                     CharLogin()
                         .frame(height: 300)
+                        .offset(y: charBounce ? -12 : 0)
+                        .onAppear {
+                            withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
+                                charBounce = true
+                            }
+                        }
                     
                     // MARK: - Title Section
                     VStack(alignment: .leading, spacing: 12) {

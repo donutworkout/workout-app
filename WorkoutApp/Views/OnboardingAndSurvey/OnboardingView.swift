@@ -10,38 +10,54 @@ import Lottie
 
 struct OnboardingView: View {
     @EnvironmentObject var router: Router
+    @State private var wiggle = false
+    @State private var bgWiggle = false
     
     var body: some View {
         NavigationStack {
             ZStack {
+                // Background with breathing motion
                 BackgroundPink()
+                    .scaleEffect(bgWiggle ? 1.09 : 1)
+                    .onAppear {
+                        withAnimation(.easeInOut(duration: 3).repeatForever(autoreverses: true)) {
+                            bgWiggle = true
+                        }
+                    }
                 
                 VStack(spacing: 24) {
                     Spacer()
                     
-                    // MARK: - Character
+                    // Character with wiggle animation
                     CharLogin()
-                        .frame(height: 300)
+                        .scaleEffect(1.25)
+                        .rotationEffect(.degrees(wiggle ? 3 : -3))
+                        .onAppear {
+                            withAnimation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true)) {
+                                wiggle = true
+                            }
+                        }
                     
-                    // MARK: - Title
+                    // Title
                     VStack(spacing: 8) {
-                        Text("Welcome to the Arena")
-                            .font(.largeTitle.bold())
+                        Text("Hey, I'm Loona!")
+                            .font(.title.bold())
                             .foregroundColor(Color("pinkTextPrimary"))
                         
-                        Text("Get stronger every single day!")
+                        Text("Let's get stronger every cycle")
                             .font(.title3)
                             .fontWeight(.semibold)
                             .foregroundColor(Color("pinkTextSecondary"))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
                     }
+                    .padding(.top, 20)
                     
                     Spacer()
                     
-                    // MARK: - Next Button
                     PrimaryGlassButton(title: "Start Your Journey") {
                         router.navigateTo(.healthConnect)
+                        HapticManager.shared.trigger(.buttonTap)
                     }
                     .padding(.horizontal)
                     .padding(.bottom, 40)
