@@ -6,10 +6,83 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ProfileView: View {
     @EnvironmentObject var router: Router
+    @Environment(\.modelContext) private var modelContext
+    
+    @Query(sort: \UserProfile.createdAt, order: .reverse)
+    private var profiles: [UserProfile]
+    
     @State private var path: [String] = []
+    
+    // Current user profile
+    private var currentProfile: UserProfile? {
+        profiles.first
+    }
+    
+    // Computed properties for display
+    private var userName: String {
+        currentProfile?.name ?? "User"
+    }
+    
+    // ✅ Calculate current cycle day using CyclePhaseCalculator
+    private var currentCycleDay: Int {
+        guard let cycle = currentProfile?.userCycle?.first else { return 1 }
+        
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let startOfLastPeriod = calendar.startOfDay(for: cycle.cycleStartDate)
+        
+        let daysSinceStart = calendar.dateComponents([.day], from: startOfLastPeriod, to: today).day ?? 0
+        return (daysSinceStart % cycle.cycleLength) + 1
+    }
+    
+    // ✅ Get current phase using CyclePhaseCalculator
+    private var currentPhase: MenstrualPhase {
+        guard let cycle = currentProfile?.userCycle?.first else {
+            return .menstruation
+        }
+        
+        return CyclePhaseCalculator.calculateCurrentPhase(
+            lastPeriodStart: cycle.cycleStartDate,
+            cycleLength: cycle.cycleLength,
+            menstrualDuration: cycle.menstrualDuration
+        )
+    }
+    
+    // ✅ Get phase display name
+    private var cyclePhaseText: String {
+        switch currentPhase {
+        case .menstruation:
+            return "Menstrual Phase"
+        case .follicular:
+            return "Follicular Phase"
+        case .ovulation:
+            return "Ovulation Phase"
+        case .luteal:
+            return "Luteal Phase"
+        }
+    }
+    
+    // ✅ Predict next period using CyclePhaseCalculator
+    private var nextPeriodDate: String {
+        guard let cycle = currentProfile?.userCycle?.first else {
+            return "Not available"
+        }
+        
+        if let nextPeriod = CyclePhaseCalculator.predictNextPeriod(
+            lastPeriodStart: cycle.cycleStartDate,
+            cycleLength: cycle.cycleLength
+        ) {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "d MMMM yyyy"
+            return formatter.string(from: nextPeriod)
+        }
+        
+        return "Not available"
+    }
     
     var body: some View {
         NavigationStack(path: $path) {
@@ -30,7 +103,7 @@ struct ProfileView: View {
                             .frame(width: 60, height: 60)
                             .clipShape(Circle())
                         
-                        Text("Si Jamety")
+                        Text(userName)
                             .font(.system(size: 18, weight: .semibold))
                     }
                     
@@ -79,10 +152,10 @@ struct ProfileView: View {
                         } label: {
                             HStack {
                                 VStack(alignment: .leading, spacing: 6) {
-                                    Text("You're on Day 14 - Ovulation phase")
+                                    Text("You're on Day \(currentCycleDay) - \(cyclePhaseText)")
                                         .font(.system(size: 16, weight: .semibold))
                                         .foregroundColor(.black)
-                                    Text("Next period predicted: 25 October 2025")
+                                    Text("Next period predicted: \(nextPeriodDate)")
                                         .font(.system(size: 14))
                                         .foregroundColor(.gray)
                                 }
@@ -103,9 +176,8 @@ struct ProfileView: View {
                     Spacer(minLength: 20)
                 }
                 .padding(.horizontal, 20)
-                .padding(.bottom, 40) 
+                .padding(.bottom, 40)
             }
-            .background(Color(.systemGroupedBackground).ignoresSafeArea())
             .navigationBarHidden(true)
             
             // MARK: - Navigation destinations
@@ -130,4 +202,5 @@ struct ProfileView: View {
 #Preview {
     ProfileView()
         .environmentObject(Router())
+        .modelContainer(for: [UserProfile.self, UserWorkout.self, UserCycle.self])
 }

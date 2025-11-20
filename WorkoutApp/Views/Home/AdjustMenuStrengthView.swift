@@ -5,43 +5,50 @@
 //  Created by Jennifer Evelyn on 24/10/25.
 //
 
-import SwiftUI
 import HealthKit
 import SwiftData
+import SwiftUI
 
 struct AdjustMenuStrengthView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    
+
+    @Environment(iPhoneConnectivityManager.self) private var connectivity
+
     @State private var selectedMenu: StrengthMenuType = .bodyweight
     @State private var workouts: [Exercise] = []
 
     @EnvironmentObject var router: Router
-    
+
     @Query private var userCycles: [UserCycle]
     @Query private var userProfiles: [UserProfile]
     @Query private var userWorkouts: [UserWorkout]
-    
+
     private let sessionManager = StrengthSessionManager.shared
-    
     let dailyMenu: DailyMenu?
-    
+
+    @State var workoutType: HKWorkoutActivityType = .functionalStrengthTraining
+
     var onNext: (() -> Void)? = nil
-    
+
     init(dailyMenu: DailyMenu? = nil) {
-        self.dailyMenu = dailyMenu
-        
+
         // Warna segmented control kustom (pink)
         let pinkColor = UIColor(named: "pinkTextPrimary") ?? UIColor.systemPink
-        let selectedAttrs: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.white]
-        let normalAttrs: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.black]
+        let selectedAttrs: [NSAttributedString.Key: Any] = [
+            .foregroundColor: UIColor.white
+        ]
+        let normalAttrs: [NSAttributedString.Key: Any] = [
+            .foregroundColor: UIColor.black
+        ]
         let appearance = UISegmentedControl.appearance()
         appearance.selectedSegmentTintColor = pinkColor
         appearance.setTitleTextAttributes(selectedAttrs, for: .selected)
         appearance.setTitleTextAttributes(normalAttrs, for: .normal)
-        
+      
+        self.dailyMenu = dailyMenu  
     }
-    
+
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 20) {
@@ -55,15 +62,15 @@ struct AdjustMenuStrengthView: View {
                 .padding(.horizontal)
                 .padding(.top, 8)
                 .onChange(of: selectedMenu) { _, newValue in
-                    let workoutType: HKWorkoutActivityType
                     switch newValue {
                     case .bodyweight:
-                        workoutType = .functionalStrengthTraining
+                        self.workoutType = .functionalStrengthTraining
                     case .gym:
-                        workoutType = .traditionalStrengthTraining
+                        self.workoutType = .traditionalStrengthTraining
                     }
-                    router.selectedWorkoutType = workoutType
-                    iPhoneConnectivityManager.shared.sendSelectedWorkout(workoutType)
+                    iPhoneConnectivityManager.shared.sendSelectedWorkout(
+                        workoutType
+                    )
                 }
 
                 // MARK: - Workout Cards
@@ -74,25 +81,34 @@ struct AdjustMenuStrengthView: View {
                         }
                     } else {
                         Spacer()
-                        
+
                         Text("Do your own gym routine! :)")
-                        
+
                         Spacer()
                     }
                 }
                 .padding(.horizontal)
                 .padding(.top, 8)
-                .padding(.bottom, 24) // extra space so last card isn't obscured by bottom button
+                .padding(.bottom, 24)  // extra space so last card isn't obscured by bottom button
             }
         }
         .safeAreaInset(edge: .bottom) {
             VStack {
                 PrimaryGlassButton(title: "Start Now") {
-                    
-                    sessionManager.startWorkout(with: workouts)
-                
-                    router.workoutExercises = workouts
-
+                    if selectedMenu == .bodyweight {
+                        sessionManager.prepareWorkout(with: workouts)
+                        router.workoutExercises = workouts
+                    } else {
+                        sessionManager.prepareWorkout(with: [])
+                        router.workoutExercises = []
+                    }
+                    router.selectedWorkoutType = workoutType
+                    iPhoneConnectivityManager.shared.sendSelectedWorkout(
+                        workoutType
+                    )
+                    iPhoneConnectivityManager.shared.startWorkoutFromPhone(
+                        type: workoutType
+                    )
                     router.lastWorkoutSource = .adjustMenuStrength
                     router.navigateTo(.countdownView)
                 }
@@ -108,7 +124,8 @@ struct AdjustMenuStrengthView: View {
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button(action: {
-                    router.navigateTo(.menu) }) {
+                    router.navigateTo(.menu)
+                }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.black)
@@ -116,12 +133,23 @@ struct AdjustMenuStrengthView: View {
             }
         }
         .onAppear {
+            workoutType = .functionalStrengthTraining
+            connectivity.sendSelectedWorkout(workoutType)
+
             DummyExerciseProvider.shared.insertDummyData(into: modelContext)
+
             loadBodyWeightExercises()
         }
-        .environmentObject(sessionManager)
+        .onChange(of: connectivity.isWorkoutActive) { _, active in
+            if active {
+                print("🏋️ Watch started workout → go to countdown/start")
+                router.lastWorkoutSource = .adjustMenuStrength
+                router.navigateTo(.countdownView)
+            }
+
+        }
     }
-    
+
     private func loadBodyWeightExercises() {
         if let menu = dailyMenu, let savedExercises = menu.strengthExercises, !savedExercises.isEmpty {
             print("✅ Loading \(savedExercises.count) saved exercises from DailyMenu")
@@ -130,31 +158,31 @@ struct AdjustMenuStrengthView: View {
         }
         
         guard let cycle = userCycle, let profile = userWorkout else { return }
-        
+
         let repo = ExerciseRepository(context: modelContext)
         let generator = WorkoutMenuGenerator(context: modelContext)
         let level = profile.workoutLevel
-        
+
         let currentPhase = CyclePhaseCalculator.calculateCurrentPhase(
             lastPeriodStart: cycle.cycleStartDate,
             menstrualDuration: cycle.menstrualDuration
         )
-        
+
         let specs = generator.getStrengthSpecs(for: level, phase: currentPhase)
-        
+
         // Fetch exercises
-        var exercises = repo.getExercises(
+        let exercises = repo.getExercises(
             forLevel: level,
             phase: currentPhase,
             count: 5
         )
-        
+
         // Apply sets and reps to each exercise
         for i in 0..<exercises.count {
             exercises[i].sets = specs.sets
             exercises[i].reps = specs.reps
         }
-        
+
         workouts = exercises
         
         if let menu = dailyMenu {
@@ -183,11 +211,11 @@ extension AdjustMenuStrengthView {
     private var userCycle: UserCycle? {
         userCycles.first
     }
-    
+
     private var userProfile: UserProfile? {
         userProfiles.first
     }
-    
+
     private var userWorkout: UserWorkout? {
         userWorkouts.first
     }

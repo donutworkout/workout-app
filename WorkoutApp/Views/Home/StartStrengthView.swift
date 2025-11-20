@@ -14,7 +14,7 @@ struct StartStrengthView: View {
     //@EnvironmentObject var sessionManager: StrengthSessionManager
     
     private let sessionManager = StrengthSessionManager.shared
-    private let phoneConnectivity = iPhoneConnectivityManager.shared
+    private let connectivity = iPhoneConnectivityManager.shared
     
     @Query private var userProfiles: [UserProfile]
     
@@ -30,7 +30,7 @@ struct StartStrengthView: View {
     @State private var isPaused: Bool = false
     @State private var timer: Timer? = nil
     @State private var calories: Int = 0
-    @State private var bpm: Int = 90
+    @State private var bpm: Int = 0
     @State private var lastExerciseIndex: Int = 0
     
     @State private var showPausePopup: Bool = false
@@ -45,16 +45,6 @@ struct StartStrengthView: View {
             VStack(spacing: 0) {
                 // MARK: - Page Control + Title + Image
                 VStack(spacing: 16) {
-                    // MARK: Page Control (bulatan)
-//                    HStack(spacing: 6) {
-//                        ForEach(1...sessionManager.totalPages, id: \.self) { index in
-//                            Circle()
-//                                .fill(index == sessionManager.currentPage ? Color("pinkTextPrimary") : Color.gray.opacity(0.3))
-//                                .frame(width: 8, height: 8)
-//                        }
-//                    }
-//                    .padding(.top, 24)
-                    
                     // MARK: Workout Title
                     Text(currentExercise?.name ?? "Get Ready!")
                         .font(.system(size: 28, weight: .semibold))
@@ -88,7 +78,8 @@ struct StartStrengthView: View {
                 // MARK: - Stats Cards
                 HStack(spacing: 12) {
                     StatCardItem(icon: "flame.fill", value: "\(calories)", label: "KCAL")
-                    StatCardItem(icon: "heart.fill", value: "\(bpm)", label: "BPM")
+                    StatCardItem(icon: "heart.fill", value: connectivity.heartRate > 0 ? "\(bpm)" : "--",
+                                 label: "BPM")
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 32)
@@ -99,24 +90,15 @@ struct StartStrengthView: View {
                 HStack(spacing: 16) {
                     NeutralGlassButton(title: isPaused ? "Resume" : "Pause") {
                         if isPaused {
-                            // ✅ Resume workout
-//                            connectivity.resumeWorkoutFromPhone()
                             isPaused = false
                             showPausePopup = false
                         } else {
-                            // ✅ Pause workout
-//                            connectivity.pauseWorkoutFromPhone()
-                            
-                            // ✅ Tampilkan alert/popup
                             isPaused = true
                             showPausePopup = true
                         }
-                        isPaused.toggle()
                     }
                     
                     NeutralGlassButton(title: "Next") {
-                        //                    phoneConnectivity.stopWorkoutFromPhone()
-                        //                    timer?.invalidate()
                         //                    router.navigateTo(.restView)
                         
                         if sessionManager.hasNextExercise {
@@ -124,7 +106,7 @@ struct StartStrengthView: View {
                             router.navigateTo(.restView)
                         } else {
                             // Workout complete - go to summary or home
-                            phoneConnectivity.stopWorkoutFromPhone()
+                            connectivity.stopWorkoutFromPhone()
                             sessionManager.reset()
                             router.navigateTo(.menu)
                         }
@@ -135,14 +117,18 @@ struct StartStrengthView: View {
             }
             if showPausePopup {
                 Alert(
-                    characterImage: "buttercup",
+                    characterImage: "characterFreeze",
                     onResume: {
                         showPausePopup = false
                         isPaused = false
+                        connectivity.resumeWorkoutFromPhone()
                     },
                     onEndWorkout: {
                         timer?.invalidate()
-                        router.navigateTo(.menu)
+                        connectivity.stopWorkoutFromPhone()
+                        showPausePopup = false
+                        isPaused = false
+                        router.navigateTo(.finishWorkout)
                     }
                 )
                 .transition(.scale.combined(with: .opacity))
@@ -230,9 +216,29 @@ struct StartStrengthView: View {
             }
         }
         .onAppear {
-            if timer == nil || lastExerciseIndex != sessionManager.currentExerciseIndex {
-                lastExerciseIndex = sessionManager.currentExerciseIndex
-                startTimer()
+            if sessionManager.isRunning {
+                if timer == nil || lastExerciseIndex != sessionManager.currentExerciseIndex {
+                    lastExerciseIndex = sessionManager.currentExerciseIndex
+                    startTimer()
+                }
+            }
+            
+        }
+        .onChange(of: connectivity.isWorkoutActive) { _, active in
+            print("onchange isWorkoutActive: \(active)")
+
+            if !active {
+                print("🏁 STOP from watch → navigate FinishWorkout")
+                timer?.invalidate()
+                sessionManager.reset()
+                router.navigateTo(.finishWorkout)
+            }
+        }
+        .onChange(of: connectivity.isWorkoutPaused) { _, paused in
+            if paused {
+                showPausePopup = true
+            } else {
+                showPausePopup = false
             }
         }
         .onDisappear { timer?.invalidate() }
@@ -256,8 +262,8 @@ struct StartStrengthView: View {
                 if !isPaused {
                     if timeRemaining > 0 {
                         timeRemaining -= 1
-                        calories = Int((TimeInterval(duration) - timeRemaining) / 6)
-                        bpm = 90 + Int.random(in: -4...6)
+                        calories = Int(connectivity.energyBurned)
+                        bpm = connectivity.heartRate > 0 ? Int(connectivity.heartRate) : 0
                         
                         if countMaximumHR() && !showHRAlert {
                             showHRAlert = true
@@ -275,8 +281,8 @@ struct StartStrengthView: View {
             timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
                 if !isPaused {
                     timeRemaining += 1
-                    calories = Int(timeRemaining / 6)
-                    bpm = 90 + Int.random(in: -4...6)
+                    calories = Int(connectivity.energyBurned)
+                    bpm = connectivity.heartRate > 0 ? Int(connectivity.heartRate) : 0
                     
                     if countMaximumHR() && !showHRAlert {
                         showHRAlert = true

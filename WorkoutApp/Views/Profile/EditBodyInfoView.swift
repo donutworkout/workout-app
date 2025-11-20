@@ -6,13 +6,24 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct EditBodyInfoView: View {
     @Environment(\.dismiss) var dismiss
+    @Environment(\.modelContext) private var modelContext
+    
+    @Query(sort: \UserProfile.createdAt, order: .reverse)
+    private var profiles: [UserProfile]
+    
+    private var currentProfile: UserProfile? {
+        profiles.first
+    }
+    
     @State private var selectedHeight: Int = 0
     @State private var selectedWeight: Int = 0
     @State private var showHeightPicker = false
     @State private var showWeightPicker = false
+    @State private var showSaveAlert = false
     
     let heights = Array(100...220)
     let weights = Array(30...150)
@@ -28,9 +39,13 @@ struct EditBodyInfoView: View {
             // MARK: - Header (pakai HeaderButton)
             HeaderButton(
                 title: "Body Measurement",
-                isEditing: true,
+                isEditing: isFormValid,
                 onClose: { dismiss() },
-                onEditToggle: { dismiss() }
+                onEditToggle: {
+                    if isFormValid {
+                        saveBodyInfo()
+                    }
+                }
             )
             
             // MARK: - Title & Character
@@ -96,7 +111,7 @@ struct EditBodyInfoView: View {
             Spacer()
         }
         .background(Color.white.ignoresSafeArea())
-        .navigationBarBackButtonHidden(true) // ✅ hilangkan back bawaan
+        .navigationBarBackButtonHidden(true)
         .sheet(isPresented: $showHeightPicker) {
             PickerSheetView(
                 title: "Select Height",
@@ -113,11 +128,54 @@ struct EditBodyInfoView: View {
                 selection: $selectedWeight
             )
         }
+        .onAppear {
+            loadBodyData()
+        }
+        .alert("Body Info Updated", isPresented: $showSaveAlert) {
+            Button("OK") {
+                dismiss()
+            }
+        } message: {
+            Text("Your body measurements have been successfully updated.")
+        }
+    }
+    
+    // MARK: - Backend Functions
+    
+    private func loadBodyData() {
+        guard let profile = currentProfile else {
+            print("⚠️ No profile found")
+            return
+        }
+        
+        selectedHeight = profile.height
+        selectedWeight = profile.weight
+        
+        print("✅ Body data loaded: Height \(selectedHeight)cm, Weight \(selectedWeight)kg")
+    }
+    
+    private func saveBodyInfo() {
+        guard let profile = currentProfile else {
+            print("❌ Cannot save: No profile found")
+            return
+        }
+        
+        profile.height = selectedHeight
+        profile.weight = selectedWeight
+        
+        do {
+            try modelContext.save()
+            print("✅ Body info saved successfully")
+            showSaveAlert = true
+        } catch {
+            print("❌ Error saving: \(error.localizedDescription)")
+        }
     }
 }
 
 #Preview {
     NavigationStack {
         EditBodyInfoView()
+            .modelContainer(for: [UserProfile.self, UserWorkout.self, UserCycle.self])
     }
 }

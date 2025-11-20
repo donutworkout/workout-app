@@ -71,7 +71,7 @@ struct WatchWorkoutDoneView: View {
                         icon: "flame.fill",
                         value: String(
                             format: "%.0f kcal",
-                            sessionManager.energyBurned
+                            sessionManager.activeEnergy
                         ),
                         label: "Active Energy"
                     )

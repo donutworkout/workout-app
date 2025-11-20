@@ -7,6 +7,7 @@ struct WorkoutDayView: View {
     
     @State private var selectedDays: [String] = []
     @State private var showCustomAlert = false
+    @State private var move = false
     
     let days = WorkoutDayPreference.allCases.map { $0.displayName }
     
@@ -40,7 +41,7 @@ struct WorkoutDayView: View {
                 
                 // MARK: - Title
                 VStack(spacing: 16) {
-                    HStack(alignment: .top, spacing: 12) {
+                    HStack(alignment: .bottom, spacing: 12) {
                         VStack(alignment: .leading, spacing: 8) {
                             SurveyProgressText(currentPage: 4, totalPages: 5)
                             Text("When do you have time to work out?")
@@ -57,10 +58,11 @@ struct WorkoutDayView: View {
                             .frame(width: 120)
                             .minimumScaleFactor(0.5)
                             .layoutPriority(0)
+                            .offset(x: move ? 9 : -54)
                     }
                 }
                 .padding(.horizontal)
-                .padding(.top, 10)
+//                .padding(.top, 10)
                 
                 // MARK: - Days Grid
                 VStack(spacing: 12) {
@@ -115,6 +117,11 @@ struct WorkoutDayView: View {
             .background(Color.white.ignoresSafeArea())
             .blur(radius: showCustomAlert ? 3 : 0) // ✅ Blur background saat alert muncul
             .allowsHitTesting(!showCustomAlert) // ✅ Disable interaction saat alert muncul
+            .onAppear {
+                withAnimation(.easeInOut(duration: 3.5).repeatForever(autoreverses: true)) {
+                    move = true
+                }
+            }
             .onAppear {
                 if selectedDays.isEmpty {
                     let savedDays = surveyManager.tempWorkoutDaysPreference

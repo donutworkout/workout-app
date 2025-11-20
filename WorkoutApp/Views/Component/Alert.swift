@@ -11,6 +11,9 @@ struct Alert: View {
     let characterImage: String
     var onResume: () -> Void
     var onEndWorkout: () -> Void
+    
+    @Environment(iPhoneConnectivityManager.self) private var connectivity
+    @EnvironmentObject var router: Router
 
     var body: some View {
         ZStack {
@@ -37,12 +40,15 @@ struct Alert: View {
                         PrimaryGlassButton(title: "Resume") {
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                 onResume()
+                                connectivity.resumeWorkoutFromPhone()
                             }
                         }
 
                         NeutralGlassButton(title: "End Workout") {
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                 onEndWorkout()
+                                connectivity.stopWorkoutFromPhone()
+                                router.navigateTo(.finishWorkout)
                             }
                         }
                     }
@@ -60,6 +66,7 @@ struct Alert: View {
             .transition(.scale.combined(with: .opacity))
         }
         .onAppear {
+            connectivity.pauseWorkoutFromPhone()
                     HapticManager.shared.trigger(.alertAppear)
                 }
         .transition(.scale.combined(with: .opacity))
@@ -81,10 +88,15 @@ struct Alert: View {
 
                 if showPausePopup {
                     Alert(
-                        characterImage: "buttercup",
-                        onResume: { showPausePopup = false },
-                        onEndWorkout: { showPausePopup = false }
+                        characterImage: "characterFreeze",
+                        onResume: {
+                            showPausePopup = false
+                        },
+                        onEndWorkout: {
+                            showPausePopup = false
+                        }
                     )
+                    .environmentObject(Router())
                     .transition(.scale.combined(with: .opacity))
                 }
             }

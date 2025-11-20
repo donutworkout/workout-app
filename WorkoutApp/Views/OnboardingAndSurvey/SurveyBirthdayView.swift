@@ -13,6 +13,7 @@ struct SurveyBirthdayView: View {
   
     @State private var selectedYear: Int = 2003
     @State private var name: String = ""
+    @State private var move = false
     let years = Array(1980...2025)
   
     var onNext: () -> Void
@@ -42,7 +43,7 @@ struct SurveyBirthdayView: View {
                 VStack(spacing: 32) {
                     
                     // MARK: - Header & Title
-                    HStack(alignment: .top) {
+                    HStack(alignment: .bottom) {
                         VStack(alignment: .leading, spacing: 8) {
                             SurveyProgressText(currentPage: 1, totalPages: 5)
                             Text("Get to know you more!")
@@ -56,9 +57,10 @@ struct SurveyBirthdayView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 120)
+                            .offset(x: move ? 9 : -54)
                     }
                     .padding(.horizontal)
-                    .padding(.top, 10)
+//                    .padding(.top, 10)
                     
                     // MARK: - Name Input
                     VStack(alignment: .leading, spacing: 16) {
@@ -67,7 +69,7 @@ struct SurveyBirthdayView: View {
                             .bold()
                             .foregroundColor(Color("pinkTextSecondary"))
                         
-                        TextField("fill your name", text: $name)
+                        TextField("Enter your name", text: $name)
                             .textInputAutocapitalization(.words)
                             .foregroundStyle(.black)
                             .padding(.horizontal, 16)
@@ -133,6 +135,11 @@ struct SurveyBirthdayView: View {
                 .opacity(isNameFilled ? 1 : 0.5)
         }
         .background(Color.white.ignoresSafeArea())
+        .onAppear {
+            withAnimation(.easeInOut(duration: 3.5).repeatForever(autoreverses: true)) {
+                move = true
+            }
+        }
         .onAppear {
             if !surveyManager.tempName.isEmpty {
                 name = surveyManager.tempName

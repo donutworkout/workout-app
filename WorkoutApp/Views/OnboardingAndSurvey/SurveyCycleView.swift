@@ -13,6 +13,7 @@ struct SurveyCycleView: View {
     @State private var selectedDates: Set<Date> = []
     @State private var currentMonth = Date()
     @State private var isFirstClick = true
+    @State private var move = false
     
     private let noneOption = "None of the above"
     private let calendar = Calendar.current
@@ -35,13 +36,15 @@ struct SurveyCycleView: View {
         CycleMoodAffectsMotivation.allCases.first { $0.displayName == name }
     }
     
-    // MARK: - Computed property
+    // MARK: - Computed property untuk Validasi
     var isAllAnswered: Bool {
         !selectedMenstrualCycle.isEmpty &&
         !selectedPhysicalSymptoms.isEmpty &&
         !selectedEnergyLevel.isEmpty &&
         !selectedMoodChanges.isEmpty &&
-        !selectedDates.isEmpty
+        !selectedDates.isEmpty &&
+        selectedEnergyLevel.first != "Not selected" &&
+        selectedMoodChanges.first != "Not selected"
     }
     
     var body: some View {
@@ -50,7 +53,7 @@ struct SurveyCycleView: View {
                 VStack(spacing: 32) {
                     
                     // MARK: - Title & Character
-                    HStack(alignment: .top) {
+                    HStack(alignment: .bottom) {
                         VStack(alignment: .leading, spacing: 8) {
                             SurveyProgressText(currentPage: 5, totalPages: 5)
                             Text("Menstrual \nCycle")
@@ -62,9 +65,10 @@ struct SurveyCycleView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 120)
+                            .offset(x: move ? 9 : -54)
                     }
                     .padding(.horizontal)
-                    .padding(.top, 10)
+//                    .padding(.top, 10)
                     
                     // MARK: - Question Sections
                     Group {
@@ -215,10 +219,15 @@ struct SurveyCycleView: View {
             PrimaryGlassButton(title: "Finish", action: saveAndFinish)
                 .padding(.horizontal)
                 .padding(.vertical)
-                .disabled(!isAllAnswered)
+                .disabled(!isAllAnswered) // Disable jika belum semua section terisi
                 .opacity(isAllAnswered ? 1 : 0.5)
         }
         .background(Color.white.ignoresSafeArea())
+        .onAppear {
+            withAnimation(.easeInOut(duration: 3.5).repeatForever(autoreverses: true)) {
+                move = true
+            }
+        }
         .onAppear {
             loadExistingSelections()
         }
@@ -258,7 +267,7 @@ struct SurveyCycleView: View {
         selectedDates.contains { calendar.isDate($0, inSameDayAs: date) }
     }
     
-    // ✅ NEW: Check if date is in the future
+    // Check if date is in the future
     private func isFutureDate(_ date: Date) -> Bool {
         let today = calendar.startOfDay(for: Date())
         let checkDate = calendar.startOfDay(for: date)
@@ -266,7 +275,7 @@ struct SurveyCycleView: View {
     }
     
     private func toggleDate(_ date: Date) {
-        // ✅ Prevent selecting future dates
+        // Prevent selecting future dates
         if isFutureDate(date) {
             return
         }
@@ -282,7 +291,7 @@ struct SurveyCycleView: View {
             if isFirstClick {
                 for i in 1...4 {
                     if let nextDay = calendar.date(byAdding: .day, value: i, to: date),
-                       !isFutureDate(nextDay) { // ✅ Only add if not future date
+                       !isFutureDate(nextDay) {
                         selectedDates.insert(nextDay)
                     }
                 }
@@ -296,7 +305,7 @@ struct SurveyCycleView: View {
 struct CalendarDayButton: View {
     let date: Date
     let isSelected: Bool
-    let isFutureDate: Bool // ✅ NEW
+    let isFutureDate: Bool
     let onTap: () -> Void
     
     private let calendar = Calendar.current
@@ -326,24 +335,23 @@ struct CalendarDayButton: View {
                 Text(dayNumber)
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(
-                        isFutureDate ? .gray.opacity(0.3) : // ✅ Grayed out for future dates
+                        isFutureDate ? .gray.opacity(0.3) :
                         (isSelected ? .white : (isToday ? Color("pinkTextPrimary") : .black))
                     )
             }
             .frame(height: 40)
         }
-        .disabled(isFutureDate) // ✅ Disable button for future dates
+        .disabled(isFutureDate)
     }
 }
 
 extension SurveyCycleView {
     
     private func loadExistingSelections() {
+        // 1. Load menstrual cycle regularity HANYA jika ada nilai valid
         if selectedMenstrualCycle.isEmpty {
             if let isRegular = surveyManager.tempIsCycleRegular {
                 selectedMenstrualCycle = [isRegular ? "Yes" : "No"]
-            } else {
-                selectedMenstrualCycle = []
             }
         }
         
@@ -370,19 +378,26 @@ extension SurveyCycleView {
             }
         }
         
-        // 3. Load symptoms (enum -> String conversion)
+        // 3. Load symptoms (enum -> String conversion) HANYA jika ada
         if selectedPhysicalSymptoms.isEmpty {
-            selectedPhysicalSymptoms = surveyManager.tempCycleSymptoms.map { $0.displayName }
+            let symptoms = surveyManager.tempCycleSymptoms.map { $0.displayName }
+            if !symptoms.isEmpty {
+                selectedPhysicalSymptoms = symptoms
+            }
         }
         
-        // 4. Load energy level
+        // 4. Load energy level HANYA jika ada nilai valid
         if selectedEnergyLevel.isEmpty {
-            selectedEnergyLevel = [surveyManager.tempCycleEnergy?.displayName ?? "Not selected"]
+            if let energy = surveyManager.tempCycleEnergy {
+                selectedEnergyLevel = [energy.displayName]
+            }
         }
         
-        // 5. Load mood
+        // 5. Load mood HANYA jika ada nilai valid
         if selectedMoodChanges.isEmpty {
-            selectedMoodChanges = [surveyManager.tempCycleMoodAffectsMotivation?.displayName ?? "Not selected"]
+            if let mood = surveyManager.tempCycleMoodAffectsMotivation {
+                selectedMoodChanges = [mood.displayName]
+            }
         }
     }
     

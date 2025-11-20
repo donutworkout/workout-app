@@ -540,6 +540,7 @@ struct PhaseCardView: View {
 
 // MARK: - Streak Card
 struct StreakCardView: View {
+    @State private var fireAnim = false
     //    let phase: PhaseType
     //
     //    private var streakInfo: (title: String, desc: String) {
@@ -555,6 +556,14 @@ struct StreakCardView: View {
         HStack(spacing: 16) {
             Text("🔥")
                 .font(.system(size: 48))
+                .scaleEffect(fireAnim ? 1.15 : 0.9)
+                .animation(
+                    .easeInOut(duration: 1.6).repeatForever(autoreverses: true),
+                    value: fireAnim
+                )
+                .onAppear {
+                    fireAnim = true
+                }
             
             VStack(alignment: .leading, spacing: 6) {
                 Text("Streak")

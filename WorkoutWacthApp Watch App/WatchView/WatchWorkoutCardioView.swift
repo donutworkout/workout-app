@@ -16,7 +16,6 @@ struct WatchWorkoutCardioView: View {
     
     let workoutType: HKWorkoutActivityType
     
-    @State private var elapsedTime: Int = 0
     @State private var currentTime: String = Self.formatCurrentTime()
     @State private var clockActive = true
     
@@ -35,16 +34,12 @@ struct WatchWorkoutCardioView: View {
                             .fill(Color.white.opacity(0.15))
                             .frame(width: 36, height: 36)
                         
-                        Image(systemName: getWorkoutIcon(for: connectivity.selectedWorkoutType ?? .running))   .font(.system(size: 18))
+                        Image(systemName: getWorkoutIcon(for: connectivity.selectedWorkoutType ?? .running))
+                            .font(.system(size: 18))
                             .foregroundColor(Color("pinkTextPrimary"))
                     }
                     
                     Spacer()
-                    
-//                    Text(currentTime)
-//                        .font(.system(size: 16, weight: .semibold))
-//                        .foregroundColor(.white)
-//                        .onReceive(clockTimer) { _ in updateTime() }
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 20)
@@ -67,11 +62,14 @@ struct WatchWorkoutCardioView: View {
                         .padding(.bottom, 4)
 
                     StatRow(icon: "flame.fill",
-                            text: String(format: "%.0f kcal", sessionManager.energyBurned))
+                            text: String(format: "%.0f kcal", sessionManager.activeEnergy))
                     StatRow(icon: "figure.walk",
                             text: String(format: "%.2f km", sessionManager.distance / 1000))
-                    StatRow(icon: "heart.fill",
-                            text: String(format: "%.0f bpm", sessionManager.heartRate))
+                    StatRow(
+                        icon: "heart.fill",
+                        text: sessionManager.heartRate > 0
+                            ? String(format: "%.0f bpm", sessionManager.heartRate): "-- bpm"
+                    )
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, 16)
@@ -89,7 +87,6 @@ struct WatchWorkoutCardioView: View {
             clockActive = !paused
         }
         .onAppear {
-            // Reset or continue as desired; keeping current value
             if !sessionManager.isRunning {
                 if let type = connectivity.selectedWorkoutType {
                     sessionManager.startWorkout(of: type)
@@ -97,9 +94,6 @@ struct WatchWorkoutCardioView: View {
                     sessionManager.startWorkout(of: .walking)
                 }
             }
-        }
-        .onDisappear {
-            // No-op here; the autoconnected timer will stop delivering when view is gone
         }
         
     }
@@ -117,7 +111,7 @@ struct WatchWorkoutCardioView: View {
             case .volleyball: return "figure.volleyball"
             case .soccer: return "figure.soccer"
             case .traditionalStrengthTraining: return "figure.strengthtraining.traditional"
-            case .functionalStrengthTraining: return "figure.functional.training"
+            case .functionalStrengthTraining: return "figure.strengthtraining.functional"
             default: return "figure.walk"
             }
         }
@@ -140,9 +134,10 @@ struct WatchWorkoutCardioView: View {
         let h = seconds / 3600
         let m = (seconds % 3600) / 60
         let s = seconds % 60
-        // Selalu tampil jam:menit:detik (00:00:00)
         return String(format: "%02d:%02d:%02d", h, m, s)
     }
+    
+    
 }
 
 // MARK: - Small row component

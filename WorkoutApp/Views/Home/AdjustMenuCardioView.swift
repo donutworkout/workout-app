@@ -102,7 +102,6 @@ struct AdjustMenuCardioView: View {
                     router.selectedWorkoutType = type
                     router.selectedCardioMenu = selectedMenu
                     connectivity.startWorkoutFromPhone(type: type)
-                    
                     router.lastWorkoutSource = .adjustMenuCardio
                     router.navigateTo(.countdownView)
                 }
@@ -117,6 +116,14 @@ struct AdjustMenuCardioView: View {
             if showCustomAlert {
                 customAlert
             }
+        }
+        .onChange(of: connectivity.isWorkoutActive) { _, active in
+            if active {
+                print("🏋️ Watch started workout → go to countdown/start")
+                router.lastWorkoutSource = .adjustMenuCardio
+                router.navigateTo(.countdownView)
+            }
+            
         }
         .navigationTitle("Today’s Cardio Menu!")
         .navigationBarTitleDisplayMode(.inline)

@@ -73,12 +73,12 @@ struct StartCardioView: View {
                     )
                     StatCardItem(
                         icon: "figure.walk",
-                        value: String(format: "%.1f", distance),
+                        value: String(format: "%.2f", distance),
                         label: "KILOMETERS"
                     )
                     StatCardItem(
                         icon: "heart.fill",
-                        value: "\(bpm)",
+                        value: connectivity.heartRate > 0 ? "\(bpm)" : "--",
                         label: "BPM"
                     )
                 }
@@ -113,7 +113,7 @@ struct StartCardioView: View {
                     onEndWorkout: {
                         timer?.invalidate()
                         connectivity.stopWorkoutFromPhone()
-                        router.navigateTo(.menu)
+                        router.navigateTo(.finishWorkout)
                     }
                 )
                 .transition(.scale.combined(with: .opacity))
@@ -202,7 +202,6 @@ struct StartCardioView: View {
             }
         }
         .onAppear {
-            //print("connectivity \(connectivity.isWorkoutActive)")
             startTimer()
         }
         .onDisappear { timer?.invalidate() }
@@ -217,38 +216,50 @@ struct StartCardioView: View {
         }
         .onChange(of: connectivity.isWorkoutPaused) { _, paused in
             if paused {
-                // Pause from WATCH → show popup
                 print("⌚ Pause from watch → show popup")
                 showPausePopup = true
             } else {
                 showPausePopup = false
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .startLocalTimer)) { _ in
+            timeElapsed = 0
+            startTimer()
+        }
+
+        .onReceive(NotificationCenter.default.publisher(for: .pauseLocalTimer)) { _ in
+            timer?.invalidate()
+        }
+
+        .onReceive(NotificationCenter.default.publisher(for: .resumeLocalTimer)) { _ in
+            startTimer()
+        }
+
     }
     
     private var formattedTime: String {
-        let hours = Int(connectivity.timeActive) / 3600
-        let minutes = (Int(connectivity.timeActive) % 3600) / 60
-        let seconds = Int(connectivity.timeActive) % 60
+        let total = Int(timeElapsed)
+        let hours = total / 3600
+        let minutes = (total % 3600) / 60
+        let seconds = total % 60
         return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
     
     private func startTimer() {
         timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) {
-            _ in
-            guard !connectivity.isWorkoutPaused else { return }
-            connectivity.timeActive += 1
 
-            // UI update — tapi *tanpa kirim apa pun ke watch*
-            timeElapsed = connectivity.timeActive
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            if !connectivity.isWorkoutPaused {
+                timeElapsed += 1    // ⬅️ TIMER LOKAL
+            }
             calories = Int(connectivity.energyBurned)
             distance = connectivity.distance / 1000
-            bpm = Int(connectivity.heartRate)
-            
+            bpm = connectivity.heartRate > 0 ? Int(connectivity.heartRate) : 0
+                                                                            
             if countMaximumHR() && !showHRAlert {
                 showHRAlert = true
             }
+
         }
     }
     
@@ -258,66 +269,12 @@ struct StartCardioView: View {
         return bpm >= maxHR
     }
 }
-// MARK: - Reusable Pause Popup
-struct WorkoutPausePopup: View {
-    let characterImage: String
-    var onResume: () -> Void
-    var onEndWorkout: () -> Void
 
-    @Environment(iPhoneConnectivityManager.self) private var connectivity
 
-    var body: some View {
-        ZStack {
-            // Background gelap transparan
-            Color.black.opacity(0.4)
-                .ignoresSafeArea()
-                .onTapGesture { onResume() }
-
-            VStack(spacing: 0) {
-                ZStack(alignment: .top) {
-
-                    // MARK: - Kotak Putih
-                    VStack(spacing: 14) {
-                        Spacer().frame(height: 50)  // ruang untuk karakter di atas
-
-                        PrimaryGlassButton(title: "Resume") {
-                            onResume()
-                            connectivity.resumeWorkoutFromPhone()
-                        }
-
-                        NeutralGlassButton(title: "End Workout") {
-                            onEndWorkout()
-                            connectivity.stopWorkoutFromPhone()
-                        }
-                        Spacer().frame(height: 10)
-                    }
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 20)
-                    .background(
-                        RoundedRectangle(cornerRadius: 24)
-                            .fill(Color.white)
-                            .shadow(
-                                color: .black.opacity(0.15),
-                                radius: 15,
-                                x: 0,
-                                y: 8
-                            )
-
-                    )
-
-                    // MARK: - Karakter setengah badan di atas kotak
-                    Image(characterImage)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 130, height: 130)
-                        .offset(y: -65)  // setengah badannya nongol di atas kotak
-                }
-            }
-            .padding(.horizontal, 40)
-            .transition(.scale.combined(with: .opacity))
-        }
-        .transition(.scale.combined(with: .opacity))
-    }
+extension Notification.Name {
+    static let startLocalTimer = Notification.Name("startLocalTimer")
+    static let pauseLocalTimer = Notification.Name("pauseLocalTimer")
+    static let resumeLocalTimer = Notification.Name("resumeLocalTimer")
 }
 
 // #Preview {
@@ -326,3 +283,4 @@ struct WorkoutPausePopup: View {
 //             .environmentObject(Router())
 //     }
 // }
+
