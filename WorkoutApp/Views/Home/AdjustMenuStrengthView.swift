@@ -25,12 +25,14 @@ struct AdjustMenuStrengthView: View {
     @Query private var userWorkouts: [UserWorkout]
 
     private let sessionManager = StrengthSessionManager.shared
+    let dailyMenu: DailyMenu?
 
     @State var workoutType: HKWorkoutActivityType = .functionalStrengthTraining
 
     var onNext: (() -> Void)? = nil
 
-    init() {
+    init(dailyMenu: DailyMenu? = nil) {
+
         // Warna segmented control kustom (pink)
         let pinkColor = UIColor(named: "pinkTextPrimary") ?? UIColor.systemPink
         let selectedAttrs: [NSAttributedString.Key: Any] = [
@@ -43,6 +45,8 @@ struct AdjustMenuStrengthView: View {
         appearance.selectedSegmentTintColor = pinkColor
         appearance.setTitleTextAttributes(selectedAttrs, for: .selected)
         appearance.setTitleTextAttributes(normalAttrs, for: .normal)
+      
+        self.dailyMenu = dailyMenu  
     }
 
     var body: some View {
@@ -89,7 +93,6 @@ struct AdjustMenuStrengthView: View {
             }
         }
         .safeAreaInset(edge: .bottom) {
-            // MARK: - Bottom anchored button
             VStack {
                 PrimaryGlassButton(title: "Start Now") {
                     if selectedMenu == .bodyweight {
@@ -133,7 +136,6 @@ struct AdjustMenuStrengthView: View {
             workoutType = .functionalStrengthTraining
             connectivity.sendSelectedWorkout(workoutType)
 
-            DummyExerciseProvider.shared.clearAllExercises(from: modelContext)
             DummyExerciseProvider.shared.insertDummyData(into: modelContext)
 
             loadBodyWeightExercises()
@@ -149,6 +151,12 @@ struct AdjustMenuStrengthView: View {
     }
 
     private func loadBodyWeightExercises() {
+        if let menu = dailyMenu, let savedExercises = menu.strengthExercises, !savedExercises.isEmpty {
+            print("✅ Loading \(savedExercises.count) saved exercises from DailyMenu")
+            workouts = savedExercises
+            return
+        }
+        
         guard let cycle = userCycle, let profile = userWorkout else { return }
 
         let repo = ExerciseRepository(context: modelContext)
@@ -176,6 +184,12 @@ struct AdjustMenuStrengthView: View {
         }
 
         workouts = exercises
+        
+        if let menu = dailyMenu {
+            menu.strengthExercises = exercises
+            try? modelContext.save()
+            print("💾 Saved \(exercises.count) exercises to DailyMenu")
+        }
     }
 }
 

@@ -30,6 +30,12 @@ final class Router: ObservableObject {
     @Published var selectedCardioMenu: String? = nil
     @Published var workoutExercises: [Exercise] = []
     
+    @Published var selectedDailyMenu: DailyMenu? = nil
+    
+    @Published var cardioSpecs: CardioDetails? = nil
+    @Published var vigorousDuration: Int = 0
+    @Published var moderateDuration: Int = 0
+    
     // In your Router class
     init(surveyManager: SurveyManager? = nil) {
         if let manager = surveyManager, manager.isSurveyComplete {

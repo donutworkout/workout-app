@@ -16,7 +16,7 @@ struct CountdownView: View {
     
     @State private var countdown: Int = 3
     @State private var showCountdown: Bool = true
-    @State private var timeRemaining: TimeInterval = 60
+    @State private var timeRemaining: TimeInterval = 0
     @State private var showPausePopup: Bool = false
     @State private var showExitAlert: Bool = false
     @State private var isPaused: Bool = false

@@ -3,7 +3,9 @@ import SwiftData
 
 struct MenuView: View {
     @EnvironmentObject var router: Router
+    @Environment(\.modelContext) private var modelContext
     
+    @Query private var menus: [DailyMenu]
     @Query private var userCycles: [UserCycle]
     @Query private var userProfiles: [UserProfile]
     @Query private var userWorkouts: [UserWorkout]
@@ -11,6 +13,10 @@ struct MenuView: View {
     @StateObject var cycleViewModel: CycleViewModel
     @StateObject var menuViewModel: MenuViewModel
 //    @State private var selectedDayIndex: Int = 0
+    
+    @State private var cardioSpecs: CardioDetails?
+    @State private var vigorousDuration: Int = 0
+    @State private var moderateDuration: Int = 0
     
     private var userCycle: UserCycle? {
         userCycles.first
@@ -30,15 +36,15 @@ struct MenuView: View {
     
     private var selectedPhase: MenstrualPhase {
         let phase = cycleViewModel.phase(for: cycleViewModel.selectedDayIndex) ?? .menstruation
-        
-        print("🔍 selectedDayIndex: \(cycleViewModel.selectedDayIndex)")
-        print("🔍 selectedPhase from ViewModel: \(phase)")
-        print("🔍 phasesForWeek count: \(cycleViewModel.phasesForWeek.count)")
+//        
+//        print("🔍 selectedDayIndex: \(cycleViewModel.selectedDayIndex)")
+//        print("🔍 selectedPhase from ViewModel: \(phase)")
+//        print("🔍 phasesForWeek count: \(cycleViewModel.phasesForWeek.count)")
         
         // Debug: print all phases
-        for (index, phaseData) in cycleViewModel.phasesForWeek.enumerated() {
-            print("🔍 Index \(index): \(phaseData.date) -> \(phaseData.phase)")
-        }
+//        for (index, phaseData) in cycleViewModel.phasesForWeek.enumerated() {
+//            print("🔍 Index \(index): \(phaseData.date) -> \(phaseData.phase)")
+//        }
         
         return phase
     }
@@ -101,22 +107,22 @@ struct MenuView: View {
                 CombinedWorkoutCardView(
                     phase: selectedPhase,
                     menu: selectedDayMenu,
+                    vigorousDuration: vigorousDuration,
+                    moderateDuration: moderateDuration,
                     onStartWorkout: {
                         if let menu = selectedDayMenu {
+                            router.vigorousDuration = vigorousDuration
+                            router.moderateDuration = moderateDuration
+                            router.cardioSpecs = cardioSpecs
+                            
                             if menu.isCardio {
+                                router.selectedDailyMenu = menu
                                 router.navigateTo(.adjustMenuCardio)
                             } else if menu.isStrength {
-                                router.navigateTo(.adjustMenuStrength)
-                            }
-                        } else {
-                            // Fallback based on phase
-                            if selectedPhase == .menstruation {
-                                router.navigateTo(.adjustMenuCardio)
-                            } else {
+                                router.selectedDailyMenu = menu
                                 router.navigateTo(.adjustMenuStrength)
                             }
                         }
-                        
                     })
                 
                 // MARK: - Streak Section
@@ -141,6 +147,7 @@ struct MenuView: View {
             
             cycleViewModel.selectedDayIndex = todayIndex()
             loadWeeklyMenu()
+            calculateCardioSpecs()
         }
     }
     
@@ -192,11 +199,36 @@ struct MenuView: View {
         )
     }
     
+    private func calculateCardioSpecs() {
+        guard let workout = userWorkouts.first,
+              let cycle = userCycles.first else { return }
+        
+        let phase = CyclePhaseCalculator.calculateCurrentPhase(
+            lastPeriodStart: cycle.cycleStartDate,
+            cycleLength: cycle.cycleLength,
+            menstrualDuration: cycle.menstrualDuration
+        )
+        
+        let generator = WorkoutMenuGenerator(context: modelContext)
+        cardioSpecs = generator.getCardioSpecs(for: workout.workoutLevel, phase: phase)
+        
+        let cardioDays = menus.filter { $0.category == .cardio }.count
+        
+        if let specs = cardioSpecs, cardioDays > 0 {
+            vigorousDuration = specs.vigorousDuration / cardioDays
+            moderateDuration = specs.moderateDuration / cardioDays
+        }
+    }
+    
 }
 
 struct CombinedWorkoutCardView: View {
+    @EnvironmentObject var router: Router
+    
     let phase: MenstrualPhase
     let menu: DailyMenu?
+    let vigorousDuration: Int
+    let moderateDuration: Int
     var onStartWorkout: () -> Void
     
     private var cardInfo: (image: String, workoutTitle: String, phaseDesc: String, duration: String) {
@@ -213,8 +245,15 @@ struct CombinedWorkoutCardView: View {
             isStrengthDay = !isCardioDay
         }
         
-        // Get duration from menu (default to 30 min for now)
-        let duration: String = "30 min"
+        var duration: String {
+            if isCardioDay {
+                return "\(vigorousDuration)-\(moderateDuration) min"
+            } else if isStrengthDay {
+                return "30 min"
+            } else {
+                return ""
+            }
+        }
         
         // Determine card content
         if isCardioDay {

@@ -1,15 +1,24 @@
 import HealthKit
 import SwiftUI
+import SwiftData
 
 struct AdjustMenuCardioView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var router: Router
+    @Environment(\.modelContext) private var modelContext
     
     @Environment(iPhoneConnectivityManager.self) private var connectivity
+    
+    @Query private var weeklyMenu: [DailyMenu]
+    @Query private var userWorkouts: [UserWorkout]
+    @Query private var userCycle: [UserCycle]
     
     @State private var selectedMenu: String? = nil
     @State private var showCustomAlert = false
     var onNext: () -> Void = {}
+    let dailyMenu: DailyMenu?
+    let vigorousDuration: Int
+    let moderateDuration: Int
     
     // MARK: - Cardio Menu (Dipisah per durasi)
     private let oneHourMenu = [
@@ -22,13 +31,46 @@ struct AdjustMenuCardioView: View {
         "Volleyball", "Tennis",
         "Outdoor Run", "Indoor Run"
     ]
+        
+    private var userLevel: WorkoutLevel {
+        userWorkouts.first?.workoutLevel ?? .beginner
+    }
+    
+    private var currentPhase: MenstrualPhase {
+        guard let cycle = userCycle.first else { return .menstruation }
+        
+        let calendar = Calendar.current
+        let daysSinceStart = calendar.dateComponents(
+            [.day],
+            from: cycle.cycleStartDate,
+            to: Date()
+        ).day ?? 0
+        
+        let currentDayInCycle = (daysSinceStart % cycle.cycleLength) + 1
+        
+        return CyclePhaseCalculator.phaseForDay(
+            currentDayInCycle,
+            cycleLength: cycle.cycleLength,
+            periodDuration: cycle.menstrualDuration
+        )
+    }
+    
+    init(
+        dailyMenu: DailyMenu? = nil,
+        vigorousDuration: Int = 0,
+        moderateDuration: Int = 0
+    ) {
+        self.dailyMenu = dailyMenu
+        self.vigorousDuration = vigorousDuration
+        self.moderateDuration = moderateDuration
+    }
     
     var body: some View {
         ZStack {
             VStack(spacing: 32) {
                 // MARK: - 1 Hour Section
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Duration 1 Hour")
+                    Text("Duration \(moderateDuration) Minutes")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.black)
                         .padding(.horizontal)
@@ -39,7 +81,7 @@ struct AdjustMenuCardioView: View {
                 
                 // MARK: - 30 Minute Section
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Duration 30 Minutes")
+                    Text("Duration \(vigorousDuration) Minutes")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.black)
                         .padding(.horizontal)
@@ -182,8 +224,8 @@ struct AdjustMenuCardioView: View {
     }
 }
 
-#Preview {
-    NavigationStack {
-        AdjustMenuCardioView()
-    }
-}
+//#Preview {
+//    NavigationStack {
+//        AdjustMenuCardioView(dailyMenu: router.selectedDailyMenu)
+//    }
+//}
