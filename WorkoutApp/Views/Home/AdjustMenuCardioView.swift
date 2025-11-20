@@ -16,6 +16,9 @@ struct AdjustMenuCardioView: View {
     @State private var selectedMenu: String? = nil
     @State private var showCustomAlert = false
     var onNext: () -> Void = {}
+    let dailyMenu: DailyMenu?
+    let vigorousDuration: Int
+    let moderateDuration: Int
     
     // MARK: - Cardio Menu (Dipisah per durasi)
     private let oneHourMenu = [
@@ -52,23 +55,14 @@ struct AdjustMenuCardioView: View {
         )
     }
     
-    private var cardioSpecs: CardioDetails {
-        let generator = WorkoutMenuGenerator(context: modelContext)
-        return generator.getCardioSpecs(for: userLevel, phase: currentPhase)
-    }
-    
-    private var vigorousDuration: Int {
-        let cardioDays = weeklyMenu.filter { $0.category == .cardio }.count
-        let vigorous = cardioSpecs.vigorousDuration / cardioDays
-        
-        return vigorous
-    }
-    
-    private var moderateDuration: Int {
-        let cardioDays = weeklyMenu.filter { $0.category == .cardio }.count
-        let moderate = cardioSpecs.moderateDuration / cardioDays
-        
-        return moderate
+    init(
+        dailyMenu: DailyMenu? = nil,
+        vigorousDuration: Int = 0,
+        moderateDuration: Int = 0
+    ) {
+        self.dailyMenu = dailyMenu
+        self.vigorousDuration = vigorousDuration
+        self.moderateDuration = moderateDuration
     }
     
     var body: some View {
@@ -223,8 +217,8 @@ struct AdjustMenuCardioView: View {
     }
 }
 
-#Preview {
-    NavigationStack {
-        AdjustMenuCardioView()
-    }
-}
+//#Preview {
+//    NavigationStack {
+//        AdjustMenuCardioView(dailyMenu: router.selectedDailyMenu)
+//    }
+//}

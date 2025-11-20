@@ -21,11 +21,27 @@ struct RestView: View {
     @State private var isPaused: Bool = false
     
     var nextWorkoutName: Exercise? {
-        sessionManager.nextExercise
+        if sessionManager.hasMoreSets {
+            return sessionManager.currentExercise
+        } else {
+            return sessionManager.nextExercise
+        }
     }
     
     var nextWorkoutNumber: Int {
-        sessionManager.currentPage + 1
+        if sessionManager.hasMoreSets {
+            return sessionManager.currentPage
+        } else {
+            return sessionManager.currentPage + 1
+        }
+    }
+    
+    var nextSetInfo: String {
+        if sessionManager.hasMoreSets {
+            return "Set \(sessionManager.currentSetNumber + 1)/\(sessionManager.currentExercise?.sets ?? 1)"
+        } else {
+            return "Next Exercise"
+        }
     }
     
     var totalWorkouts: Int = 7
@@ -33,11 +49,11 @@ struct RestView: View {
     var restDuration: TimeInterval {
         switch level {
         case .beginner:
-            return 60  // 60 seconds for beginners
+            return 60
         case .intermediate:
-            return 45  // 45 seconds for intermediate
+            return 45
         case .advanced:
-            return 30  // 30 seconds for advanced
+            return 30
         }
     }
     
@@ -51,7 +67,7 @@ struct RestView: View {
         VStack(spacing: 0) {
             Spacer()
             
-            // MARK: - Rest Timer
+            // Rest Timer
             VStack(spacing: 16) {
                 Text("Rest")
                     .font(.system(size: 40, weight: .semibold))
@@ -73,7 +89,7 @@ struct RestView: View {
             // MARK: - Next Workout Preview
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    Text("Next \(nextWorkoutNumber)/\(totalWorkouts)")
+                    Text(sessionManager.hasMoreSets ? nextSetInfo : "Next \(nextWorkoutNumber)/\(totalWorkouts)")
                         .font(.system(size: 16, weight: .regular))
                         .foregroundColor(.gray)
                     Spacer()

@@ -52,7 +52,10 @@ struct RouterView: View {
                 
                 // MARK: - Workout Flow
             case .adjustMenuCardio:
-                AdjustMenuCardioView()
+                AdjustMenuCardioView(
+                    dailyMenu: router.selectedDailyMenu,
+                    vigorousDuration: router.vigorousDuration,
+                    moderateDuration: router.moderateDuration)
                     .environmentObject(router)
                 //.environment(connectivity)
                 
@@ -106,8 +109,8 @@ struct RouterView: View {
             case .startWorkout:
                 let weekday = Calendar.current.component(.weekday, from: Date())
                 if weekday % 2 == 0 {
-                    AdjustMenuCardioView()
-                        .environmentObject(router)
+                    AdjustMenuCardioView(dailyMenu: router.selectedDailyMenu)
+                    .environmentObject(router)
                     //.environment(connectivity)
                 } else {
                     AdjustMenuStrengthView()

@@ -13,6 +13,7 @@ class StrengthSessionManager: ObservableObject {
     
     @Published var exercises: [Exercise] = []
     @Published var currentExerciseIndex: Int = 0
+    @Published var currentSetNumber: Int = 1
     @Published var isWorkoutComplete: Bool = false
     
     private init() {} 
@@ -32,6 +33,18 @@ class StrengthSessionManager: ObservableObject {
         return currentExerciseIndex < exercises.count - 1
     }
     
+    var hasMoreSets: Bool {
+        guard let exercise = currentExercise else { return false }
+        
+        // Only apply sets logic if exercise has a time duration
+        guard let time = exercise.time, time > 0 else {
+            return false  // Rep-based exercises don't have multiple sets
+        }
+        
+        let totalSets = exercise.sets ?? 1
+        return currentSetNumber < totalSets
+    }
+    
     var currentPage: Int {
         return currentExerciseIndex + 1
     }
@@ -47,10 +60,15 @@ class StrengthSessionManager: ObservableObject {
     }
     
     func moveToNextExercise() {
-        if hasNextExercise {
-            currentExerciseIndex += 1
+        if hasMoreSets {
+            currentSetNumber += 1
         } else {
-            isWorkoutComplete = true
+            if hasNextExercise {
+                currentExerciseIndex += 1
+                currentSetNumber = 1
+            } else {
+                isWorkoutComplete = true
+            }
         }
     }
     
