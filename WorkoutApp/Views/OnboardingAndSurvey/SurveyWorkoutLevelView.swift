@@ -17,6 +17,7 @@ struct SurveyWorkoutLevelView: View {
     @State private var selectedDuration: [String] = []
     @State private var selectedIntensity: [String] = []
     @State private var selectedExperience: [String] = []
+    @State private var move = false
     
     // MARK: - Options
     let workoutFrequency = WorkoutTimesAWeek.allCases.map { $0.displayName }
@@ -45,7 +46,11 @@ struct SurveyWorkoutLevelView: View {
         !selectedFrequency.isEmpty &&
         !selectedDuration.isEmpty &&
         !selectedIntensity.isEmpty &&
-        !selectedExperience.isEmpty
+        !selectedExperience.isEmpty &&
+        selectedFrequency.first != "Not selected" &&
+        selectedDuration.first != "Not selected" &&
+        selectedIntensity.first != "Not selected" &&
+        selectedExperience.first != "Not selected"
     }
     
     // MARK: - Body
@@ -61,7 +66,7 @@ struct SurveyWorkoutLevelView: View {
 //                        .padding(.top, 20)
                     
                     // MARK: - Title & Character
-                    HStack(alignment: .top) {
+                    HStack(alignment: .bottom) {
                         VStack(alignment: .leading, spacing: 8) {
                             SurveyProgressText(currentPage: 3, totalPages: 5)
                             Text("Workout\nLevel")
@@ -73,9 +78,10 @@ struct SurveyWorkoutLevelView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 120)
+                            .offset(x: move ? 9 : -54)
                     }
                     .padding(.horizontal)
-                    .padding(.top, 10)
+//                    .padding(.top, 10)
                     
                     // MARK: - Question Sections
                     Group {
@@ -120,17 +126,33 @@ struct SurveyWorkoutLevelView: View {
             PrimaryGlassButton(title: "Next", action: saveAndNext)
                 .padding(.horizontal)
                 .padding(.vertical)
-                .disabled(!isAllAnswered)
+                .disabled(!isAllAnswered) // Disable jika belum semua section terisi
                 .opacity(isAllAnswered ? 1 : 0.5)
             
         }
         .background(Color.white.ignoresSafeArea())
         .onAppear {
-            // Initialize selections from surveyManager, converting to display-name arrays
-            selectedFrequency = [surveyManager.tempWorkoutTimesAWeek?.displayName ?? "Not selected"]
-            selectedDuration = [surveyManager.tempWorkoutDuration?.displayName ?? "Not selected"]
-            selectedIntensity = [surveyManager.tempWorkoutIntensity?.displayName ?? "Not selected"]
-            selectedExperience = [surveyManager.tempWorkoutExperience?.displayName ?? "Not selected"]
+            withAnimation(.easeInOut(duration: 3.5).repeatForever(autoreverses: true)) {
+                move = true
+            }
+        }
+        .onAppear {
+            // Initialize selections from surveyManager HANYA jika ada nilai valid
+            if let frequency = surveyManager.tempWorkoutTimesAWeek {
+                selectedFrequency = [frequency.displayName]
+            }
+            
+            if let duration = surveyManager.tempWorkoutDuration {
+                selectedDuration = [duration.displayName]
+            }
+            
+            if let intensity = surveyManager.tempWorkoutIntensity {
+                selectedIntensity = [intensity.displayName]
+            }
+            
+            if let experience = surveyManager.tempWorkoutExperience {
+                selectedExperience = [experience.displayName]
+            }
         }
     }
 }
