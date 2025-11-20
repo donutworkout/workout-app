@@ -140,9 +140,15 @@ extension iPhoneConnectivityManager {
                 self.sessionManager.resumeWorkout()
 
             case WorkoutCommand.stop.rawValue, "stop":
+                print("stop dari watch")
                 self.isWorkoutActive = false
                 self.isWorkoutPaused = false
                 self.sessionManager.stopWorkout()
+                
+            case "started":
+                print("📲 Workout confirmed started by watch")
+                self.isWorkoutActive = true
+                self.isWorkoutPaused = false
 
             case "updateMetrics":
                 self.heartRate    = message["heartRate"] as? Double ?? 0
@@ -177,12 +183,12 @@ extension iPhoneConnectivityManager {
             session.transferUserInfo(data)  // ✅ fallback
             return
         }
-
+        
         session.sendMessage(data, replyHandler: nil) { error in
             print("❌ Error sending message: \(error.localizedDescription)")
         }
     }
-
+    
     func sendSelectedWorkout(_ type: HKWorkoutActivityType) {
         guard session.activationState == .activated else {
             print("⚠️ WCSession not activated.")
@@ -192,7 +198,7 @@ extension iPhoneConnectivityManager {
             print("⚠️ Watch not reachable.")
             return
         }
-
+        
         let message: [String: Any] = ["selectedWorkout": type.rawValue]
         session.sendMessage(message, replyHandler: nil) { error in
             print(
@@ -201,7 +207,7 @@ extension iPhoneConnectivityManager {
         }
         print("📤 Sent selected workout: \(String(describing: type))")
     }
-
+    
     func startWorkoutFromPhone(type: HKWorkoutActivityType) {
         // If reachable -> watch owns session
         if session.isReachable {
@@ -211,7 +217,7 @@ extension iPhoneConnectivityManager {
             print("📱 Phone started workout locally (no watch reachable)")
         }
     }
-
+    
     func pauseWorkoutFromPhone() {
         isWorkoutPaused = true
         if session.isReachable {
@@ -220,7 +226,7 @@ extension iPhoneConnectivityManager {
             sessionManager.pauseWorkout()
         }
     }
-
+    
     func resumeWorkoutFromPhone() {
         isWorkoutPaused = false
         if session.isReachable {
@@ -229,15 +235,19 @@ extension iPhoneConnectivityManager {
             sessionManager.resumeWorkout()
         }
     }
-
+    
     func stopWorkoutFromPhone() {
+        print("📱 STOP requested from phone")
         if session.isReachable {
+            print("📱 → ⌚️ sending STOP to watch (watch will stop session)")
             sendMessage(["cmd": WorkoutCommand.stop.rawValue])
+            isWorkoutPaused = false
+        } else {
+            print("📱 Watch unreachable → stopping locally")
+            sessionManager.stopWorkout()
+            isWorkoutActive = false
+            isWorkoutPaused = false
         }
-        sessionManager.stopWorkout()
-        isWorkoutActive = false
-        isWorkoutPaused = false
-        print("📱 User ended workout → notifying watch")
     }
+    
 }
-

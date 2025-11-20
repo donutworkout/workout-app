@@ -128,7 +128,6 @@ struct StartCardioView: View {
             }
         }
         .onAppear {
-            //print("connectivity \(connectivity.isWorkoutActive)")
             startTimer()
         }
         .onDisappear { timer?.invalidate() }
@@ -179,75 +178,10 @@ struct StartCardioView: View {
             if !connectivity.isWorkoutPaused {
                 timeElapsed += 1    // ⬅️ TIMER LOKAL
             }
-
-            // metrics dari Watch tetap realtime
             calories = Int(connectivity.energyBurned)
             distance = connectivity.distance / 1000
             bpm = connectivity.heartRate > 0 ? Int(connectivity.heartRate) : 0
         }
-    }
-}
-// MARK: - Reusable Pause Popup
-struct WorkoutPausePopup: View {
-    let characterImage: String
-    var onResume: () -> Void
-    var onEndWorkout: () -> Void
-
-    @Environment(iPhoneConnectivityManager.self) private var connectivity
-    @EnvironmentObject var router: Router
-
-    var body: some View {
-        ZStack {
-            // Background gelap transparan
-            Color.black.opacity(0.4)
-                .ignoresSafeArea()
-                .onTapGesture { onResume() }
-
-            VStack(spacing: 0) {
-                ZStack(alignment: .top) {
-
-                    // MARK: - Kotak Putih
-                    VStack(spacing: 14) {
-                        Spacer().frame(height: 50)  // ruang untuk karakter di atas
-
-                        PrimaryGlassButton(title: "Resume") {
-                            onResume()
-                            connectivity.resumeWorkoutFromPhone()
-                        }
-
-                        NeutralGlassButton(title: "End Workout") {
-                            onEndWorkout()
-                            connectivity.stopWorkoutFromPhone()
-                            router.navigateTo(.finishWorkout)
-                        }
-                        Spacer().frame(height: 10)
-                    }
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 20)
-                    .background(
-                        RoundedRectangle(cornerRadius: 24)
-                            .fill(Color.white)
-                            .shadow(
-                                color: .black.opacity(0.15),
-                                radius: 15,
-                                x: 0,
-                                y: 8
-                            )
-
-                    )
-
-                    // MARK: - Karakter setengah badan di atas kotak
-                    Image(characterImage)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 130, height: 130)
-                        .offset(y: -65)  // setengah badannya nongol di atas kotak
-                }
-            }
-            .padding(.horizontal, 40)
-            .transition(.scale.combined(with: .opacity))
-        }
-        .transition(.scale.combined(with: .opacity))
     }
 }
 

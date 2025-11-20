@@ -10,7 +10,6 @@ import SwiftUI
 struct CountdownCardioView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var router: Router
-//    private let phoneConnectivity = iPhoneConnectivityManager.shared
     @Environment(iPhoneConnectivityManager.self) private var connectivity
     
     // MARK: - Props
@@ -168,8 +167,6 @@ struct CountdownCardioView: View {
             } else {
                 t.invalidate()
                 HapticManager.shared.trigger(.countdownEnd)
-                
-                // Start workout on countdown completion
                 if let type = router.selectedWorkoutType {
                     connectivity.startWorkoutFromPhone(type: type)
                 }

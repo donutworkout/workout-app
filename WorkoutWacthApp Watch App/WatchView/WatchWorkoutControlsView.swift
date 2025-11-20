@@ -107,7 +107,7 @@ struct WatchWorkoutControlsView: View {
        case .volleyball: return "figure.volleyball"
        case .soccer: return "figure.soccer"
        case .traditionalStrengthTraining: return "figure.strengthtraining.traditional"
-       case .functionalStrengthTraining: return "figure.functional.training"
+       case .functionalStrengthTraining: return "figure.strengthtraining.functional"
        default: return "figure.walk"
        }
    }

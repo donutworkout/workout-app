@@ -42,16 +42,6 @@ struct CountdownView: View {
             VStack(spacing: 0) {
                 // MARK: - Page Control + Title + Image
                 VStack(spacing: 16) {
-                    // MARK: Page Control (bulatan)
-                    //                    HStack(spacing: 6) {
-                    //                        ForEach(1...totalPages, id: \.self) { index in
-                    //                            Circle()
-                    //                                .fill(index == 1 ? Color("pinkTextPrimary") : Color.gray.opacity(0.3))
-                    //                                .frame(width: 8, height: 8)
-                    //                        }
-                    //                    }
-                    //                    .padding(.top, 24)
-                    
                     // MARK: Workout Title
                     Text(firstExercise?.name ?? "Get Ready!")
                         .font(.system(size: 28, weight: .semibold))
@@ -160,7 +150,6 @@ struct CountdownView: View {
             }
         }
         .onAppear {
-            sessionManager.startWorkout(with: sessionManager.exercises)
             startCountdown()
         }
         //.onDisappear { timer?.invalidate() }
@@ -189,23 +178,21 @@ struct CountdownView: View {
                 // Still counting
                 HapticManager.shared.trigger(.countdownTick)
             } else {
-                // ✅ countdown = 0 → STOP IMMEDIATELY
                 t.invalidate()
                 HapticManager.shared.trigger(.countdownEnd)
                 
-                // Start workout on countdown completion
                 if let type = router.selectedWorkoutType {
                     iPhoneConnectivityManager.shared.startWorkoutFromPhone(type: type)
                 }
+                
+                StrengthSessionManager.shared.beginWorkout()
                 
                 withAnimation(.easeOut(duration: 0.3)) {
                     showCountdown = false
                 }
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {  // ✅ Match animation duration
-                    // Navigate to StartStrengthView
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { 
                     print("🚀 Navigating to StartStrengthView")
-                    sessionManager.startWorkout(with: exercises)
                     router.navigateTo(.startStrength)
                 }
             }
@@ -219,7 +206,7 @@ struct CountdownView: View {
                 if timeRemaining > 0 {
                     timeRemaining -= 1
                     // calories = Int((duration - timeRemaining) / 6)
-                    bpm = 90 + Int.random(in: -4...6)
+                    bpm = 90 + Int(timeRemaining.truncatingRemainder(dividingBy: 30))
                 } else {
                     t.invalidate()
                     handleTimerComplete()

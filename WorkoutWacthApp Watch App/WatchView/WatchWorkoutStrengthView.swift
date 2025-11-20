@@ -14,6 +14,8 @@ struct WatchWorkoutStrengthView: View {
     
     @State private var currentTime: String = Self.formatCurrentTime()
     private let clockTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    
+    @State private var clockActive = true
 
     var body: some View {
         ZStack {
@@ -34,11 +36,6 @@ struct WatchWorkoutStrengthView: View {
                     }
                     
                     Spacer()
-                    
-//                    Text(currentTime)
-//                        .font(.system(size: 16, weight: .semibold))
-//                        .foregroundColor(.white)
-//                        .onReceive(clockTimer) { _ in updateTime() }
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 20)
@@ -61,7 +58,8 @@ struct WatchWorkoutStrengthView: View {
                         .padding(.bottom, 4)
 
                     StatRow(icon: "flame.fill", text: String(format: "%.0f kcal", sessionManager.activeEnergy))
-                    StatRow(icon: "heart.fill", text: String(format: "%.0f bpm", sessionManager.heartRate))
+                    StatRow(icon: "heart.fill", text: sessionManager.heartRate > 0
+                            ? String(format: "%.0f bpm", sessionManager.heartRate): "-- bpm")
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, 16)
@@ -71,13 +69,30 @@ struct WatchWorkoutStrengthView: View {
                     .padding(.bottom, 20)
             }
         }
+        .onReceive(clockTimer) { _ in
+            guard clockActive else { return }
+            updateTime()
+        }
+        .onChange(of: sessionManager.isPaused) { _, paused in
+            clockActive = !paused
+        }
         .onAppear {
-            // Start workout session for strength if not running
             if !sessionManager.isRunning {
-                sessionManager.startWorkout(of: connectivity.selectedWorkoutType ?? .traditionalStrengthTraining)
+                if let type = connectivity.selectedWorkoutType {
+                    sessionManager.startWorkout(of: type)
+                } else {
+                    sessionManager.startWorkout(of: .functionalStrengthTraining)
+                }
             }
         }
-        .onReceive(clockTimer) { _ in updateTime() }
+        .onChange(of: sessionManager.isRunning) { _, running in
+            if !running {
+                print("⌚️ WATCH Strength STOP → sending to phone")
+                connectivity.sendMessage([
+                    "cmd": WorkoutCommand.stop.rawValue
+                ])
+            }
+        }
     }
 
     // MARK: - Helpers
@@ -103,7 +118,7 @@ struct WatchWorkoutStrengthView: View {
     private func getWorkoutIcon(for type: HKWorkoutActivityType) -> String {
         switch type {
         case .traditionalStrengthTraining: return "figure.strengthtraining.traditional"
-        case .functionalStrengthTraining: return "figure.functional.training"
+        case .functionalStrengthTraining: return "figure.strengthtraining.functional"
         default: return "figure.strengthtraining.traditional"
         }
     }
