@@ -9,14 +9,14 @@ import SwiftUI
 
 struct WorkoutItemCard: View {
     let workout: Exercise
-    @State private var sets: Int
-    let reps: Int
+    let sets: Int
+    @State private var reps: Int
     @State private var time: Int
     
     init(workout: Exercise) {
         self.workout = workout
-        _sets = State(initialValue: workout.sets ?? 1)
-        self.reps = workout.reps ?? 0
+        self.sets = workout.sets ?? 0
+        _reps = State(initialValue: workout.reps ?? 1)
         _time = State(initialValue: workout.time ?? 0)
     }
     
@@ -51,7 +51,7 @@ struct WorkoutItemCard: View {
             
             // MARK: - Plus & Minus
             HStack(spacing: 12) {
-                if sets <= workout.sets ?? 0 {
+                if reps <= 8 {
                     Image(systemName: "minus")
                         .font(.system(size: 14, weight: .semibold))
                         .frame(width: 28, height: 28)
@@ -60,7 +60,7 @@ struct WorkoutItemCard: View {
                         .foregroundColor(.gray)
                 } else {
                     Button(action: {
-                        sets -= 1
+                        reps -= 1
                         HapticManager.shared.trigger(.adjustReps)
                     }) {
                         Image(systemName: "minus")
@@ -80,7 +80,7 @@ struct WorkoutItemCard: View {
 //                        sets += 1
 //                        HapticManager.shared.trigger(.adjustReps)
 //                    }
-                    sets += 1
+                    reps += 1
                     HapticManager.shared.trigger(.adjustReps)
                 }) {
                     Image(systemName: "plus")
