@@ -27,6 +27,9 @@ struct CountdownCardioView: View {
     @State private var showPausePopup: Bool = false
     @State private var showExitAlert: Bool = false
     @State private var timer: Timer? = nil
+    @State private var scale: CGFloat = 0.5
+    @State private var opacity: Double = 0
+
     
     init(activityName: String = "Indoor Walk",
          imageName: String = "indoorWalk",
@@ -111,14 +114,59 @@ struct CountdownCardioView: View {
                     Color.black.opacity(0.4)
                         .ignoresSafeArea()
                     
-                    // Countdown number
-                    Text("\(countdown)")
-                        .font(.system(size: 120, weight: .bold))
-                        .foregroundColor(.white)
-                        .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
+                    VStack(spacing: 0) {
+//                        // Teks "Get Ready!"
+//                        Text("Get Ready!")
+//                            .font(.system(size: 22, weight: .semibold, design: .rounded))
+//                            .foregroundColor(.white.opacity(0.9))
+//                            .textCase(.uppercase)
+//                            .tracking(1)
+//                            .padding(.bottom, 20)
+                        
+                        // Countdown number + circle
+                        ZStack {
+                            Circle()
+                                .stroke(Color("pinkTextPrimary").opacity(0.3), lineWidth: 4)
+                                .frame(width: 150, height: 150)
+                            Circle()
+                                .fill(Color("pinkTextPrimary").opacity(0.13))
+                                .frame(width: 122, height: 122)
+                            Text("\(countdown)")
+                                .font(.system(size: 72, weight: .bold, design: .rounded))
+                                .foregroundColor(Color("pinkTextPrimary"))
+                                .monospacedDigit()
+                        }
+                        .scaleEffect(scale)
+                        .opacity(opacity)
+                        
+//                        Spacer()
+                        
+//                        // Hint bawah
+//                        Text("Starting workout...")
+//                            .font(.system(size: 14, weight: .medium))
+//                            .foregroundColor(.white.opacity(0.7))
+//                            .padding(.top, 24)
+                    }
+                    .padding(.bottom, 60)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
                 .transition(.opacity)
+                .onAppear {
+                    withAnimation(.spring(response: 0.42, dampingFraction: 0.62)) {
+                        scale = 1.0
+                        opacity = 1.0
+                    }
+                }
+                .onChange(of: countdown) { _, _ in
+                    scale = 0.78
+                    opacity = 0.5
+                    withAnimation(.spring(response: 0.31, dampingFraction: 0.7)) {
+                        scale = 1.0
+                        opacity = 1.0
+                    }
+                }
             }
+
         }
         .navigationTitle(activityName)
         .navigationBarTitleDisplayMode(.inline)
