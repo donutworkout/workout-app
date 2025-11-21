@@ -573,40 +573,87 @@ struct PhaseCardView: View {
 
 // MARK: - Streak Card
 struct StreakCardView: View {
-    @State private var fireAnim = false
+    @State private var progressAnim: CGFloat = 0
+    let currentStreak: Int = 7
+    let targetStreak: Int = 20
+    
+    var progress: CGFloat {
+        return CGFloat(currentStreak) / CGFloat(targetStreak)
+    }
     
     var body: some View {
         HStack(spacing: 16) {
-            Text("🔥")
-                .font(.system(size: 48))
-                .scaleEffect(fireAnim ? 1.15 : 0.9)
-                .animation(
-                    .easeInOut(duration: 1.6).repeatForever(autoreverses: true),
-                    value: fireAnim
-                )
-                .onAppear {
-                    fireAnim = true
-                }
+            // Character on the Left
+            Image("charStreak")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 100, height: 100)
             
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Streak")
-                    .font(.system(size: 16, weight: .semibold))
+            // Card on the Right
+            VStack(spacing: 8) {
+                // Streak Counter
+                HStack(spacing: 4) {
+                    Text("\(currentStreak) / \(targetStreak)")
+                        .font(.system(size: 32, weight: .bold))
+                        .foregroundColor(Color("pinkTextPrimary"))
+                    
+                    Spacer()
+                }
+                
+                Text("Day Streak")
+                    .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(.black)
-                Text("You go girl!")
-                    .font(.system(size: 14))
-                    .fontWeight(.semibold)
-                    .foregroundColor(.black)
-                    .lineSpacing(3)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                // Progress Bar
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        // Background
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.gray.opacity(0.15))
+                            .frame(width: geometry.size.width, height: 20)
+                        
+                        // Progress Fill with Fire Icon
+                        ZStack(alignment: .trailing) {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color("pinkTextPrimary"), Color("pinkTextPrimary").opacity(0.85)],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .frame(width: max(20, progressAnim * geometry.size.width), height: 20)
+                            
+                            // Fire Icon at the end
+                            if progressAnim > 0 {
+                                Image("fireStreakRed")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 26, height: 26)
+                                    .offset(x: 8)
+                            }
+                        }
+                        .frame(width: max(20, progressAnim * geometry.size.width), height: 20, alignment: .leading)
+                    }
+                }
+                .frame(height: 20)
             }
-            Spacer()
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color.white)
+                    .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 3)
+            )
         }
-        .padding(20)
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color.white)
-                .shadow(color: .black.opacity(0.06), radius: 10, x: 0, y: 4)
-        )
         .padding(.horizontal, 20)
+        .onAppear {
+            // Animate progress bar with smooth easing
+            withAnimation(.easeOut(duration: 1.2)) {
+                progressAnim = progress
+            }
+        }
     }
 }
 

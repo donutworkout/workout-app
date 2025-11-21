@@ -11,9 +11,12 @@ struct FinishWorkoutView: View {
     @EnvironmentObject var router: Router
     @Environment(iPhoneConnectivityManager.self) private var connectivity
 
-    
     var characterImage: String = "charCongrats"
-    
+
+    // State for animation
+    @State private var characterScale: CGFloat = 0.7
+    @State private var characterOpacity: Double = 0
+
     func formatTime(_ seconds: Double) -> String {
         let s = Int(seconds)
         let h = s / 3600
@@ -21,23 +24,26 @@ struct FinishWorkoutView: View {
         let sec = s % 60
         return String(format: "%02d:%02d:%02d", h, m, sec)
     }
-    
+
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
             
-            // MARK: - Character
+            // MARK: - Character with animation
             Image(characterImage)
                 .resizable()
                 .scaledToFit()
                 .frame(width: 300, height: 300)
-            
+                .scaleEffect(characterScale)
+                .opacity(characterOpacity)
+                .animation(.spring(response: 0.6, dampingFraction: 0.66, blendDuration: 0.2), value: characterScale)
+                .animation(.easeOut(duration: 0.6), value: characterOpacity)
+
             // MARK: - Title
             VStack(spacing: 6) {
                 Text("Congratulations!")
                     .font(.system(size: 34, weight: .bold))
                     .foregroundColor(Color("pinkTextPrimary"))
-                
             }
             .multilineTextAlignment(.center)
             .padding(.horizontal)
@@ -83,9 +89,18 @@ struct FinishWorkoutView: View {
         .navigationBarBackButtonHidden(true)
         .onAppear {
             HapticManager.shared.trigger(.workoutCompleted)
+            // Trigger character animation
+            characterScale = 1.15
+            characterOpacity = 1
+            // Bounce back
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
+                    characterScale = 1.0
                 }
+            }
+        }
     }
-    
+
     // MARK: - Reusable Summary Item
     @ViewBuilder
     func summaryItem(title: String, value: String) -> some View {

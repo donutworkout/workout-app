@@ -5,8 +5,6 @@
 //  Created by Jennifer Evelyn on 04/11/25.
 //
 
-// page 1 yang start stop, page 2 nya di WatchWorkoutStatsView
-
 import SwiftUI
 import HealthKit
 
@@ -14,108 +12,82 @@ struct WatchWorkoutControlsView: View {
     @Environment(WorkoutSessionManager.self) private var sessionManager
     @Environment(WatchConnectivityManager.self) private var connectivity
 
-    @State private var currentTime: String = ""
     @State private var isPaused: Bool = false
-    private let clockTimer = Timer.publish(every: 1, on: .main, in: .common)
-        .autoconnect()
 
     var body: some View {
+        VStack {
+            // MARK: - Top Bar
+            HStack {
+                ZStack {
+                    Circle()
+                        .fill(Color.white.opacity(0.15))
+                        .frame(width: 32, height: 32)
 
-            // MARK: - Page 1: Controls
-            VStack(spacing: 0) {
-                // MARK: - Top Bar
-                HStack {
-                    ZStack {
-                        Circle()
-                            .fill(Color.white.opacity(0.15))
-                            .frame(width: 36, height: 36)
-
-                        //                        Image(systemName: getWorkoutIcon(for: connectivity.selectedWorkoutType ?? .walking))
-                        Image(systemName: "figure.run")
-                            .font(.system(size: 18))
-                            .foregroundColor(Color("pinkTextPrimary"))
-                    }
-
-                    Spacer()
+                    Image(systemName: getWorkoutIcon(for: connectivity.selectedWorkoutType ?? .walking))
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(Color("pinkTextPrimary"))
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 20)
-
-                Spacer()
-
-                // MARK: - Control Buttons
-                VStack(spacing: 12) {
-                    PrimaryGlassButton(
-                        title: isPaused ? "RESUME" : "PAUSE",
-                        icon: isPaused ? "play.fill" : "pause.fill"
-                    ) {
-                        if isPaused {
-                            isPaused = false
-                            sessionManager.resumeWorkout()
-                            connectivity.sendMessage(["cmd": "resume"])
-                           } else {
-                               isPaused = true
-                               sessionManager.pauseWorkout()
-                               connectivity.sendMessage(["cmd": "pause"])
-                           }
-                    }
-                    .frame(height: 50)
-
-                    NeutralGlassButton(title: "STOP", icon: "stop.fill") {
-                        sessionManager.stopWorkout()
-                        connectivity.sendMessage([
-                            "cmd": WorkoutCommand.stop.rawValue
-                        ])
-                        connectivity.shouldStartWorkout = false
-                        WKInterfaceDevice.current().play(.stop)
-                        print("🛑 Workout stopped from watch controls")
-                    }
-                    .frame(height: 50)
-                }
-                .padding(.horizontal, 16)
-
+                
                 Spacer()
             }
-            .padding(.bottom, 20)
-            .background(Color("grayBackground"))
-            .ignoresSafeArea()
-            .onChange(of: sessionManager.isPaused) { _, paused in
-                isPaused = paused
+            .padding(.horizontal, 12)
+            .padding(.top, 0)
 
+            Spacer()   // Mengisi ruang atas–tengah
+            Spacer()
+
+            // MARK: - Buttons (Center block)
+            VStack(spacing: 12) {
+                PrimaryGlassButton(
+                    title: isPaused ? "RESUME" : "PAUSE",
+                    icon: isPaused ? "play.fill" : "pause.fill"
+                ) {
+                    if isPaused {
+                        isPaused = false
+                        sessionManager.resumeWorkout()
+                        connectivity.sendMessage(["cmd": "resume"])
+                    } else {
+                        isPaused = true
+                        sessionManager.pauseWorkout()
+                        connectivity.sendMessage(["cmd": "pause"])
+                    }
+                }
+                .frame(maxWidth: .infinity, minHeight: 40)
+
+                NeutralGlassButton(title: "STOP", icon: "stop.fill") {
+                    sessionManager.stopWorkout()
+                    connectivity.sendMessage([
+                        "cmd": WorkoutCommand.stop.rawValue
+                    ])
+                    connectivity.shouldStartWorkout = false
+                    WKInterfaceDevice.current().play(.stop)
+                    print("🛑 Workout stopped from watch controls")
+                }
+                .frame(maxWidth: .infinity, minHeight: 40)
             }
+            .padding(.horizontal, 12)
 
+            Spacer()   // Tombol tetap proporsional ke bawah
+        }
+        .onChange(of: sessionManager.isPaused) { _, paused in
+            isPaused = paused
+        }
     }
-
-    // MARK: - Update Time
-    private func updateTime() {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        currentTime = formatter.string(from: Date())
+    
+    private func getWorkoutIcon(for type: HKWorkoutActivityType) -> String {
+        switch type {
+        case .running: return "figure.run"
+        case .cycling: return "figure.outdoor.cycle"
+        case .walking: return "figure.walk"
+        case .swimming: return "figure.pool.swim"
+        case .basketball: return "figure.basketball"
+        case .tennis: return "figure.tennis"
+        case .badminton: return "figure.badminton"
+        case .volleyball: return "figure.volleyball"
+        case .soccer: return "figure.soccer"
+        case .traditionalStrengthTraining: return "figure.strengthtraining.traditional"
+        case .functionalStrengthTraining: return "figure.strengthtraining.functional"
+        default: return "figure.walk"
+        }
     }
 }
-
-// MARK: - Workout Icon
-   private func getWorkoutIcon(for type: HKWorkoutActivityType) -> String {
-       switch type {
-       case .running: return "figure.run"
-       case .cycling: return "figure.outdoor.cycle"
-       case .walking: return "figure.walk"
-       case .swimming: return "figure.pool.swim"
-       case .basketball: return "figure.basketball"
-       case .tennis: return "figure.tennis"
-       case .badminton: return "figure.badminton"
-       case .volleyball: return "figure.volleyball"
-       case .soccer: return "figure.soccer"
-       case .traditionalStrengthTraining: return "figure.strengthtraining.traditional"
-       case .functionalStrengthTraining: return "figure.strengthtraining.functional"
-       default: return "figure.walk"
-       }
-   }
-
-
-#Preview {
-    WatchWorkoutControlsView()
-        .environment(WorkoutSessionManager())
-        .environment(WatchConnectivityManager())
-}
-
