@@ -12,6 +12,11 @@ struct SummaryView: View {
     let weekDays = ["M", "T", "W", "T", "F", "S", "S"]
     let progress: [Double] = [1.0, 0.9, 0.3, 0.6, 0.2, 0.4, 0.7]
     
+    // Animation states
+    @State private var showContent: Bool = false
+    @State private var characterScale: CGFloat = 0.5
+    @State private var characterOpacity: Double = 0
+    
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 24) {
@@ -22,20 +27,26 @@ struct SummaryView: View {
                     .foregroundColor(.black)
                     .padding(.top, 32)
                     .padding(.horizontal, 20)
+                    .opacity(showContent ? 1 : 0)
+                    .offset(y: showContent ? 0 : -20)
                 
                 // MARK: - Day Selector with Progress
                 DaySelectorSummaryView(selectedDay: $selectedDay, weekDays: weekDays, progress: progress)
                     .padding(.horizontal, 20)
+                    .opacity(showContent ? 1 : 0)
+                    .offset(y: showContent ? 0 : -20)
                 
-                // MARK: - Character (Static)
-                VStack {
-                    Image("charLogin")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 300, height: 300)
-                        .padding(.vertical, 8)
-                }
-                .frame(maxWidth: .infinity)
+                // MARK: - Character with Progress Fill
+                ProgressCharacterView(progress: progress[selectedDay])
+                    .frame(width: 300, height: 300)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                    .scaleEffect(characterScale)
+                    .opacity(characterOpacity)
+                    .rotation3DEffect(
+                        .degrees(showContent ? 0 : 15),
+                        axis: (x: 0, y: 1, z: 0)
+                    )
 
                 // MARK: - Stats Card
                 VStack(spacing: 12) {
@@ -58,12 +69,31 @@ struct SummaryView: View {
                         .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
                 )
                 .padding(.horizontal, 20)
+                .opacity(showContent ? 1 : 0)
+                .offset(y: showContent ? 0 : 20)
                 
                 Spacer()
             }
             .padding(.bottom, 40)
         }
         .background(Color.white.ignoresSafeArea())
+        .onAppear {
+            startEntranceAnimation()
+        }
+    }
+    
+    // MARK: - Entrance Animation Sequence
+    private func startEntranceAnimation() {
+        // Step 1: Show title and day selector (0.3s delay)
+        withAnimation(.easeOut(duration: 0.5).delay(0.3)) {
+            showContent = true
+        }
+        
+        // Step 2: Character pop in with bounce (0.5s delay)
+        withAnimation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.5)) {
+            characterScale = 1.0
+            characterOpacity = 1.0
+        }
     }
     
     // MARK: - Reusable Summary Item
@@ -79,6 +109,46 @@ struct SummaryView: View {
                 .fontWeight(.semibold)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+// MARK: - Progress Character View Component with Fill Animation
+struct ProgressCharacterView: View {
+    let progress: Double
+    @State private var animatedProgress: Double = 0
+    
+    var body: some View {
+        ZStack {
+            // Base layer: Black & White character (always visible)
+            Image("charCongratsBnw")
+                .resizable()
+                .scaledToFit()
+            
+            // Top layer: Colored character with animated mask (fills from bottom)
+            Image("charCongrats")
+                .resizable()
+                .scaledToFit()
+                .mask(
+                    GeometryReader { geometry in
+                        Rectangle()
+                            .fill(Color.black)
+                            .frame(height: geometry.size.height * animatedProgress)
+                            .offset(y: geometry.size.height * (1 - animatedProgress))
+                    }
+                )
+        }
+        .onAppear {
+            // Fill animation when character first appears
+            withAnimation(.easeInOut(duration: 1.2).delay(0.8)) {
+                animatedProgress = progress
+            }
+        }
+        .onChange(of: progress) { _, newValue in
+            // Smooth fill when switching days
+            withAnimation(.easeInOut(duration: 0.6)) {
+                animatedProgress = newValue
+            }
+        }
     }
 }
 

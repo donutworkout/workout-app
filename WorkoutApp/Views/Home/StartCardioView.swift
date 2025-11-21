@@ -32,6 +32,31 @@ struct StartCardioView: View {
         userProfiles.first
     }
     
+    // MARK: - Check if activity should show distance
+    private var shouldShowDistance: Bool {
+        let distanceActivities = ["Outdoor Run", "Indoor Run", "Outdoor Walk", "Indoor Walk",
+                                  "Cycling", "Swimming"]
+        return distanceActivities.contains(activityName)
+    }
+
+    private var isSwimming: Bool {
+        return activityName == "Swimming"
+    }
+
+    private var distanceValue: String {
+        if isSwimming {
+            // Swimming: show in meters
+            return String(format: "%.0f", distance * 1000)
+        } else {
+            // Other activities: show in kilometers
+            return String(format: "%.2f", distance)
+        }
+    }
+
+    private var distanceLabel: String {
+        return isSwimming ? "METERS" : "KILOMETERS"
+    }
+    
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
@@ -64,18 +89,23 @@ struct StartCardioView: View {
                 }
                 .padding(.bottom, 32)
                 
-                // MARK: - Stats
+                // MARK: - Stats (Conditional Layout)
                 HStack(spacing: 12) {
                     StatCardItem(
                         icon: "flame.fill",
                         value: "\(calories)",
                         label: "KCAL"
                     )
-                    StatCardItem(
-                        icon: "figure.walk",
-                        value: String(format: "%.2f", distance),
-                        label: "KILOMETERS"
-                    )
+                    
+                    // Only show distance for specific activities
+                    if shouldShowDistance {
+                        StatCardItem(
+                            icon: isSwimming ? "figure.pool.swim" : "figure.walk",
+                            value: distanceValue,
+                            label: distanceLabel
+                        )
+                    }
+                    
                     StatCardItem(
                         icon: "heart.fill",
                         value: connectivity.heartRate > 0 ? "\(bpm)" : "--",
@@ -84,7 +114,7 @@ struct StartCardioView: View {
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 32)
-                
+
                 Spacer()
                 
                 // MARK: - Button
