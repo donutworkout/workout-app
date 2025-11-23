@@ -64,11 +64,6 @@ struct SummaryView: View {
             summaryManager.weeklySummaries[selectedDay] ?? DaySummary()
         }
     
-    // Animation states
-    @State private var showContent: Bool = false
-    @State private var characterScale: CGFloat = 0.5
-    @State private var characterOpacity: Double = 0
-    
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 24) {
@@ -201,12 +196,10 @@ struct ProgressCharacterView: View {
     
     var body: some View {
         ZStack {
-            // Base layer: Black & White character (always visible)
             Image("charCongratsBnw")
                 .resizable()
                 .scaledToFit()
             
-            // Top layer: Colored character with animated mask (fills from bottom)
             Image("charCongrats")
                 .resizable()
                 .scaledToFit()
@@ -300,42 +293,6 @@ struct DaySelectorSummaryView: View {
     func formattedDate(_ date: Date) -> String {
         let day = Calendar.current.component(.day, from: date)
         return "\(day)"
-    }
-}
-
-// MARK: - Progress Character View Component with Fill Animation
-struct ProgressCharacterView: View {
-    let progress: Double
-    @State private var animatedProgress: Double = 0
-    
-    var body: some View {
-        ZStack {
-            Image("charCongratsBnw")
-                .resizable()
-                .scaledToFit()
-            
-            Image("charCongrats")
-                .resizable()
-                .scaledToFit()
-                .mask(
-                    GeometryReader { geometry in
-                        Rectangle()
-                            .fill(Color.black)
-                            .frame(height: geometry.size.height * animatedProgress)
-                            .offset(y: geometry.size.height * (1 - animatedProgress))
-                    }
-                )
-        }
-        .onAppear {
-            withAnimation(.easeInOut(duration: 1.2).delay(0.8)) {
-                animatedProgress = progress
-            }
-        }
-        .onChange(of: progress) { _, newValue in
-            withAnimation(.easeInOut(duration: 0.6)) {
-                animatedProgress = newValue
-            }
-        }
     }
 }
 
