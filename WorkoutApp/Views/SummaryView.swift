@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct SummaryView: View {
+    @EnvironmentObject var router: Router
     @State private var selectedDay: Int = Calendar.current.component(.weekday, from: Date()) - 1
     let weekDays = ["M", "T", "W", "T", "F", "S", "S"]
     let progress: [Double] = [1.0, 0.9, 0.3, 0.6, 0.2, 0.4, 0.7]
@@ -80,6 +81,20 @@ struct SummaryView: View {
         .onAppear {
             startEntranceAnimation()
         }
+        .onChange(of: router.selectedTab) { oldValue, newValue in
+            if newValue == 1 {
+                showContent = false
+                characterScale = 0.5
+                characterOpacity = 0
+                
+                withAnimation(.easeOut(duration: 0.4).delay(0.1)) {
+                    showContent = true
+                    characterScale = 1.0
+                    characterOpacity = 1.0
+                }
+            }
+        }
+
     }
     
     // MARK: - Entrance Animation Sequence
