@@ -215,8 +215,13 @@ struct CountdownCardioView: View {
             } else {
                 t.invalidate()
                 HapticManager.shared.trigger(.countdownEnd)
-                if let type = router.selectedWorkoutType {
-                    connectivity.startWorkoutFromPhone(type: type)
+                if var type = router.selectedWorkoutType {
+                    let mapping = mapActivityToHKType(activityName)
+                    
+                    connectivity.startWorkoutFromPhone(
+                        type: type,
+                        isIndoor: mapping.isIndoor
+                    )
                 }
                 
                 withAnimation(.easeOut(duration: 0.3)) {

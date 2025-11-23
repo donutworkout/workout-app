@@ -62,14 +62,15 @@ struct AdjustMenuStrengthView: View {
                 .padding(.horizontal)
                 .padding(.top, 8)
                 .onChange(of: selectedMenu) { _, newValue in
-                    switch newValue {
-                    case .bodyweight:
-                        self.workoutType = .functionalStrengthTraining
-                    case .gym:
-                        self.workoutType = .traditionalStrengthTraining
-                    }
+                    let name = newValue.rawValue.lowercased()
+                    let mapping = mapActivityToHKType(name)
+
+                    self.workoutType = mapping.type
+
                     iPhoneConnectivityManager.shared.sendSelectedWorkout(
-                        workoutType
+                        mapping.type,
+                        activityName: newValue.rawValue,   // "Bodyweight" / "Gym"
+                        isIndoor: mapping.isIndoor
                     )
                 }
 
@@ -102,13 +103,23 @@ struct AdjustMenuStrengthView: View {
                         sessionManager.prepareWorkout(with: [])
                         router.workoutExercises = []
                     }
-                    router.selectedWorkoutType = workoutType
+
+                    let name = selectedMenu.rawValue.lowercased()
+                    let mapping = mapActivityToHKType(name)
+
+                    router.selectedWorkoutType = mapping.type
+
                     iPhoneConnectivityManager.shared.sendSelectedWorkout(
-                        workoutType
+                        mapping.type,
+                        activityName: selectedMenu.rawValue,
+                        isIndoor: mapping.isIndoor
                     )
+
                     iPhoneConnectivityManager.shared.startWorkoutFromPhone(
-                        type: workoutType
+                        type: mapping.type,
+                        isIndoor: mapping.isIndoor
                     )
+
                     router.lastWorkoutSource = .adjustMenuStrength
                     router.navigateTo(.countdownView)
                 }
@@ -134,8 +145,12 @@ struct AdjustMenuStrengthView: View {
         }
         .onAppear {
             workoutType = .functionalStrengthTraining
-            connectivity.sendSelectedWorkout(workoutType)
-
+            let mapping = mapActivityToHKType("bodyweight")
+            connectivity.sendSelectedWorkout(
+                mapping.type,
+                activityName: "Bodyweight",
+                isIndoor: mapping.isIndoor
+            )
             DummyExerciseProvider.shared.insertDummyData(into: modelContext)
 
             loadBodyWeightExercises()

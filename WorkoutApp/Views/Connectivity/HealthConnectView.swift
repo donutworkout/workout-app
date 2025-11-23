@@ -54,7 +54,13 @@ struct HealthConnectView: View {
                 
                 // MARK: - Allow Button
                 PrimaryGlassButton(title: "Allow") {
-                    HealthKitManager.shared.requestAuthorization()
+                    iPhoneHealthKitManager.shared.requestAuthorization { success, error in
+                        if success {
+                            print("authorization success")
+                        } else {
+                            print("failed:", error?.localizedDescription ?? "")
+                        }
+                    }
                     onAllow()
                 }
                 .padding(.horizontal)

@@ -18,23 +18,25 @@ struct StartView: View {
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
     private var workoutInfo: (name: String, icon: String) {
-        switch workoutType {
-        case .running: return ("Running", "figure.run")
+        let indoor = connectivity.selectedIsIndoor
+            switch workoutType {
+            case .running: return (
+                    indoor ? "Indoor Run" : "Outdoor Run",
+                    indoor ? "figure.run.treadmill" : "figure.run")
         case .cycling: return ("Cycling", "figure.outdoor.cycle")
-        case .walking: return ("Walking", "figure.walk")
+        case .walking: return (
+                       indoor ? "Indoor Walk" : "Outdoor Walk",
+                       indoor ? "figure.walk.treadmill" : "figure.walk")
         case .swimming: return ("Swimming", "figure.pool.swim")
         case .badminton: return ("Badminton", "figure.badminton")
         case .basketball: return ("Basketball", "figure.basketball")
         case .tennis: return ("Tennis", "figure.tennis")
         case .volleyball: return ("Volleyball", "figure.volleyball")
         case .soccer: return ("Soccer", "figure.soccer")
-        case .pilates: return ("Pilates", "figure.pilates")
-        case .yoga: return ("Yoga", "figure.yoga")
         case .coreTraining: return ("Core Training", "figure.core.training")
         case .highIntensityIntervalTraining: return ("HIIT", "figure.highintensity.intervaltraining")
         case .traditionalStrengthTraining: return ("Strength", "figure.strengthtraining.traditional")
         case .functionalStrengthTraining: return ("Functional", "figure.strengthtraining.functional")
-        case .martialArts: return ("Martial Arts", "figure.martial.arts")
         default: return ("Workout", "figure.mixed.cardio")
         }
     }
@@ -101,7 +103,8 @@ struct StartView: View {
             PrimaryGlassButton(title: "START", icon: "play.fill") {
                 connectivity.sendMessage([
                     "cmd": WorkoutCommand.start.rawValue,
-                    "workoutType": workoutType.rawValue
+                    "workoutType": workoutType.rawValue,
+                    "isIndoor": connectivity.selectedIsIndoor
                 ])
                 WKInterfaceDevice.current().play(.start)
                 print("Starting \(workoutInfo.name) workout")

@@ -113,8 +113,8 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Music/countdownMusic.mp3,
-				Services/HealthKitManager.swift,
 				Services/WatchConnectivityManager.swift,
+				Services/WatchHealthKitManager.swift,
 				Services/WorkoutMapping.swift,
 				Services/WorkoutSessionManager.swift,
 			);
