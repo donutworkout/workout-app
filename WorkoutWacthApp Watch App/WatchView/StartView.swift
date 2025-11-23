@@ -62,55 +62,56 @@ struct StartView: View {
             
             // MARK: - Category
             Text(categoryName)
-                .font(.system(size: 18, weight: .regular, design: .rounded))
-                .foregroundColor(.black.opacity(0.9))
-                .padding(.top, -10)
-            
-            Spacer(minLength: 8)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.white.opacity(0.9))
+                .textCase(.uppercase)
+                .tracking(0.5)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(
+                    Capsule()
+                        .fill(Color.white.opacity(0.15))
+                )
+                .padding(.bottom, 16)
             
             // MARK: - Icon + Name
-            VStack(spacing: 6) {
-                Image(systemName: workoutInfo.icon)
-                    .font(.system(size: 40))
-                    .foregroundColor(Color("pinkTextPrimary"))
+            VStack(spacing: 10) {
+                ZStack {
+                    Circle()
+                        .fill(Color.white.opacity(0.1))
+                        .frame(width: 80, height: 80)
+                    
+                    Image(systemName: workoutInfo.icon)
+                        .font(.system(size: 38, weight: .semibold))
+                        .foregroundColor(Color("pinkTextPrimary"))
+                }
                 
                 Text(workoutInfo.name)
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundColor(Color("pinkTextPrimary"))
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
+                    .padding(.horizontal, 8)
             }
             
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.black)
-        .edgesIgnoringSafeArea(.all)
         
-        // MARK: - Always-Anchored Bottom Button
+        // MARK: - Anchored Bottom Button with PrimaryGlassButton
         .safeAreaInset(edge: .bottom) {
-            Button(action: {
+            PrimaryGlassButton(title: "START", icon: "play.fill") {
                 connectivity.sendMessage([
                     "cmd": WorkoutCommand.start.rawValue,
                     "workoutType": workoutType.rawValue,
                     "isIndoor": connectivity.selectedIsIndoor
                 ])
+                WKInterfaceDevice.current().play(.start)
                 print("Starting \(workoutInfo.name) workout")
-            }) {
-                Text("START")
-                    .font(.system(.headline, design: .rounded))
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(
-                        Capsule()
-                            .fill(Color("pinkTextPrimary"))
-                    )
             }
-            .padding(.horizontal, 6)
-            .padding(.bottom, 4) 
-            .background(Color.black)
+            .frame(height: 40)
+            .padding(.horizontal, 16)
+            .padding(.bottom, 8)
         }
         
         .onReceive(timer) { _ in updateTime() }
@@ -123,7 +124,3 @@ struct StartView: View {
         currentTime = formatter.string(from: Date())
     }
 }
-
-//#Preview {
-//    StartView(workoutType: .running)
-//}

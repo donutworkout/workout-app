@@ -16,6 +16,25 @@ struct ConnectWatchView: View {
     var onAllow: () -> Void = {}
     var onSkip: () -> Void = {}
     
+    private func startJumping() {
+        // Lompat ke atas
+        withAnimation(.easeOut(duration: 0.35)) {
+            jump = true
+        }
+        
+        // Turun lagi setelah 0.35 detik
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            withAnimation(.easeIn(duration: 0.35)) {
+                jump = false
+            }
+            
+            // Jeda lucu 0.3 detik, lalu ulangi
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                startJumping()
+            }
+        }
+    }
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 32) {
@@ -37,12 +56,7 @@ struct ConnectWatchView: View {
                         .frame(width: 150, height: 150)
                         .offset(y: jump ? -35 : 0)
                         .onAppear {
-                            withAnimation(
-                                .easeInOut(duration: 0.6)
-                                .repeatForever(autoreverses: true)
-                            ) {
-                                jump = true
-                            }
+                            startJumping()
                         }
                 }
                 Spacer()

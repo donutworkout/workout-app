@@ -11,23 +11,30 @@ struct HalfwayWorkoutView: View {
     @EnvironmentObject var router: Router
     
     var characterImage: String = "charHalfwayDone"
-    
+
+    // Tambahkan state untuk animasi
+    @State private var characterScale: CGFloat = 0.7
+    @State private var characterOpacity: Double = 0.0
+
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
             
-            // MARK: - Character
+            // MARK: - Character dengan animasi
             Image(characterImage)
                 .resizable()
                 .scaledToFit()
                 .frame(width: 300, height: 300)
+                .scaleEffect(characterScale)
+                .opacity(characterOpacity)
+                .animation(.spring(response: 0.6, dampingFraction: 0.65, blendDuration: 0.2), value: characterScale)
+                .animation(.easeOut(duration: 0.6), value: characterOpacity)
             
             // MARK: - Title
             VStack(spacing: 6) {
                 Text("HALFWAY DONE!")
                     .font(.system(size: 34, weight: .bold))
                     .foregroundColor(Color("pinkTextPrimary"))
-                
             }
             .multilineTextAlignment(.center)
             .padding(.horizontal)
@@ -69,7 +76,16 @@ struct HalfwayWorkoutView: View {
         .navigationBarBackButtonHidden(true)
         .onAppear {
             HapticManager.shared.trigger(.workoutCompleted)
+            // Trigger animasi karakter
+            characterScale = 1.18
+            characterOpacity = 1.0
+            // Sedikit bouncing back to 100%
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                    characterScale = 1.0
                 }
+            }
+        }
     }
     
     // MARK: - Reusable Summary Item

@@ -21,34 +21,8 @@ struct WatchWorkoutDoneView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // MARK: - Top Bar
-                HStack {
-                    ZStack {
-                        Circle()
-                            .fill(Color.white.opacity(0.15))
-                            .frame(width: 36, height: 36)
-
-                        Image(systemName: "figure.run")
-                            .font(.system(size: 18))
-                            .foregroundColor(Color("pinkTextPrimary"))
-                    }
-
-//                    Spacer()
-
-                    // Tetap update jam di kanan atas
-//                    Text(currentTime)
-//                        .font(.system(size: 16, weight: .semibold))
-//                        .foregroundColor(.white)
-//                        .onReceive(clockTimer) { _ in updateTime() }
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, 20)
-
-                Spacer()
-
-                // MARK: - Character & Congratulations
                 VStack(spacing: 0) {
-                    Image("buttercup")
+                    Image("charCongrats")
                         .resizable()
                         .scaledToFit()
                         .frame(height: 80)

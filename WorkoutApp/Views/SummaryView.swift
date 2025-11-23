@@ -64,6 +64,11 @@ struct SummaryView: View {
             summaryManager.weeklySummaries[selectedDay] ?? DaySummary()
         }
     
+    // Animation states
+    @State private var showContent: Bool = false
+    @State private var characterScale: CGFloat = 0.5
+    @State private var characterOpacity: Double = 0
+    
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 24) {
@@ -140,6 +145,8 @@ struct SummaryView: View {
                         .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
                 )
                 .padding(.horizontal, 20)
+                .opacity(showContent ? 1 : 0)
+                .offset(y: showContent ? 0 : 20)
                 
                 Spacer()
             }
@@ -184,6 +191,46 @@ struct SummaryView: View {
                 .fontWeight(.semibold)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+// MARK: - Progress Character View Component with Fill Animation
+struct ProgressCharacterView: View {
+    let progress: Double
+    @State private var animatedProgress: Double = 0
+    
+    var body: some View {
+        ZStack {
+            // Base layer: Black & White character (always visible)
+            Image("charCongratsBnw")
+                .resizable()
+                .scaledToFit()
+            
+            // Top layer: Colored character with animated mask (fills from bottom)
+            Image("charCongrats")
+                .resizable()
+                .scaledToFit()
+                .mask(
+                    GeometryReader { geometry in
+                        Rectangle()
+                            .fill(Color.black)
+                            .frame(height: geometry.size.height * animatedProgress)
+                            .offset(y: geometry.size.height * (1 - animatedProgress))
+                    }
+                )
+        }
+        .onAppear {
+            // Fill animation when character first appears
+            withAnimation(.easeInOut(duration: 1.2).delay(0.8)) {
+                animatedProgress = progress
+            }
+        }
+        .onChange(of: progress) { _, newValue in
+            // Smooth fill when switching days
+            withAnimation(.easeInOut(duration: 0.6)) {
+                animatedProgress = newValue
+            }
+        }
     }
 }
 
