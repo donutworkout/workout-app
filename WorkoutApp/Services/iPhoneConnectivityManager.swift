@@ -125,10 +125,16 @@ extension iPhoneConnectivityManager {
             case WorkoutCommand.start.rawValue, "start":
                 if let typeRaw = message["workoutType"] as? UInt,
                    let type = HKWorkoutActivityType(rawValue: typeRaw) {
-                    print("📱 Start command → begin workout on iPhone")
+
+                    let isIndoor = message["isIndoor"] as? Bool ?? false
+                    print("📱 Start command → type: \(type.displayName), indoor? \(isIndoor)")
+
                     self.isWorkoutActive = true
                     self.isWorkoutPaused = false
-                    self.sessionManager.startWorkout(of: type)
+
+                    if !self.session.isReachable {
+                        self.sessionManager.startWorkout(of: type, isIndoor: isIndoor)
+                    }
                 }
 
             case WorkoutCommand.pause.rawValue, "pause":
@@ -189,31 +195,37 @@ extension iPhoneConnectivityManager {
         }
     }
     
-    func sendSelectedWorkout(_ type: HKWorkoutActivityType) {
-        guard session.activationState == .activated else {
-            print("⚠️ WCSession not activated.")
-            return
-        }
-        guard session.isReachable else {
-            print("⚠️ Watch not reachable.")
-            return
-        }
-        
-        let message: [String: Any] = ["selectedWorkout": type.rawValue]
-        session.sendMessage(message, replyHandler: nil) { error in
-            print(
-                "❌ Failed to send workout type: \(error.localizedDescription)"
-            )
-        }
-        print("📤 Sent selected workout: \(String(describing: type))")
-    }
+    func sendSelectedWorkout(_ type: HKWorkoutActivityType,
+                              activityName: String,
+                              isIndoor: Bool) {
+         guard session.activationState == .activated else {
+             print("⚠️ WCSession not activated.")
+             return }
+         guard session.isReachable else {
+             print("⚠️ Watch not reachable.")
+             return }
+
+         let message: [String: Any] = [
+             "selectedWorkout": type.rawValue,
+             "activityName": activityName,
+             "isIndoor": isIndoor ]
+
+         session.sendMessage(message, replyHandler: nil) { error in
+             print("❌ Failed to send selectedWorkout: \(error.localizedDescription)")
+         }
+     }
+
     
-    func startWorkoutFromPhone(type: HKWorkoutActivityType) {
+    func startWorkoutFromPhone(type: HKWorkoutActivityType, isIndoor: Bool) {
         // If reachable -> watch owns session
         if session.isReachable {
-            sendMessage(["cmd": "start", "workoutType": type.rawValue])
+            sendMessage([
+                "cmd": "start",
+                "workoutType": type.rawValue,
+                "isIndoor": isIndoor
+            ])
         } else {
-            sessionManager.startWorkout(of: type)
+            sessionManager.startWorkout(of: type, isIndoor: isIndoor)
             print("📱 Phone started workout locally (no watch reachable)")
         }
     }

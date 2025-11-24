@@ -16,6 +16,7 @@ struct ContentView: View {
     @State private var countdownValue = 3
     @State private var workoutStarted = false
     @State private var showDoneView = false
+
     
     var body: some View {
         Group {
@@ -94,7 +95,7 @@ struct ContentView: View {
                 timer.invalidate()
                 
                 // Start workout
-                sessionManager.startWorkout(of: type)
+                sessionManager.startWorkout(of: type, isIndoor: connectivity.selectedIsIndoor)
                 WKInterfaceDevice.current().play(.start)
                 
                 // Notify phone that watch has started

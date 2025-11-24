@@ -98,10 +98,12 @@ struct AdjustMenuCardioView: View {
                         return
                     }
                     
-                    let type = mapActivityToHKType(selectedMenu)
+                    let mapping = mapActivityToHKType(selectedMenu)
+                    let type = mapping.type
+                    let isIndoor = mapping.isIndoor
                     router.selectedWorkoutType = type
                     router.selectedCardioMenu = selectedMenu
-                    connectivity.startWorkoutFromPhone(type: type)
+                    connectivity.startWorkoutFromPhone(type: type, isIndoor: isIndoor)
                     router.lastWorkoutSource = .adjustMenuCardio
                     router.navigateTo(.countdownView)
                 }
@@ -180,9 +182,11 @@ struct AdjustMenuCardioView: View {
         } else {
             selectedMenu = activity
             HapticManager.shared.trigger(.adjustReps)
-            let type = mapActivityToHKType(activity)
-            router.selectedWorkoutType = type
-            iPhoneConnectivityManager.shared.sendSelectedWorkout(type)
+            let mapping = mapActivityToHKType(activity)
+            router.selectedWorkoutType = mapping.type
+            iPhoneConnectivityManager.shared.sendSelectedWorkout(mapping.type,
+                                                                     activityName: activity,
+                                                                     isIndoor: mapping.isIndoor )
         }
     }
     
