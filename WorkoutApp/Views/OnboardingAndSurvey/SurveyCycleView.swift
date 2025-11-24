@@ -315,7 +315,7 @@ struct SurveyCycleView: View {
     }
     
     private func syncFromHealthKit() {
-        HealthKitManager.shared.getLastPeriodDate { date in
+        iPhoneHealthKitManager.shared.getLastPeriodDate { date in
             DispatchQueue.main.async {
                 if let periodStart = date {
                     selectedDates.removeAll()

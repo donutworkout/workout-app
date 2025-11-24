@@ -127,4 +127,40 @@ final class iPhoneHealthKitManager {
                 self.healthStore.execute(query)
             }
         }
+    
+    func getLastPeriodDate(completion: @escaping (Date?) -> Void) {
+        guard let menstrualType = HKCategoryType.categoryType(forIdentifier: .menstrualFlow) else {
+            completion(nil)
+            return
+        }
+        
+        let predicate = NSPredicate(format: "metadata.%K == YES", HKMetadataKeyMenstrualCycleStart)
+        let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
+        
+        let query = HKSampleQuery(
+            sampleType: menstrualType,
+            predicate: predicate,
+            limit: 1,
+            sortDescriptors: [sortDescriptor]
+        ) { query, results, error in
+            if let sample = results?.first {
+                completion(sample.startDate)
+            } else {
+                completion(nil)
+            }
+        }
+        
+        healthStore.execute(query)
+    }
+        
+    //    func syncCycleData(to userCycle: UserCycle) {
+    //        getLastPeriodDate { date in
+    //            if let lastPeriod = date {
+    //                DispatchQueue.main.async {
+    //                    userCycle.cycleStartDate = lastPeriod
+    //                    print("✅ Synced cycle data: \(lastPeriod)")
+    //                }
+    //            }
+    //        }
+    //    }
 }
