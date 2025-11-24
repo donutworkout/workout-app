@@ -14,6 +14,7 @@ struct SurveyCycleView: View {
     @State private var currentMonth = Date()
     @State private var isFirstClick = true
     @State private var move = false
+    @State private var isLoadingHealthData = false
     
     private let noneOption = "None of the above"
     private let calendar = Calendar.current
@@ -240,6 +241,9 @@ struct SurveyCycleView: View {
         }
         .onAppear {
             loadExistingSelections()
+            if selectedDates.isEmpty {
+                syncFromHealthKit()
+            }
         }
     }
     
@@ -306,6 +310,28 @@ struct SurveyCycleView: View {
                     }
                 }
                 isFirstClick = false
+            }
+        }
+    }
+    
+    private func syncFromHealthKit() {
+        HealthKitManager.shared.getLastPeriodDate { date in
+            DispatchQueue.main.async {
+                if let periodStart = date {
+                    selectedDates.removeAll()
+                    
+                    // Add 5 days from period start
+                    for i in 0...4 {
+                        if let day = calendar.date(byAdding: .day, value: i, to: periodStart) {
+                            selectedDates.insert(day)
+                        }
+                    }
+                    
+                    currentMonth = periodStart
+                    isFirstClick = false
+                    
+                    print("✅ Auto-loaded period from Health: \(periodStart)")
+                }
             }
         }
     }

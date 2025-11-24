@@ -16,7 +16,14 @@ class WorkoutSplitGenerator {
     ) -> [Int: MenuCategory] {
         
         let dayNumbers = chosenDays.compactMap { $0.toDayNumber() }.sorted()
-        let totalDays = dayNumbers.count
+        var totalDays = dayNumbers.count
+        
+        switch level {
+        case .beginner:
+            totalDays = min(totalDays, 5)
+        case .intermediate, .advanced:
+            totalDays = min(totalDays, 6)
+        }
         
         if chosenDays.contains(.flexible) {
             return generateFlexibleSplit(level: level)
@@ -32,7 +39,7 @@ class WorkoutSplitGenerator {
                 baseSplit = [.strength, .cardio, .strength]
                 // If more than 3 days, repeat pattern
                 while baseSplit.count < totalDays {
-                    baseSplit.append(contentsOf: [.strength, .cardio])
+                    baseSplit.append(contentsOf: [.cardio, .strength])
                 }
             } else {
                 // Less than 3 days: just alternate
