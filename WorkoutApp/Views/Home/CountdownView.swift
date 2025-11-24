@@ -48,6 +48,7 @@ struct CountdownView: View {
                     Text(firstExercise?.name ?? "Get Ready!")
                         .font(.system(size: 28, weight: .semibold))
                         .foregroundColor(Color("pinkTextPrimary"))
+                        .pageHeaderAnimation(delay: 0.1)
                     
                     // MARK: Image
                     if let imageName = firstExercise?.imageName {
@@ -56,6 +57,7 @@ struct CountdownView: View {
                             .scaledToFit()
                             .frame(height: 320)
                             .padding(.top, 8)
+                            .pageImageAnimation(delay: 0.2)
                     }
                 }
                 
@@ -73,6 +75,7 @@ struct CountdownView: View {
                         .monospacedDigit()
                 }
                 .padding(.bottom, 32)
+                .pageCardAnimation(delay: 0.3)
                 
                 // MARK: - Stats Cards
                 HStack(spacing: 12) {
@@ -81,6 +84,7 @@ struct CountdownView: View {
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 32)
+                .pageCardAnimation(delay: 0.4)
                 
                 Spacer()
                 
@@ -99,6 +103,7 @@ struct CountdownView: View {
                     .padding(.horizontal)
                     .padding(.bottom, 40)
                     .disabled(showPausePopup)
+                    .pageCardAnimation(delay: 0.5)
                 }
                 
                 // MARK: - Pause Popup
@@ -137,16 +142,16 @@ struct CountdownView: View {
                         // Countdown number + circle
                         ZStack {
                             Circle()
-                                .stroke(Color("pinkTextPrimary").opacity(0.3), lineWidth: 4)
+                                .stroke(Color("pinkTextPrimary").opacity(0.9), lineWidth: 4)
                                 .frame(width: 150, height: 150)
                             
                             Circle()
-                                .fill(Color("pinkTextPrimary").opacity(0.13))
+                                .fill(Color("pinkTextPrimary").opacity(0.9))
                                 .frame(width: 122, height: 122)
                             
                             Text("\(countdown)")
                                 .font(.system(size: 72, weight: .bold, design: .rounded))
-                                .foregroundColor(Color("pinkTextPrimary"))
+                                .foregroundColor(Color.white.opacity(0.7))
                                 .monospacedDigit()
                         }
                         .scaleEffect(scale)

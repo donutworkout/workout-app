@@ -61,6 +61,7 @@ struct AdjustMenuStrengthView: View {
                 .pickerStyle(.segmented)
                 .padding(.horizontal)
                 .padding(.top, 8)
+                .pageHeaderAnimation(delay: 0.1)
                 .onChange(of: selectedMenu) { _, newValue in
                     let name = newValue.rawValue.lowercased()
                     let mapping = mapActivityToHKType(name)
@@ -77,14 +78,15 @@ struct AdjustMenuStrengthView: View {
                 // MARK: - Workout Cards
                 VStack(spacing: 16) {
                     if selectedMenu == .bodyweight {
-                        ForEach(workouts) { workout in
+                        ForEach(Array(workouts.enumerated()), id: \.element) { index, workout in
                             WorkoutItemCard(workout: workout)
+                                .pageCardAnimation(delay: 0.2 + Double(index) * 0.1)
                         }
                     } else {
                         Spacer()
 
                         Text("Do your own gym routine! :)")
-
+                            .pageCardAnimation(delay: 0.2)
                         Spacer()
                     }
                 }
@@ -126,6 +128,7 @@ struct AdjustMenuStrengthView: View {
                 .padding(.horizontal)
                 .padding(.top, 8)
                 .padding(.bottom, 8)
+                .pageCardAnimation(delay: 0.3)
             }
             .background(Color.white.opacity(0.95))
         }

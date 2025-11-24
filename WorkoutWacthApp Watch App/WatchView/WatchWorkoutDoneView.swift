@@ -31,7 +31,7 @@ struct WatchWorkoutDoneView: View {
                         .font(.system(size: 20, weight: .semibold))
                         .foregroundColor(Color.white)
                 }
-                .padding(.top, -20)
+//                .padding(.top, -20)
 
                 // MARK: - Static Stats
                 VStack(alignment: .leading, spacing: 0) {

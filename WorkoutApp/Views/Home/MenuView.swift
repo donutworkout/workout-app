@@ -18,12 +18,6 @@ struct MenuView: View {
     @State private var vigorousDuration: Int = 0
     @State private var moderateDuration: Int = 0
     
-    // MARK: - Animation States
-    @State private var showContent: Bool = false
-    @State private var workoutCardScale: CGFloat = 0.5
-    @State private var workoutCardOpacity: Double = 0
-    @State private var streakCardOffset: CGFloat = 50
-    
     private var userCycle: UserCycle? {
         userCycles.first
     }
@@ -103,15 +97,13 @@ struct MenuView: View {
                     .foregroundColor(.black)
                     .padding(.top, 32)
                     .padding(.horizontal, 20)
-                    .opacity(showContent ? 1 : 0)
-                    .offset(y: showContent ? 0 : -20)
+                    .animateHeader(forTab: 0, currentTab: $router.selectedTab, delay: 0.1)
                 
                 // MARK: - Day Selector
                 DaySelectorView(
                     selectedDayIndex: $cycleViewModel.selectedDayIndex,
                     userCycle: userCycle)
-                    .opacity(showContent ? 1 : 0)
-                    .offset(y: showContent ? 0 : -20)
+                .animateHeader(forTab: 0, currentTab: $router.selectedTab, delay: 0.2)
                 
                 // MARK: - Workout Card
                 CombinedWorkoutCardView(
@@ -134,12 +126,7 @@ struct MenuView: View {
                             }
                         }
                     })
-                    .scaleEffect(workoutCardScale)
-                    .opacity(workoutCardOpacity)
-                    .rotation3DEffect(
-                        .degrees(showContent ? 0 : 15),
-                        axis: (x: 0, y: 1, z: 0)
-                    )
+                .animateCard(forTab: 0, currentTab: $router.selectedTab, delay: 0.3)
                 
                 // MARK: - Streak Section
                 VStack(spacing: 8) {
@@ -150,11 +137,8 @@ struct MenuView: View {
                         .padding(.horizontal, 20)
                     StreakCardView()
                 }
+                .animateCard(forTab: 0, currentTab: $router.selectedTab, delay: 0.4)
             }
-            .opacity(showContent ? 1 : 0)
-            .offset(y: streakCardOffset)
-            .padding(.horizontal, 20)
-            .padding(.bottom, 40)
         }
         .background(Color.white.ignoresSafeArea())
         .onAppear {
@@ -166,44 +150,6 @@ struct MenuView: View {
             cycleViewModel.selectedDayIndex = todayIndex()
             loadWeeklyMenu()
             calculateCardioSpecs()
-            
-            // Start entrance animation
-            startEntranceAnimation()
-        }
-        .onChange(of: router.selectedTab) { oldValue, newValue in
-            if newValue == 0 {
-                showContent = false
-                workoutCardScale = 0.9
-                workoutCardOpacity = 0
-                streakCardOffset = 30
-                
-                withAnimation(.easeOut(duration: 0.4).delay(0.1)) {
-                    showContent = true
-                    workoutCardScale = 1.0
-                    workoutCardOpacity = 1.0
-                    streakCardOffset = 0
-                }
-            }
-        }
-
-    }
-    
-    // MARK: - Entrance Animation Sequence
-    private func startEntranceAnimation() {
-        // Step 1: Show header and day selector (0.3s delay)
-        withAnimation(.easeOut(duration: 0.5).delay(0.3)) {
-            showContent = true
-        }
-        
-        // Step 2: Workout card pop in with bounce (0.5s delay)
-        withAnimation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.5)) {
-            workoutCardScale = 1.0
-            workoutCardOpacity = 1.0
-        }
-        
-        // Step 3: Streak card slide up (0.8s delay)
-        withAnimation(.easeOut(duration: 0.5).delay(0.8)) {
-            streakCardOffset = 0
         }
     }
     
@@ -497,7 +443,7 @@ struct DaySelectorView: View {
                                         ? Color.gray.opacity(0.3) // abu
                                         : (
                                             isSelected
-                                            ? Color("pinkTextPrimary") // pink tua kalau dipilih
+                                            ? Color("pinkTextSecondary") // pink tua kalau dipilih
                                             : (
                                                 isToday
                                                 ? Color("pinkTextTertiary") // pink muda kalau hari ini tapi tdk dipilih

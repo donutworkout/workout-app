@@ -72,10 +72,12 @@ struct RestView: View {
                 Text("Rest")
                     .font(.system(size: 40, weight: .semibold))
                     .foregroundColor(Color("pinkTextPrimary"))
+                    .pageHeaderAnimation(delay: 0.1)  // Animasi header
                 
                 Text(formattedTime)
                     .font(.system(size: 72, weight: .bold))
                     .foregroundColor(Color("pinkTextPrimary"))
+                    .pageCardAnimation(delay: 0.2)    // Animasi angka timer
                 
                 Text(isTooMuchPaused ? "⚠️ You’ve added too much rest time!" : " ")
                     .font(.system(size: 16, weight: .semibold))
@@ -92,6 +94,8 @@ struct RestView: View {
                     Text(sessionManager.hasMoreSets ? nextSetInfo : "Next \(nextWorkoutNumber)/\(totalWorkouts)")
                         .font(.system(size: 16, weight: .regular))
                         .foregroundColor(.gray)
+                        .pageHeaderAnimation(delay: 0.3) // Animasi teks preview
+                    
                     Spacer()
                 }
                 
@@ -100,6 +104,7 @@ struct RestView: View {
                         .font(.system(size: 28, weight: .semibold))
                         .foregroundColor(.black)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .pageCardAnimation(delay: 0.4)  // Animasi nama workout
                     
                     // Next workout image with pink background
                     Image(next.imageName ?? "")
@@ -112,6 +117,7 @@ struct RestView: View {
                                 .fill(Color("pinkTextPrimary").opacity(0.15))
                         )
                         .clipShape(RoundedRectangle(cornerRadius: 24))
+                        .pageImageAnimation(delay: 0.5)  // Animasi gambar workout
                 }
             }
             .padding(.horizontal, 20)
@@ -152,6 +158,8 @@ struct RestView: View {
             }
             .padding(.horizontal)
             .padding(.bottom, 40)
+            .pageCardAnimation(delay: 0.6)   // Animasi tombol
+            
         }
         .background(Color.white.ignoresSafeArea())
         .navigationBarBackButtonHidden(true)
