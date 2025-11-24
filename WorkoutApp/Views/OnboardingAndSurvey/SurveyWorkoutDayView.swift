@@ -2,6 +2,7 @@ import SwiftUI
 
 struct WorkoutDayView: View {
     @EnvironmentObject var surveyManager: SurveyManager
+    @EnvironmentObject var router: Router
     
     var onNext: () -> Void
     
@@ -98,7 +99,7 @@ struct WorkoutDayView: View {
                 Spacer()
                 
                 // MARK: - Next Button
-                PrimaryGlassButton(title: "Next") {
+                PrimaryGlassButton(title: router.isEditingFromProfile ? "Done" : "Next") {
                     if selectedDays.contains("Flexible") {
                         saveAndNext()
                     } else if selectedDays.count < minimumDays {

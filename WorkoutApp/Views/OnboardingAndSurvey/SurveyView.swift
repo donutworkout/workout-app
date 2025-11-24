@@ -86,6 +86,10 @@ struct SurveyView: View {
         .background(Color.white.ignoresSafeArea())
         .navigationTitle("Survey")
         .navigationBarTitleDisplayMode(.inline)
+        // Ketika survey dimulai dari onboarding
+        .onAppear {
+            router.isEditingFromProfile = false  // Pastikan false untuk flow normal
+        }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 if currentPage > 0 {

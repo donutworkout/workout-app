@@ -6,6 +6,8 @@ enum Route {
     case healthConnect
     case watchConnect
     case survey
+    case surveyWorkoutLevel  // ✅ TAMBAHKAN
+    case surveyWorkoutDay    // ✅ TAMBAHKAN
     case tabBar
     case menu
     case profile
@@ -18,7 +20,10 @@ enum Route {
     case countdownView
     case finishWorkout
     case afterSurvey
+    case aboutMe
+    case streak
 }
+
 
 @MainActor
 final class Router: ObservableObject {
@@ -29,6 +34,8 @@ final class Router: ObservableObject {
     @Published var selectedWorkoutType: HKWorkoutActivityType? = nil
     @Published var selectedCardioMenu: String? = nil
     @Published var workoutExercises: [Exercise] = []
+    
+    @Published var isEditingFromProfile: Bool = false
     
     @Published var selectedDailyMenu: DailyMenu? = nil
     

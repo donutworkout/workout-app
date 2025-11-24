@@ -14,6 +14,9 @@ struct ProfileView: View {
 
     @Query(sort: \UserProfile.createdAt, order: .reverse)
     private var profiles: [UserProfile]
+    
+    // Animation state - hanya satu
+    @State private var showContent: Bool = false
 
     // User & cycle data
     private var currentProfile: UserProfile? { profiles.first }
@@ -81,8 +84,8 @@ struct ProfileView: View {
                     .padding(.horizontal, 20)
 
                 // MARK: - User Profile Card (Simple HStack)
-                NavigationLink {
-                    // Navigate to profile detail
+                Button {
+                    router.navigateTo(.aboutMe)
                 } label: {
                     HStack(spacing: 14) {
                         Image("profile")
@@ -139,7 +142,6 @@ struct ProfileView: View {
                     // Mascot illustration (9:16 ratio, same as MenuView)
                     Image("menuCardio")
                         .resizable()
-//                        .scaledToFill()
                         .frame(maxWidth: .infinity)
                         .clipped()
                     
@@ -262,8 +264,22 @@ struct ProfileView: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
             }
+            .opacity(showContent ? 1 : 0)
             .onAppear {
                 loadCycleDates()
+                // Animasi hanya saat pertama kali
+                withAnimation(.easeOut(duration: 0.4)) {
+                    showContent = true
+                }
+            }
+            .onChange(of: router.selectedTab) { oldValue, newValue in
+                // Reset dan play animasi saat pindah ke tab Profile (tab 2)
+                if newValue == 2 {
+                    showContent = false
+                    withAnimation(.easeOut(duration: 0.4).delay(0.1)) {
+                        showContent = true
+                    }
+                }
             }
         }
         .background(Color.white.ignoresSafeArea())

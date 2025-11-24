@@ -22,6 +22,8 @@ class WatchConnectivityManager: NSObject {
 
     private let session = WCSession.default
     var selectedWorkoutType: HKWorkoutActivityType? = nil
+    var selectedIsIndoor: Bool = false
+    var selectedActivityName: String = ""
 
     var phoneReady = false
     var shouldStartWorkout = false
@@ -121,24 +123,42 @@ class WatchConnectivityManager: NSObject {
     
     private func handleIncomingMessage(_ message: [String: Any]) {
             DispatchQueue.main.async {
-                if let typeRaw = message["selectedWorkout"] as? UInt,
+                
+                let selectedTypeRaw = message["selectedWorkout"] as? UInt
+                let activityName = message["activityName"] as? String
+                let isIndoorFromPhone = message["isIndoor"] as? Bool
+                let cmdRaw = message["cmd"] as? String
+                
+                if let typeRaw = selectedTypeRaw,
                    let type = HKWorkoutActivityType(rawValue: typeRaw) {
-                    self.selectedWorkoutType = type
-                    print("✅ Updated selectedWorkoutType: \(type.displayName)")
-                }
-                if let cmdRaw = message["cmd"] as? String,
-                   let cmd = WorkoutCommand(rawValue: cmdRaw) {
+                    self.selectedWorkoutType = type }
+                if let name = activityName {
+                    self.selectedActivityName = name }
+                if let isIndoor = isIndoorFromPhone {
+                    self.selectedIsIndoor = isIndoor }
+
+                if let type = self.selectedWorkoutType {
+                    print("✅ Updated selectedWorkoutType: \(type.displayName)") }
+                if !self.selectedActivityName.isEmpty {
+                    print("✅ Updated selectedActivityName: \(self.selectedActivityName)") }
+                print("✅ selectedIsIndoor = \(self.selectedIsIndoor)")
+
+                if let cmdRaw = cmdRaw, let cmd = WorkoutCommand(rawValue: cmdRaw) {
                     switch cmd {
-                        
-                    // iPhone → start
+                    
                     case .start:
                         if let typeRaw = message["workoutType"] as? UInt,
-                           let type = HKWorkoutActivityType(rawValue: typeRaw) {
-                            self.selectedWorkoutType = type
-                            self.sessionManager.timeActive = 0
-                            print("⌚ Received start command from iPhone: \(type.displayName)")
-                            self.shouldStartWorkout = true
-                        }
+                            let type = HKWorkoutActivityType(rawValue: typeRaw) {
+
+                             let isIndoor = message["isIndoor"] as? Bool ?? false
+                             print("⌚ Received start command from iPhone: \(type.displayName), indoor? \(isIndoor)")
+
+                             self.selectedWorkoutType = type
+                             self.selectedIsIndoor = isIndoor  
+
+                             self.sessionManager.timeActive = 0
+                             self.shouldStartWorkout = true
+                         }
                         
                     case .pause:
                         self.sessionManager.pauseWorkout()

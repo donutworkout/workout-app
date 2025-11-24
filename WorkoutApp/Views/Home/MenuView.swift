@@ -150,9 +150,9 @@ struct MenuView: View {
                         .padding(.horizontal, 20)
                     StreakCardView()
                 }
-                .opacity(showContent ? 1 : 0)
-                .offset(y: streakCardOffset)
             }
+            .opacity(showContent ? 1 : 0)
+            .offset(y: streakCardOffset)
             .padding(.horizontal, 20)
             .padding(.bottom, 40)
         }
@@ -170,6 +170,22 @@ struct MenuView: View {
             // Start entrance animation
             startEntranceAnimation()
         }
+        .onChange(of: router.selectedTab) { oldValue, newValue in
+            if newValue == 0 {
+                showContent = false
+                workoutCardScale = 0.9
+                workoutCardOpacity = 0
+                streakCardOffset = 30
+                
+                withAnimation(.easeOut(duration: 0.4).delay(0.1)) {
+                    showContent = true
+                    workoutCardScale = 1.0
+                    workoutCardOpacity = 1.0
+                    streakCardOffset = 0
+                }
+            }
+        }
+
     }
     
     // MARK: - Entrance Animation Sequence
@@ -573,6 +589,8 @@ struct PhaseCardView: View {
 
 // MARK: - Streak Card
 struct StreakCardView: View {
+    @EnvironmentObject var router: Router  // ✅ Tambahkan ini
+    
     @State private var progressAnim: CGFloat = 0
     let currentStreak: Int = 7
     let targetStreak: Int = 20
@@ -583,69 +601,74 @@ struct StreakCardView: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            // Character on the Left
+            // Character on the Left (tidak bisa diklik)
             Image("charStreak")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 100, height: 100)
             
-            // Card on the Right
-            VStack(spacing: 8) {
-                // Streak Counter
-                HStack(spacing: 4) {
-                    Text("\(currentStreak) / \(targetStreak)")
-                        .font(.system(size: 32, weight: .bold))
-                        .foregroundColor(Color("pinkTextPrimary"))
-                    
-                    Spacer()
-                }
-                
-                Text("Day Streak")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.black)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                
-                // Progress Bar
-                GeometryReader { geometry in
-                    ZStack(alignment: .leading) {
-                        // Background
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.gray.opacity(0.15))
-                            .frame(width: geometry.size.width, height: 20)
+            // Card on the Right (bisa diklik)
+            Button {
+                router.navigateTo(.streak)  // ✅ Navigasi ke StreakView
+            } label: {
+                VStack(spacing: 8) {
+                    // Streak Counter
+                    HStack(spacing: 4) {
+                        Text("\(currentStreak) / \(targetStreak)")
+                            .font(.system(size: 32, weight: .bold))
+                            .foregroundColor(Color("pinkTextPrimary"))
                         
-                        // Progress Fill with Fire Icon
-                        ZStack(alignment: .trailing) {
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(
-                                    LinearGradient(
-                                        colors: [Color("pinkTextPrimary"), Color("pinkTextPrimary").opacity(0.85)],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
-                                )
-                                .frame(width: max(20, progressAnim * geometry.size.width), height: 20)
-                            
-                            // Fire Icon at the end
-                            if progressAnim > 0 {
-                                Image("fireStreakRed")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 26, height: 26)
-                                    .offset(x: 8)
-                            }
-                        }
-                        .frame(width: max(20, progressAnim * geometry.size.width), height: 20, alignment: .leading)
+                        Spacer()
                     }
+                    
+                    Text("Day Streak")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    // Progress Bar
+                    GeometryReader { geometry in
+                        ZStack(alignment: .leading) {
+                            // Background
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.gray.opacity(0.15))
+                                .frame(width: geometry.size.width, height: 20)
+                            
+                            // Progress Fill with Fire Icon
+                            ZStack(alignment: .trailing) {
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [Color("pinkTextPrimary"), Color("pinkTextPrimary").opacity(0.85)],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
+                                    .frame(width: max(20, progressAnim * geometry.size.width), height: 20)
+                                
+                                // Fire Icon at the end
+                                if progressAnim > 0 {
+                                    Image("fireStreakRed")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 26, height: 26)
+                                        .offset(x: 8)
+                                }
+                            }
+                            .frame(width: max(20, progressAnim * geometry.size.width), height: 20, alignment: .leading)
+                        }
+                    }
+                    .frame(height: 20)
                 }
-                .frame(height: 20)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color.white)
+                        .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 3)
+                )
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
-            .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(Color.white)
-                    .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 3)
-            )
+            .buttonStyle(PlainButtonStyle())  // ✅ Agar tidak ada efek highlight default
         }
         .padding(.horizontal, 20)
         .onAppear {
