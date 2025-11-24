@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct SummaryView: View {
+    @EnvironmentObject var router: Router
     @Environment(\.modelContext) private var modelContext
     @Query private var dailyMenus: [DailyMenu]
         
@@ -160,6 +161,20 @@ struct SummaryView: View {
         .onChange(of: selectedDay) { _, _ in
             // Could refresh if needed
         }
+        .onChange(of: router.selectedTab) { oldValue, newValue in
+            if newValue == 1 {
+                showContent = false
+                characterScale = 0.5
+                characterOpacity = 0
+                
+                withAnimation(.easeOut(duration: 0.4).delay(0.1)) {
+                    showContent = true
+                    characterScale = 1.0
+                    characterOpacity = 1.0
+                }
+            }
+        }
+
     }
     
     // MARK: - Entrance Animation Sequence
