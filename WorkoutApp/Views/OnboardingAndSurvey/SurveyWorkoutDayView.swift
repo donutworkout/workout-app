@@ -22,7 +22,7 @@ struct WorkoutDayView: View {
         } else if workoutLevel == WorkoutLevel.advanced {
             return 5
         }
-        return 3 // Default value for unexpected cases
+        return 3
     }
     
     private func saveAndNext() {
@@ -32,7 +32,14 @@ struct WorkoutDayView: View {
         surveyManager.updateTempWorkoutDaysPreference(preferences)
         
         surveyManager.finalizeUserWorkout()
-        onNext()
+        
+        // ✅ Jika dari AboutMe, kembali ke Profile
+        if router.isEditingFromProfile {
+            router.selectedTab = 2
+            router.navigateTo(.profile)
+        } else {
+            onNext()
+        }
     }
     
     var body: some View {
@@ -44,7 +51,11 @@ struct WorkoutDayView: View {
                 VStack(spacing: 16) {
                     HStack(alignment: .bottom, spacing: 12) {
                         VStack(alignment: .leading, spacing: 8) {
-                            SurveyProgressText(currentPage: 4, totalPages: 5)
+                            // ✅ Hanya tampilkan SurveyProgressText jika BUKAN dari AboutMe
+                            if !router.isEditingFromProfile {
+                                SurveyProgressText(currentPage: 4, totalPages: 5)
+                            }
+                            
                             Text("When do you have time to work out?")
                                 .font(.system(.title, weight: .semibold))
                                 .foregroundColor(Color("pinkTextPrimary"))
@@ -63,7 +74,6 @@ struct WorkoutDayView: View {
                     }
                 }
                 .padding(.horizontal)
-//                .padding(.top, 10)
                 
                 // MARK: - Days Grid
                 VStack(spacing: 12) {
@@ -116,8 +126,8 @@ struct WorkoutDayView: View {
             }
             .animation(.easeInOut, value: selectedDays)
             .background(Color.white.ignoresSafeArea())
-            .blur(radius: showCustomAlert ? 3 : 0) // ✅ Blur background saat alert muncul
-            .allowsHitTesting(!showCustomAlert) // ✅ Disable interaction saat alert muncul
+            .blur(radius: showCustomAlert ? 3 : 0)
+            .allowsHitTesting(!showCustomAlert)
             .onAppear {
                 withAnimation(.easeInOut(duration: 3.5).repeatForever(autoreverses: true)) {
                     move = true
@@ -134,29 +144,24 @@ struct WorkoutDayView: View {
                 }
             }
             
-            // MARK: - Custom Alert Overlay (FULL COVER)
+            // MARK: - Custom Alert Overlay
             if showCustomAlert {
                 ZStack {
-                    // ✅ Full screen overlay
                     Color.white.opacity(0.5)
-                        .ignoresSafeArea(.all) // ✅ Cover everything including safe areas
+                        .ignoresSafeArea(.all)
                         .onTapGesture {
                             withAnimation(.spring()) {
                                 showCustomAlert = false
                             }
                         }
                     
-                    // ✅ Alert Dialog
                     VStack(spacing: 0) {
-                        // MARK: - Content Area
                         VStack(spacing: 12) {
-                            // Title
                             Text("Too Chill")
                                 .font(.system(size: 17, weight: .semibold))
                                 .foregroundColor(.primary)
                                 .multilineTextAlignment(.center)
                             
-                            // Message
                             Text("Pick at least \(minimumDays) days so we can get that streak going!")
                                 .font(.system(size: 13))
                                 .foregroundColor(.secondary)
@@ -170,7 +175,6 @@ struct WorkoutDayView: View {
                         
                         Divider()
                         
-                        // MARK: - Button
                         Button(action: {
                             withAnimation(.spring()) {
                                 showCustomAlert = false
@@ -196,7 +200,7 @@ struct WorkoutDayView: View {
                     .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
                 }
                 .transition(.opacity.combined(with: .scale(scale: 1.1)))
-                .zIndex(999) // ✅ Ensure it's on top
+                .zIndex(999)
             }
         }
     }
@@ -224,8 +228,4 @@ struct WorkoutDayView: View {
     private var isButtonEnabled: Bool {
         !selectedDays.isEmpty
     }
-}
-
-#Preview {
-    WorkoutDayView(onNext: {})
 }

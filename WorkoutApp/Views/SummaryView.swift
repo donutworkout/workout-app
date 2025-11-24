@@ -31,12 +31,6 @@ struct SummaryView: View {
             calendar.date(byAdding: .day, value: $0, to: startOfWeek)
         }
     }
-
-    
-    // Animation states
-        @State private var showContent: Bool = false
-        @State private var characterScale: CGFloat = 0.5
-        @State private var characterOpacity: Double = 0
         
         // Computed progress based on actual workout data
         var progress: [Double] {
@@ -68,15 +62,13 @@ struct SummaryView: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 24) {
-                
                 // MARK: - Title
                 Text("Summary")
                     .font(.system(size: 34, weight: .bold))
                     .foregroundColor(.black)
                     .padding(.top, 32)
                     .padding(.horizontal, 20)
-                    .opacity(showContent ? 1 : 0)
-                    .offset(y: showContent ? 0 : -20)
+                    .animateHeader(forTab: 1, currentTab: $router.selectedTab, delay: 0.1)
                 
                 // MARK: - Day Selector with Progress
                 DaySelectorSummaryView(
@@ -85,21 +77,9 @@ struct SummaryView: View {
                     progress: progress,
                     weekDays: weekDays
                 )
-                    .padding(.horizontal, 20)
-                    .opacity(showContent ? 1 : 0)
-                    .offset(y: showContent ? 0 : -20)
+                .padding(.horizontal, 20)
+                .animateHeader(forTab: 1, currentTab: $router.selectedTab, delay: 0.2)
                 
-                // MARK: - Character (Static)
-                
-//                VStack {
-//                    Image("charLogin")
-//                        .resizable()
-//                        .scaledToFit()
-//                        .frame(width: 300, height: 300)
-//                        .padding(.vertical, 8)
-//                }
-//                .frame(maxWidth: .infinity)
-
                 // MARK: - Character with Progress Fill
                 if summaryManager.isLoading {
                     ProgressView()
@@ -110,12 +90,7 @@ struct SummaryView: View {
                         .frame(width: 300, height: 300)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
-                        .scaleEffect(characterScale)
-                        .opacity(characterOpacity)
-                        .rotation3DEffect(
-                            .degrees(showContent ? 0 : 15),
-                            axis: (x: 0, y: 1, z: 0)
-                        )
+                        .animateHeader(forTab: 1, currentTab: $router.selectedTab, delay: 0.3)
                 }
                 
                 // MARK: - Stats Card
@@ -141,51 +116,21 @@ struct SummaryView: View {
                         .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
                 )
                 .padding(.horizontal, 20)
-                .opacity(showContent ? 1 : 0)
-                .offset(y: showContent ? 0 : 20)
+                .animateHeader(forTab: 1, currentTab: $router.selectedTab, delay: 0.5)
                 
                 Spacer()
             }
             .padding(.bottom, 40)
-            .opacity(showContent ? 1 : 0)
-            .offset(y: showContent ? 0 : 20)
         }
         .refreshable {
             await summaryManager.fetchWeeklySummary(dailyMenus: dailyMenus)
         }
         .background(Color.white.ignoresSafeArea())
         .task {
-            startEntranceAnimation()
             await summaryManager.fetchWeeklySummary(dailyMenus: dailyMenus)
         }
         .onChange(of: selectedDay) { _, _ in
             // Could refresh if needed
-        }
-        .onChange(of: router.selectedTab) { oldValue, newValue in
-            if newValue == 1 {
-                showContent = false
-                characterScale = 0.5
-                characterOpacity = 0
-                
-                withAnimation(.easeOut(duration: 0.4).delay(0.1)) {
-                    showContent = true
-                    characterScale = 1.0
-                    characterOpacity = 1.0
-                }
-            }
-        }
-
-    }
-    
-    // MARK: - Entrance Animation Sequence
-    private func startEntranceAnimation() {
-        withAnimation(.easeOut(duration: 0.5).delay(0.3)) {
-            showContent = true
-        }
-        
-        withAnimation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.5)) {
-            characterScale = 1.0
-            characterOpacity = 1.0
         }
     }
     // MARK: - Reusable Summary Item
@@ -251,13 +196,27 @@ import SwiftUI
 
 struct DaySelectorSummaryView: View {
     @Binding var selectedDay: Int
-        var weekDates: [Date]
-        var progress: [Double]
-        let weekDays: [String]
+    var weekDates: [Date]
+    var progress: [Double]
+    let weekDays: [String]
+    
+    // ✅ Detect hari ini
+    private var todayIndex: Int {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        
+        // Cari index dari weekDates yang match dengan hari ini
+        if let index = weekDates.firstIndex(where: { calendar.isDate($0, inSameDayAs: today) }) {
+            return index
+        }
+        return -1 // Jika tidak ditemukan
+    }
     
     var body: some View {
         HStack(spacing: 8) {
             ForEach(0..<7, id: \.self) { index in
+                let isToday = index == todayIndex  // ✅ Check apakah hari ini
+                
                 VStack(spacing: 6) {
                     // Day label (M, T, W...) di atas
                     Text(weekDays[index])
@@ -278,7 +237,7 @@ struct DaySelectorSummaryView: View {
                             
                             // Progress fill naik dari bawah
                             Circle()
-                                .fill(Color("pinkTextPrimary"))
+                                .fill(Color("pinkTextSecondary"))
                                 .frame(width: 44, height: 44)
                                 .mask(
                                     Rectangle()
@@ -290,7 +249,12 @@ struct DaySelectorSummaryView: View {
                             // Border kalau hari ini terpilih
                             if selectedDay == index {
                                 Circle()
-                                    .stroke(Color("pinkTextPrimary"), lineWidth: 3)
+                                    .stroke(
+                                        isToday
+                                        ? Color("pinkTextPrimary")  // Pink untuk hari ini
+                                        : Color("grayTextPrimary"),  // Abu untuk bukan hari ini
+                                        lineWidth: 3
+                                    )
                                     .frame(width: 46, height: 46)
                             }
                             

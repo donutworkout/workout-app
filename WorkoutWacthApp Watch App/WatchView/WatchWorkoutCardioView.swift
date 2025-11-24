@@ -56,7 +56,7 @@ struct WatchWorkoutCardioView: View {
                 .padding(.bottom, 8)
 
             // MARK: - Stats (Same as Strength)
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 3) {
                 StatRow(
                     icon: "flame.fill",
                     text: String(format: "%.0f kcal", sessionManager.activeEnergy)
