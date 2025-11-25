@@ -138,20 +138,11 @@ struct SummaryView: View {
                         .padding(.horizontal, 20)
                         .opacity(showContent ? 1 : 0)
                         .offset(y: showContent ? 0 : 20)
-
+                        .animateHeader(forTab: 1, currentTab: $router.selectedTab, delay: 0.5)
+                        
                         Spacer()
                     }
                 }
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.white)
-                        .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
-                )
-                .padding(.horizontal, 20)
-                .animateHeader(forTab: 1, currentTab: $router.selectedTab, delay: 0.5)
-                
-                Spacer()
             }
             .padding(.bottom, 40)
         }
