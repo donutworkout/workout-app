@@ -21,6 +21,7 @@ struct StartStrengthView: View {
     // Misal latihan ke-2 dari 5
     var currentPage: Int = 1
     var totalPages: Int = 5
+    var durationGoal: Int = 30
     
     private var userProfile: UserProfile? {
         userProfiles.first

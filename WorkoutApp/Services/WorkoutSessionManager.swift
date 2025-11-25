@@ -151,6 +151,7 @@ class WorkoutSessionManager: NSObject {
         timer?.invalidate()
         isRunning = false
         session.end()
+        
         builder.endCollection(withEnd: Date()) { _, _ in
             builder.finishWorkout { workout, error in
                 DispatchQueue.main.async {

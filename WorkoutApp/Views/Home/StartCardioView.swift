@@ -25,8 +25,21 @@ struct StartCardioView: View {
     @State private var bpm: Int = 90
     @State private var showPausePopup: Bool = false
     @State private var showHRAlert: Bool = false
+    @State private var hasReachedGoal = false
     
     @State private var timer: Timer? = nil
+    
+    let selectedIntensity: IntensityLevel  // e.g. .vigorous or .moderate
+    let vigorousDuration: Int
+    let moderateDuration: Int
+
+    var durationGoal: Int {
+        selectedIntensity == .vigorous ? vigorousDuration : moderateDuration
+    }
+    
+    var durationGoalSeconds: TimeInterval {
+        TimeInterval(durationGoal * 60)
+    }
     
     private var userProfile: UserProfile? {
         userProfiles.first
@@ -143,7 +156,12 @@ struct StartCardioView: View {
                     onEndWorkout: {
                         timer?.invalidate()
                         connectivity.stopWorkoutFromPhone()
-                        router.navigateTo(.finishWorkout)
+                        
+                        if hasReachedGoal {
+                            router.navigateTo(.finishWorkout)
+                        } else {
+                            router.navigateTo(.halfwayWorkout)
+                        }
                     }
                 )
                 .transition(.scale.combined(with: .opacity))
@@ -233,6 +251,7 @@ struct StartCardioView: View {
         }
         .onAppear {
             startTimer()
+            print("workout goal: \(durationGoal), \(durationGoalSeconds)")
         }
         .onDisappear { timer?.invalidate() }
         .onChange(of: connectivity.isWorkoutActive) { _, active in
@@ -241,7 +260,13 @@ struct StartCardioView: View {
                 print(
                     "🏁 Workout stopped from watch → showing FinishWorkoutView"
                 )
-                router.navigateTo(.finishWorkout)
+                
+                if hasReachedGoal {
+                    router.navigateTo(.finishWorkout)
+                } else {
+                    // Navigate to another view if goal not reached
+                    router.navigateTo(.halfwayWorkout)
+                }
             }
         }
         .onChange(of: connectivity.isWorkoutPaused) { _, paused in
@@ -289,6 +314,10 @@ struct StartCardioView: View {
             if countMaximumHR() && !showHRAlert {
                 showHRAlert = true
             }
+            
+            if !hasReachedGoal && timeElapsed >= durationGoalSeconds {
+                hasReachedGoal = true
+            }
 
         }
     }
@@ -305,6 +334,11 @@ extension Notification.Name {
     static let startLocalTimer = Notification.Name("startLocalTimer")
     static let pauseLocalTimer = Notification.Name("pauseLocalTimer")
     static let resumeLocalTimer = Notification.Name("resumeLocalTimer")
+}
+
+enum IntensityLevel: CaseIterable {
+    case moderate
+    case vigorous
 }
 
 // #Preview {
