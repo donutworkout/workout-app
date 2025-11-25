@@ -12,12 +12,13 @@ struct StartCardioView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var router: Router
     @Environment(iPhoneConnectivityManager.self) private var connectivity
+    @EnvironmentObject var sessionManager: StrengthSessionManager
     
     @Query private var userProfiles: [UserProfile]
     
-    // MARK: - Props
-    var activityName: String = "Badminton"
-    var imageName: String = "charBadminton"
+//    // MARK: - Props
+//    var activityName: String = "Badminton"
+//    var imageName: String = "charBadminton"
     
     @State private var timeElapsed: TimeInterval = 0
     @State private var calories: Int = 0
@@ -27,6 +28,8 @@ struct StartCardioView: View {
     @State private var showHRAlert: Bool = false
     
     @State private var timer: Timer? = nil
+    
+    let activityName: String
     
     private var userProfile: UserProfile? {
         userProfiles.first
@@ -67,7 +70,7 @@ struct StartCardioView: View {
                         .foregroundColor(Color("pinkTextPrimary"))
                         .padding(.top, 16)
                     
-                    Image(imageName)
+                    Image("char\(activityName.replacingOccurrences(of: " ", with: ""))")
                         .resizable()
                         .scaledToFit()
                         .frame(height: 320)

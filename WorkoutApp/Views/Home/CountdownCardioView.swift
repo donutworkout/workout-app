@@ -34,7 +34,7 @@ struct CountdownCardioView: View {
     init(activityName: String = "Indoor Walk",
          imageName: String = "indoorWalk",
          onCountdownComplete: @escaping () -> Void = {}) {
-        self.activityName = activityName
+        self.activityName = "Cardio Workout"
         self.imageName = imageName
         self.onCountdownComplete = onCountdownComplete
     }
@@ -64,13 +64,13 @@ struct CountdownCardioView: View {
                 )
                 .padding(.horizontal)
                 
-                // MARK: - Stats
-                HStack(spacing: 16) {
-                    StatCardItem(icon: "flame.fill", value: "\(calories)", label: "KCAL")
-                    StatCardItem(icon: "figure.walk", value: String(format: "%.1f", distance), label: "KILOMETERS")
-                    StatCardItem(icon: "heart.fill", value: "\(bpm)", label: "BPM")
-                }
-                .padding(.horizontal)
+//                // MARK: - Stats
+//                HStack(spacing: 16) {
+//                    StatCardItem(icon: "flame.fill", value: "\(calories)", label: "KCAL")
+//                    StatCardItem(icon: "figure.walk", value: String(format: "%.1f", distance), label: "KILOMETERS")
+//                    StatCardItem(icon: "heart.fill", value: "\(bpm)", label: "BPM")
+//                }
+//                .padding(.horizontal)
                 
                 Spacer()
                 
