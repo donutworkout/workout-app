@@ -84,7 +84,7 @@ struct SurveyCycleView: View {
                         // 2. Period Start Date - Custom Calendar
                         VStack(alignment: .leading, spacing: 12) {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("When did your period start?")
+                                Text("When did your last period start?")
                                     .font(.title3)
                                     .fontWeight(.bold)
                                     .foregroundColor(Color.black)
