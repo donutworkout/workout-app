@@ -315,8 +315,9 @@ struct CombinedWorkoutCardView: View {
                 
                 // Gambar di tengah
             Image(cardInfo.image)
+                .resizable()
                 .frame(maxWidth: .infinity)
-//                                    .frame(height: 180)
+                .clipped()
 //            }
             
             // MARK: - Konten bawah (judul, deskripsi, tombol)
@@ -349,20 +350,24 @@ struct CombinedWorkoutCardView: View {
                         .lineSpacing(3)
                 }
                 if (menu?.isCardio ?? false) || (menu?.isStrength ?? false) {
-                                PrimaryGlassButton(title: "Start Workout") {
-                                    HapticManager.shared.trigger(.buttonTap)
-                                    
-                                    // ✅ Check HealthKit connection
-                                    if checkHealthKitAuthorization() {
-                                        onStartWorkout()
-                                    } else {
-                                        showHealthNotConnectedModal = true
-                                    }
-                                }
-                            }
+                    PrimaryGlassButton(title: "Start Workout") {
+                        HapticManager.shared.trigger(.buttonTap)
+                        // Pastikan iPhoneHealthKitManager sudah diimport di file Anda
+                        if iPhoneHealthKitManager.shared.isAuthorized() {
+                            onStartWorkout()
+                        } else {
+                            showHealthNotConnectedModal = true
+                        }
+                    }
+                }
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 20)
+        }
+        .sheet(isPresented: $showHealthNotConnectedModal) {
+            HealthNotConnectedView()
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
         }
         .background(
             RoundedRectangle(cornerRadius: 20)

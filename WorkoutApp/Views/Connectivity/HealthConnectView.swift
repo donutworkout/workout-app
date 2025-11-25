@@ -29,8 +29,8 @@ struct HealthConnectView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
                 Spacer()
-
-                // MARK: - Heart Icon Box
+                
+                // MARK: - Heart Icon Box (lebih kecil & animasi smooth)
                 ZStack {
                     RoundedRectangle(cornerRadius: 24)
                         .fill(Color.white)
@@ -46,14 +46,9 @@ struct HealthConnectView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 60, height: 60)
-                        .foregroundColor(Color.pink)  // warna pink solid
-                        .scaleEffect(pulse ? 1.08 : 1.0)
-                        .animation(
-                            .easeInOut(duration: 0.8).repeatForever(
-                                autoreverses: true
-                            ),
-                            value: pulse
-                        )
+                        .foregroundColor(Color.pink)
+                        .scaleEffect(pulse ? 1.12 : 1.0)
+                        .animation(.easeInOut(duration: 0.22), value: pulse)
                 }
                 .padding(.top, 10)
 
@@ -100,12 +95,18 @@ struct HealthConnectView: View {
 
             }
             .onAppear {
-                pulse = true
-                if finishedHealthOnboarding {
-                    onSkip()
-                }
+                startHeartbeat()
             }
-
+        }
+    }
+    
+    // Heartbeat lebih smooth (scale kecil, timing smooth)
+    private func startHeartbeat() {
+        Timer.scheduledTimer(withTimeInterval: 1.1, repeats: true) { _ in
+            withAnimation { pulse = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) {
+                withAnimation { pulse = false }
+            }
         }
     }
 }
