@@ -55,7 +55,7 @@ struct HealthNotConnectedView: View {
                 
                 // Open Settings Button
                 PrimaryGlassButton(title: "Open Settings") {
-                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                    if let url = URL(string: "App-Prefs:") {
                         UIApplication.shared.open(url)
                     }
                 }
