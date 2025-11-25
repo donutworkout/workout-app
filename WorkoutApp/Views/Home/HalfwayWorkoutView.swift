@@ -44,7 +44,7 @@ struct HalfwayWorkoutView: View {
                 HStack {
                     summaryItem(title: "Workout Time", value: "0:15:18")
                     Divider()
-                    summaryItem(title: "Active Calories", value: "100 kcal")
+                    summaryItem(title: "Active Kilocalories", value: "100 kcal")
                 }
                 Divider()
                 HStack {

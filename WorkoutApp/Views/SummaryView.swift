@@ -14,7 +14,7 @@ struct SummaryView: View {
     @Query private var dailyMenus: [DailyMenu]
         
     @StateObject private var summaryManager = WorkoutSummaryManager()
-    @State private var selectedDay: Int = Calendar.current.component(.weekday, from: Date()) - 1
+    @State private var selectedDay: Int = 0
 
     let weekDays = ["M", "T", "W", "T", "F", "S", "S"]
     //let progress: [Double] = [1.0, 0.9, 0.3, 0.6, 0.2, 0.4, 0.7]
@@ -24,41 +24,38 @@ struct SummaryView: View {
         let today = calendar.startOfDay(for: Date())
         let weekday = calendar.component(.weekday, from: today)
         let mondayOffset = weekday == 1 ? -6 : -(weekday - 2)
-        
         let startOfWeek = calendar.date(byAdding: .day, value: mondayOffset, to: today)!
-
-        return (0..<7).compactMap {
-            calendar.date(byAdding: .day, value: $0, to: startOfWeek)
-        }
+        return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: startOfWeek) }
     }
-        
-        // Computed progress based on actual workout data
-        var progress: [Double] {
-            var progressArray: [Double] = []
-            for dayIndex in 0..<7 {
-                guard let summary = summaryManager.weeklySummaries[dayIndex] else {
-                    progressArray.append(0.0)
-                    continue
-                }
-                
-                // Calculate progress based on workout completion
-                // If there's a workout, show progress based on duration
-                // 30+ minutes = 100%, scale down from there
-                if summary.workoutCount > 0 {
-                    let minutes = summary.totalDuration / 60
-                    let progress = min(minutes / 30.0, 1.0)
-                    progressArray.append(progress)
-                } else {
-                    progressArray.append(0.0)
-                }
+  
+    // Animation states
+    @State private var showContent: Bool = false
+    @State private var characterScale: CGFloat = 0.5
+    @State private var characterOpacity: Double = 0
+
+    // Computed progress based on actual workout data
+    var progress: [Double] {
+        var progressArray: [Double] = []
+        for dayIndex in 0..<7 {
+            guard let summary = summaryManager.weeklySummaries[dayIndex] else {
+                progressArray.append(0.0)
+                continue
             }
-            return progressArray
+            if summary.workoutCount > 0 {
+                let minutes = summary.totalDuration / 60
+                let progress = min(minutes / 30.0, 1.0)
+                progressArray.append(progress)
+            } else {
+                progressArray.append(0.0)
+            }
         }
-        
-        var currentDaySummary: DaySummary {
-            summaryManager.weeklySummaries[selectedDay] ?? DaySummary()
-        }
-    
+        return progressArray
+    }
+
+    var currentDaySummary: DaySummary {
+        summaryManager.weeklySummaries[selectedDay] ?? DaySummary()
+    }
+
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 24) {
@@ -68,6 +65,8 @@ struct SummaryView: View {
                     .foregroundColor(.black)
                     .padding(.top, 32)
                     .padding(.horizontal, 20)
+                    .opacity(showContent ? 1 : 0)
+                    .offset(y: showContent ? 0 : -20)
                     .animateHeader(forTab: 1, currentTab: $router.selectedTab, delay: 0.1)
                 
                 // MARK: - Day Selector with Progress
@@ -78,6 +77,8 @@ struct SummaryView: View {
                     weekDays: weekDays
                 )
                 .padding(.horizontal, 20)
+                .opacity(showContent ? 1 : 0)
+                .offset(y: showContent ? 0 : -20)
                 .animateHeader(forTab: 1, currentTab: $router.selectedTab, delay: 0.2)
                 
                 // MARK: - Character with Progress Fill
@@ -86,27 +87,59 @@ struct SummaryView: View {
                         .frame(width: 300, height: 300)
                         .frame(maxWidth: .infinity)
                 } else {
-                    ProgressCharacterView(progress: progress[selectedDay])
+                    ProgressCharacterView(progress: progress.indices.contains(selectedDay) ? progress[selectedDay] : 0)
                         .frame(width: 300, height: 300)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
                         .animateHeader(forTab: 1, currentTab: $router.selectedTab, delay: 0.3)
                 }
-                
-                // MARK: - Stats Card
-                VStack(spacing: 12) {
-                    HStack {
-                        summaryItem(title: "Workout Time", value: summaryManager.formatDuration(currentDaySummary.totalDuration))
-                        Divider()
-                        summaryItem(title: "Active Calories", value: "\(Int(currentDaySummary.activeCalories)) kcal")
-                    }
-                    Divider()
-                    HStack {
-                        summaryItem(title: "Total Kilocalories", value: "\(Int(currentDaySummary.totalCalories)) kcal")
-                        Divider()
-                        summaryItem(title: "Avg. Heart Rate", value: currentDaySummary.avgHeartRate > 0
-                                    ? "\(Int(currentDaySummary.avgHeartRate)) bpm"
-                                    : "-- bpm")
+
+                if let menu = dailyMenus.first(where: { Calendar.current.isDate($0.date, inSameDayAs: weekDates[selectedDay]) }) {
+                    if menu.category == .rest {
+                        Text("It's your rest day!")
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.gray)
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 20)
+                            .padding(.horizontal, 20)
+                            .opacity(showContent ? 1 : 0)
+                            .offset(y: showContent ? 0 : -10)
+                    } else if currentDaySummary.workoutCount == 0 {
+                        Text("No workout data yet.")
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.gray)
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 20)
+                            .padding(.horizontal, 20)
+                            .opacity(showContent ? 1 : 0)
+                            .offset(y: showContent ? 0 : -10)
+                    } else {
+                        VStack(spacing: 12) {
+                            HStack {
+                                summaryItem(title: "Workout Time", value: summaryManager.formatDuration(currentDaySummary.totalDuration))
+                                Divider()
+                                summaryItem(title: "Active Kilocalories", value: "\(Int(currentDaySummary.activeCalories)) kcal")
+                            }
+                            Divider()
+                            HStack {
+                                summaryItem(title: "Total Kilocalories", value: "\(Int(currentDaySummary.totalCalories)) kcal")
+                                Divider()
+                                summaryItem(title: "Avg. Heart Rate", value: currentDaySummary.avgHeartRate > 0 ? "\(Int(currentDaySummary.avgHeartRate)) bpm" : "-- bpm")
+                            }
+                        }
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.white)
+                                .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
+                        )
+                        .padding(.horizontal, 20)
+                        .opacity(showContent ? 1 : 0)
+                        .offset(y: showContent ? 0 : 20)
+
+                        Spacer()
                     }
                 }
                 .padding()
@@ -127,12 +160,32 @@ struct SummaryView: View {
         }
         .background(Color.white.ignoresSafeArea())
         .task {
+            startEntranceAnimation()
+            summaryManager.setupService(modelContext: modelContext)
             await summaryManager.fetchWeeklySummary(dailyMenus: dailyMenus)
+            
+            let calendar = Calendar.current
+            let today = calendar.startOfDay(for: Date())
+
+            if let index = weekDates.firstIndex(where: { calendar.isDate($0, inSameDayAs: today) }) {
+                selectedDay = index
+            }
+            
         }
-        .onChange(of: selectedDay) { _, _ in
-            // Could refresh if needed
+        .onChange(of: selectedDay) { _, _ in }
+    }
+
+    // MARK: - Entrance Animation Sequence
+    private func startEntranceAnimation() {
+        withAnimation(.easeOut(duration: 0.5).delay(0.3)) {
+            showContent = true
+        }
+        withAnimation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.5)) {
+            characterScale = 1.0
+            characterOpacity = 1.0
         }
     }
+
     // MARK: - Reusable Summary Item
     @ViewBuilder
     func summaryItem(title: String, value: String) -> some View {
@@ -153,13 +206,13 @@ struct SummaryView: View {
 struct ProgressCharacterView: View {
     let progress: Double
     @State private var animatedProgress: Double = 0
-    
+
     var body: some View {
         ZStack {
             Image("charCongratsBnw")
                 .resizable()
                 .scaledToFit()
-            
+
             Image("charCongrats")
                 .resizable()
                 .scaledToFit()
@@ -173,26 +226,17 @@ struct ProgressCharacterView: View {
                 )
         }
         .onAppear {
-            // Fill animation when character first appears
             withAnimation(.easeInOut(duration: 1.2).delay(0.8)) {
                 animatedProgress = progress
             }
         }
         .onChange(of: progress) { _, newValue in
-            // Smooth fill when switching days
             withAnimation(.easeInOut(duration: 0.6)) {
                 animatedProgress = newValue
             }
         }
     }
 }
-
-//
-//  DaySelectorSummaryView.swift
-//  WorkoutApp
-//
-
-import SwiftUI
 
 struct DaySelectorSummaryView: View {
     @Binding var selectedDay: Int
@@ -218,35 +262,30 @@ struct DaySelectorSummaryView: View {
                 let isToday = index == todayIndex  // ✅ Check apakah hari ini
                 
                 VStack(spacing: 6) {
-                    // Day label (M, T, W...) di atas
                     Text(weekDays[index])
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(.black)
-                    
-                    // Lingkaran dengan progress dan angka
+
                     Button {
                         withAnimation(.easeInOut(duration: 0.25)) {
                             selectedDay = index
                         }
                     } label: {
                         ZStack {
-                            // Base circle (abu/pink lembut)
                             Circle()
                                 .fill(Color("pinkTextTertiary").opacity(0.25))
                                 .frame(width: 44, height: 44)
-                            
-                            // Progress fill naik dari bawah
+
                             Circle()
                                 .fill(Color("pinkTextSecondary"))
                                 .frame(width: 44, height: 44)
                                 .mask(
                                     Rectangle()
-                                        .frame(height: 44 * progress[index])
-                                        .offset(y: 44 * (1 - progress[index]))
+                                        .frame(height: 44 * (progress.indices.contains(index) ? progress[index] : 0))
+                                        .offset(y: 44 * (1 - (progress.indices.contains(index) ? progress[index] : 0)))
                                 )
                                 .clipShape(Circle())
-                            
-                            // Border kalau hari ini terpilih
+
                             if selectedDay == index {
                                 Circle()
                                     .stroke(
@@ -257,8 +296,7 @@ struct DaySelectorSummaryView: View {
                                     )
                                     .frame(width: 46, height: 46)
                             }
-                            
-                            // Angka hari (1–7)
+
                             Text(formattedDate(weekDates[index]))
                                 .font(.system(size: 16, weight: .semibold))
                                 .foregroundColor(.black)
@@ -268,7 +306,7 @@ struct DaySelectorSummaryView: View {
             }
         }
     }
-    
+
     func formattedDate(_ date: Date) -> String {
         let day = Calendar.current.component(.day, from: date)
         return "\(day)"
@@ -277,4 +315,5 @@ struct DaySelectorSummaryView: View {
 
 #Preview {
     SummaryView()
+        .modelContainer(for: DailyMenu.self, inMemory: true)
 }
