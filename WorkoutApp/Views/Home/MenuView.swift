@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import HealthKit 
 
 struct MenuView: View {
     @EnvironmentObject var router: Router
@@ -225,6 +226,7 @@ struct MenuView: View {
 }
 
 struct CombinedWorkoutCardView: View {
+    @State private var showHealthNotConnectedModal = false
     @EnvironmentObject var router: Router
     
     let phase: MenstrualPhase
@@ -347,11 +349,17 @@ struct CombinedWorkoutCardView: View {
                         .lineSpacing(3)
                 }
                 if (menu?.isCardio ?? false) || (menu?.isStrength ?? false) {
-                    PrimaryGlassButton(title: "Start Workout", action: {
-                        HapticManager.shared.trigger(.buttonTap)
-                        onStartWorkout()
-                    })
-                }
+                                PrimaryGlassButton(title: "Start Workout") {
+                                    HapticManager.shared.trigger(.buttonTap)
+                                    
+                                    // ✅ Check HealthKit connection
+                                    if checkHealthKitAuthorization() {
+                                        onStartWorkout()
+                                    } else {
+                                        showHealthNotConnectedModal = true
+                                    }
+                                }
+                            }
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 20)
@@ -363,6 +371,24 @@ struct CombinedWorkoutCardView: View {
         )
         .padding(.horizontal, 20)
     }
+    private func checkHealthKitAuthorization() -> Bool {
+            guard HKHealthStore.isHealthDataAvailable() else {
+                return false
+            }
+            
+            let healthStore = HKHealthStore()
+            
+            // Check untuk workout type yang dibutuhkan
+            let workoutType = HKObjectType.workoutType()
+            let heartRateType = HKObjectType.quantityType(forIdentifier: .heartRate)!
+            let activeEnergyType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
+            
+            // Check authorization status
+            let workoutStatus = healthStore.authorizationStatus(for: workoutType)
+            
+            // Return true jika sudah authorized
+            return workoutStatus == .sharingAuthorized
+        }
 }
 
 // MARK: - Day Selector (Final Fixed Version)
