@@ -7,6 +7,7 @@
 
 import Foundation
 import HealthKit
+import SwiftData
 import WatchConnectivity
 
 @Observable
@@ -17,7 +18,7 @@ final class iPhoneConnectivityManager: NSObject {
     private let session = WCSession.default
     var isWorkoutActive = false
     var isWorkoutPaused = false
-    
+
     var summaryDuration: Double = 0
     var summaryActiveEnergy: Double = 0
     var summaryTotalEnergy: Double = 0
@@ -36,7 +37,7 @@ final class iPhoneConnectivityManager: NSObject {
         session.delegate = self
         session.activate()
     }
-    
+
     func resetMetrics() {
         heartRate = 0
         energyBurned = 0
@@ -48,6 +49,15 @@ final class iPhoneConnectivityManager: NSObject {
         summaryAvgHeartRate = 0
         isWorkoutActive = false
         isWorkoutPaused = false
+    }
+
+    @MainActor
+    private var workoutService: WorkoutSessionService?
+
+    @MainActor
+    func setupService(modelContext: ModelContext) {
+        let storage = WorkoutSessionStorage(modelContext: modelContext)
+        self.workoutService = WorkoutSessionService(storage: storage)
     }
 
 }
@@ -83,13 +93,16 @@ extension iPhoneConnectivityManager: WCSessionDelegate {
         self.handleIncomingMessage(message)
         replyHandler(["status": "received"])
     }
-    
-    func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+
+    func session(_ session: WCSession, didReceiveMessage message: [String: Any])
+    {
         print("📱 iPhone received: \(message)")
         self.handleIncomingMessage(message)
     }
 
-    func session(_ session: WCSession,didReceiveUserInfo userInfo: [String: Any]
+    func session(
+        _ session: WCSession,
+        didReceiveUserInfo userInfo: [String: Any]
     ) {
         DispatchQueue.main.async {
             print("📬 Received background message: \(userInfo)")
@@ -104,7 +117,8 @@ extension iPhoneConnectivityManager {
         DispatchQueue.main.async {
 
             if let typeRaw = message["selectedWorkout"] as? UInt,
-               let type = HKWorkoutActivityType(rawValue: typeRaw) {
+                let type = HKWorkoutActivityType(rawValue: typeRaw)
+            {
                 print("📌 iPhone received selectedWorkout → \(type.displayName)")
                 self.isWorkoutActive = false
                 self.isWorkoutPaused = false
@@ -124,16 +138,22 @@ extension iPhoneConnectivityManager {
 
             case WorkoutCommand.start.rawValue, "start":
                 if let typeRaw = message["workoutType"] as? UInt,
-                   let type = HKWorkoutActivityType(rawValue: typeRaw) {
+                    let type = HKWorkoutActivityType(rawValue: typeRaw)
+                {
 
                     let isIndoor = message["isIndoor"] as? Bool ?? false
-                    print("📱 Start command → type: \(type.displayName), indoor? \(isIndoor)")
+                    print(
+                        "📱 Start command → type: \(type.displayName), indoor? \(isIndoor)"
+                    )
 
                     self.isWorkoutActive = true
                     self.isWorkoutPaused = false
 
                     if !self.session.isReachable {
-                        self.sessionManager.startWorkout(of: type, isIndoor: isIndoor)
+                        self.sessionManager.startWorkout(
+                            of: type,
+                            isIndoor: isIndoor
+                        )
                     }
                 }
 
@@ -150,26 +170,40 @@ extension iPhoneConnectivityManager {
                 self.isWorkoutActive = false
                 self.isWorkoutPaused = false
                 self.sessionManager.stopWorkout()
-                
+
             case "started":
                 print("📲 Workout confirmed started by watch")
                 self.isWorkoutActive = true
                 self.isWorkoutPaused = false
 
             case "updateMetrics":
-                self.heartRate    = message["heartRate"] as? Double ?? 0
-                self.energyBurned = message["energy"]     as? Double ?? 0
-                self.distance     = message["distance"]   as? Double ?? 0
+                self.heartRate = message["heartRate"] as? Double ?? 0
+                self.energyBurned = message["energy"] as? Double ?? 0
+                self.distance = message["distance"] as? Double ?? 0
                 print("📈 Metrics Updated")
 
             case "workoutSummary":
-                self.summaryDuration      = message["duration"]     as? Double ?? 0
-                self.summaryActiveEnergy  = message["activeEnergy"] as? Double ?? 0
-                self.summaryTotalEnergy   = message["totalEnergy"]  as? Double ?? 0
-                self.summaryDistance      = message["distance"]     as? Double ?? 0
-                self.summaryAvgHeartRate  = message["avgHeartRate"] as? Double ?? 0
-                print("📦 Summary received")
+                print("📊 Received workout summary")
 
+                self.summaryDuration = message["duration"] as? TimeInterval ?? 0
+                self.summaryActiveEnergy =
+                    message["activeEnergy"] as? Double ?? 0
+                self.summaryTotalEnergy = message["totalEnergy"] as? Double ?? 0
+                self.summaryDistance = message["distance"] as? Double ?? 0
+                self.summaryAvgHeartRate =
+                    message["avgHeartRate"] as? Double ?? 0
+
+                // Save to SwiftData
+                Task { @MainActor in
+                    self.workoutService?.saveWorkout(
+                        date: Date(),
+                        duration: self.summaryDuration,
+                        activeEnergy: self.summaryActiveEnergy,
+                        totalEnergy: self.summaryTotalEnergy,
+                        avgHeartRate: self.summaryAvgHeartRate,
+                        distance: self.summaryDistance
+                    )
+                }
             default:
                 print("⚠️ Unknown cmd: \(cmd)")
             }
@@ -189,47 +223,53 @@ extension iPhoneConnectivityManager {
             session.transferUserInfo(data)  // ✅ fallback
             return
         }
-        
+
         session.sendMessage(data, replyHandler: nil) { error in
             print("❌ Error sending message: \(error.localizedDescription)")
         }
     }
-    
-    func sendSelectedWorkout(_ type: HKWorkoutActivityType,
-                              activityName: String,
-                              isIndoor: Bool) {
-         guard session.activationState == .activated else {
-             print("⚠️ WCSession not activated.")
-             return }
-         guard session.isReachable else {
-             print("⚠️ Watch not reachable.")
-             return }
 
-         let message: [String: Any] = [
-             "selectedWorkout": type.rawValue,
-             "activityName": activityName,
-             "isIndoor": isIndoor ]
+    func sendSelectedWorkout(
+        _ type: HKWorkoutActivityType,
+        activityName: String,
+        isIndoor: Bool
+    ) {
+        guard session.activationState == .activated else {
+            print("⚠️ WCSession not activated.")
+            return
+        }
+        guard session.isReachable else {
+            print("⚠️ Watch not reachable.")
+            return
+        }
 
-         session.sendMessage(message, replyHandler: nil) { error in
-             print("❌ Failed to send selectedWorkout: \(error.localizedDescription)")
-         }
-     }
+        let message: [String: Any] = [
+            "selectedWorkout": type.rawValue,
+            "activityName": activityName,
+            "isIndoor": isIndoor,
+        ]
 
-    
+        session.sendMessage(message, replyHandler: nil) { error in
+            print(
+                "❌ Failed to send selectedWorkout: \(error.localizedDescription)"
+            )
+        }
+    }
+
     func startWorkoutFromPhone(type: HKWorkoutActivityType, isIndoor: Bool) {
         // If reachable -> watch owns session
         if session.isReachable {
             sendMessage([
                 "cmd": "start",
                 "workoutType": type.rawValue,
-                "isIndoor": isIndoor
+                "isIndoor": isIndoor,
             ])
         } else {
             sessionManager.startWorkout(of: type, isIndoor: isIndoor)
             print("📱 Phone started workout locally (no watch reachable)")
         }
     }
-    
+
     func pauseWorkoutFromPhone() {
         isWorkoutPaused = true
         if session.isReachable {
@@ -238,7 +278,7 @@ extension iPhoneConnectivityManager {
             sessionManager.pauseWorkout()
         }
     }
-    
+
     func resumeWorkoutFromPhone() {
         isWorkoutPaused = false
         if session.isReachable {
@@ -247,7 +287,7 @@ extension iPhoneConnectivityManager {
             sessionManager.resumeWorkout()
         }
     }
-    
+
     func stopWorkoutFromPhone() {
         print("📱 STOP requested from phone")
         if session.isReachable {
@@ -261,5 +301,5 @@ extension iPhoneConnectivityManager {
             isWorkoutPaused = false
         }
     }
-    
+
 }

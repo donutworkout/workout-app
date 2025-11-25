@@ -141,7 +141,7 @@ class WatchConnectivityManager: NSObject {
                     print("✅ Updated selectedWorkoutType: \(type.displayName)") }
                 if !self.selectedActivityName.isEmpty {
                     print("✅ Updated selectedActivityName: \(self.selectedActivityName)") }
-                print("✅ selectedIsIndoor = \(self.selectedIsIndoor)")
+    
 
                 if let cmdRaw = cmdRaw, let cmd = WorkoutCommand(rawValue: cmdRaw) {
                     switch cmd {
