@@ -5,23 +5,23 @@
 //  Created by Jennifer Evelyn on 28/10/25.
 //
 
-import SwiftUI
 import HealthKit
+import SwiftUI
 
 struct HealthConnectView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var router: Router
     @State private var pulse = false
+    @AppStorage("finishedHealthOnboarding") var finishedHealthOnboarding = false
 
-    
     var onAllow: () -> Void = {}
     var onSkip: () -> Void = {}
-    
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 32) {
-//                Spacer()
-                
+                //                Spacer()
+
                 // MARK: - Title Text
                 Text("Automatically track your health metrics")
                     .font(.system(size: 28, weight: .semibold))
@@ -34,9 +34,14 @@ struct HealthConnectView: View {
                 ZStack {
                     RoundedRectangle(cornerRadius: 24)
                         .fill(Color.white)
-                        .shadow(color: .gray.opacity(0.2), radius: 8, x: 0, y: 3)
+                        .shadow(
+                            color: .gray.opacity(0.2),
+                            radius: 8,
+                            x: 0,
+                            y: 3
+                        )
                         .frame(width: 120, height: 120)
-                    
+
                     Image(systemName: "heart.fill")
                         .resizable()
                         .scaledToFit()
@@ -46,24 +51,27 @@ struct HealthConnectView: View {
                         .animation(.easeInOut(duration: 0.22), value: pulse)
                 }
                 .padding(.top, 10)
-                
+
                 Spacer()
-                
+
                 // MARK: - Allow Button
                 PrimaryGlassButton(title: "Allow") {
-                    iPhoneHealthKitManager.shared.requestAuthorization { success, error in
-                        if success {
-                            print("authorization success")
-                        } else {
-                            print("failed:", error?.localizedDescription ?? "")
+                    iPhoneHealthKitManager.shared.requestAuthorization {
+                        success,
+                        error in
+                        finishedHealthOnboarding = true
+                        DispatchQueue.main.async {
+                            onAllow()
                         }
                     }
-                    onAllow()
                 }
                 .padding(.horizontal)
-                
+
                 // MARK: - Skip Button
-                Button(action: onSkip) {
+                Button {
+                    finishedHealthOnboarding = true
+                    onSkip()
+                } label: {
                     Text("No, Thanks")
                         .font(.system(size: 16, weight: .medium))
                         .foregroundColor(.gray)
@@ -71,7 +79,7 @@ struct HealthConnectView: View {
                 .padding(.bottom, 40)
             }
             .background(Color.white.ignoresSafeArea())
-            
+
             // MARK: - Navigation Title & Toolbar
             .navigationTitle("Health Connect")
             .navigationBarTitleDisplayMode(.inline)
@@ -84,8 +92,7 @@ struct HealthConnectView: View {
                             .foregroundColor(.black)
                     }
                 }
-                
-               
+
             }
             .onAppear {
                 startHeartbeat()

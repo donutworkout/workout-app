@@ -7,10 +7,12 @@
 
 import Foundation
 import HealthKit
+import SwiftData
 
 struct DaySummary {
     var totalDuration: TimeInterval = 0
     var activeCalories: Double = 0
+    var basalCalories: Double = 0
     var totalCalories: Double = 0
     var avgHeartRate: Double = 0
     var workoutCount: Int = 0
@@ -19,14 +21,21 @@ struct DaySummary {
 @MainActor
 class WorkoutSummaryManager: ObservableObject {
     private let healthStore = HKHealthStore()
+    private var workoutService: WorkoutSessionService?
     
     @Published var weeklySummaries: [Int: DaySummary] = [:]
     @Published var isLoading: Bool = false
     
-
+    // ✨ Setup with modelContext
+    func setupService(modelContext: ModelContext) {
+        let storage = WorkoutSessionStorage(modelContext: modelContext)
+        self.workoutService = WorkoutSessionService(storage: storage)
+    }
+    
     private let allowedSourceBundleIDs: Set<String> = [
         "dawnhazed.WorkoutApp2",
-        "dawnhazed.WorkoutApp2.watchkitapp"
+        "dawnhazed.WorkoutApp2.watchkitapp",
+        "dawnhazed.WorkoutApp2.watchkitapp.watchkitextension"
     ]
     
     // MARK: - Public API
@@ -68,15 +77,29 @@ class WorkoutSummaryManager: ObservableObject {
         }
     }
     
-    // MARK: - Per-day summary
-    
+   
     private func fetchDaySummary(for date: Date, category: MenuCategory) async -> DaySummary {
+            if category == .rest {
+                return DaySummary()
+            }
+            
+            // ✨ Use SwiftData service
+            if let savedSummary = workoutService?.getAggregatedSummary(for: date),
+               savedSummary.workoutCount > 0 {
+                print("📊 Using saved session data: \(savedSummary.workoutCount) workout(s)")
+                return savedSummary
+            }
+        
+        // ✨ FALLBACK: Query HealthKit (for workouts saved before this feature)
+        print("📊 No saved sessions, querying HealthKit for \(date)")
+        
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: date)
         guard let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) else {
             return DaySummary()
         }
         
+        // Determine workout types based on category
         let workoutTypes: [HKWorkoutActivityType]
         switch category {
         case .cardio:
@@ -93,6 +116,7 @@ class WorkoutSummaryManager: ObservableObject {
             return DaySummary()
         }
         
+        // Build predicates
         let datePredicate = HKQuery.predicateForSamples(
             withStart: startOfDay,
             end: endOfDay,
@@ -109,6 +133,7 @@ class WorkoutSummaryManager: ObservableObject {
             typePredicate
         ])
         
+        // Query HealthKit
         return await withCheckedContinuation { continuation in
             let query = HKSampleQuery(
                 sampleType: .workoutType(),
@@ -117,24 +142,38 @@ class WorkoutSummaryManager: ObservableObject {
                 sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
             ) { [allowedSourceBundleIDs] _, samples, error in
                 
-                if samples == nil {
+                if let error = error {
+                    print("❌ Error fetching workouts from HealthKit: \(error.localizedDescription)")
+                    continuation.resume(returning: DaySummary())
+                    return
+                }
+                
+                guard let samples = samples else {
+                    print("⚠️ No workout samples found in HealthKit")
                     continuation.resume(returning: DaySummary())
                     return
                 }
                 
                 let workouts = samples as! [HKWorkout]
-                let filtered = workouts.filter { allowedSourceBundleIDs.contains($0.sourceRevision.source.bundleIdentifier) }
+                
+                // Filter by allowed bundle IDs
+                let filtered = workouts.filter {
+                    allowedSourceBundleIDs.contains($0.sourceRevision.source.bundleIdentifier)
+                }
                 
                 if filtered.isEmpty {
+                    print("⚠️ No workouts from allowed sources in HealthKit")
                     continuation.resume(returning: DaySummary())
                     return
                 }
                 
-                let startOfDayLocal = startOfDay
-                let endOfDayLocal = endOfDay
+                print("📊 Found \(filtered.count) workout(s) in HealthKit for \(startOfDay)")
+                for workout in filtered {
+                    print("   • \(workout.workoutActivityType.displayName) at \(workout.startDate)")
+                }
                 
                 Task {
-                    let summary = await self.computeSummary(for: filtered, startOfDay: startOfDayLocal, endOfDay: endOfDayLocal)
+                    let summary = await self.aggregateWorkoutsFromHealthKit(filtered)
                     continuation.resume(returning: summary)
                 }
             }
@@ -142,82 +181,105 @@ class WorkoutSummaryManager: ObservableObject {
             healthStore.execute(query)
         }
     }
-    
-    private func computeSummary(for workouts: [HKWorkout], startOfDay: Date, endOfDay: Date) async -> DaySummary {
+
+    // MARK: - Aggregate from HealthKit (Fallback)
+
+    private func aggregateWorkoutsFromHealthKit(_ workouts: [HKWorkout]) async -> DaySummary {
         var summary = DaySummary()
-        var totalHeartRate = 0.0
-        var heartRateCount = 0
+        var allHeartRates: [Double] = []
         
         for workout in workouts {
             summary.totalDuration += workout.duration
             summary.workoutCount += 1
-        }
-        
-        let active = await self.loadActiveEnergy(start: startOfDay, end: endOfDay)
-        let basal = await self.loadBasalEnergy(start: startOfDay, end: endOfDay)
-        
-        summary.activeCalories = active
-        summary.totalCalories = active + basal
-        
-        for workout in workouts {
-            if let avgHR = await self.fetchAverageHeartRate(for: workout) {
-                totalHeartRate += avgHR
-                heartRateCount += 1
+            
+            if let basalEnergy = workout.statistics(for: HKQuantityType.quantityType(forIdentifier: .basalEnergyBurned)!)?.sumQuantity()?.doubleValue(for: .kilocalorie()){
+                summary.basalCalories += basalEnergy
+            }
+            
+            if let activeEnergy = workout.statistics(for: HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)!)?.sumQuantity()?.doubleValue(for: .kilocalorie()) {
+                summary.activeCalories += activeEnergy
+            }
+            
+            let totalEnergy = summary.activeCalories + summary.basalCalories
+            summary.totalCalories += totalEnergy
+            
+            if let avgHR = await fetchAverageHeartRate(for: workout) {
+                allHeartRates.append(avgHR)
             }
         }
         
-        if heartRateCount > 0 {
-            summary.avgHeartRate = totalHeartRate / Double(heartRateCount)
+        if !allHeartRates.isEmpty {
+            summary.avgHeartRate = allHeartRates.reduce(0, +) / Double(allHeartRates.count)
         }
         
         return summary
     }
-    
-    // MARK: - Basal
-    
-    private func loadBasalEnergy(start: Date, end: Date) async -> Double {
-        guard let type = HKObjectType.quantityType(forIdentifier: .basalEnergyBurned) else {
-            return 0
-        }
-        
-        return await withCheckedContinuation { continuation in
-            let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
 
-            let query = HKStatisticsQuery(
-                quantityType: type,
-                quantitySamplePredicate: predicate,
-                options: .cumulativeSum
-            ) { _, stats, _ in
-                let kcal = stats?.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
-                continuation.resume(returning: kcal)
-            }
-            
-            healthStore.execute(query)
-        }
-    }
-
-    // MARK: - Active
+    // MARK: - Energy Queries (using HKStatisticsQuery)
     
-    private func loadActiveEnergy(start: Date, end: Date) async -> Double {
+    private func loadTotalActiveEnergy(start: Date, end: Date) async -> Double {
         guard let type = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned) else {
             return 0
         }
         
         return await withCheckedContinuation { continuation in
-            let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
+            let predicate = HKQuery.predicateForSamples(
+                withStart: start,
+                end: end,
+                options: .strictStartDate
+            )
+            
             let query = HKStatisticsQuery(
                 quantityType: type,
                 quantitySamplePredicate: predicate,
                 options: .cumulativeSum
-            ) { _, stats, _ in
-                let kcal = stats?.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
+            ) { _, statistics, error in
+                if let error = error {
+                    print("❌ Error fetching active energy: \(error.localizedDescription)")
+                    continuation.resume(returning: 0)
+                    return
+                }
+                
+                let kcal = statistics?.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
                 continuation.resume(returning: kcal)
             }
-            healthStore.execute(query)
+            
+            self.healthStore.execute(query)
         }
     }
     
-    // MARK: - HR helper
+    private func loadTotalBasalEnergy(start: Date, end: Date) async -> Double {
+        guard let type = HKObjectType.quantityType(forIdentifier: .basalEnergyBurned) else {
+            return 0
+        }
+        
+        return await withCheckedContinuation { continuation in
+            let predicate = HKQuery.predicateForSamples(
+                withStart: start,
+                end: end,
+                options: .strictStartDate
+            )
+            
+            let query = HKStatisticsQuery(
+                quantityType: type,
+                quantitySamplePredicate: predicate,
+                options: .cumulativeSum
+            ) { _, statistics, error in
+                if let error = error {
+                    print("❌ Error fetching basal energy: \(error.localizedDescription)")
+                    continuation.resume(returning: 0)
+                    return
+                }
+                
+                let kcal = statistics?.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
+                continuation.resume(returning: kcal)
+            }
+            
+            self.healthStore.execute(query)
+        }
+    }
+    
+    // MARK: - Heart Rate Helper
     
     private func fetchAverageHeartRate(for workout: HKWorkout) async -> Double? {
         guard let heartRateType = HKObjectType.quantityType(forIdentifier: .heartRate) else {
@@ -235,7 +297,12 @@ class WorkoutSummaryManager: ObservableObject {
                 quantityType: heartRateType,
                 quantitySamplePredicate: predicate,
                 options: .discreteAverage
-            ) { _, statistics, _ in
+            ) { _, statistics, error in
+                if let error = error {
+                    print("❌ Error fetching heart rate: \(error.localizedDescription)")
+                    continuation.resume(returning: nil)
+                    return
+                }
                 
                 guard let avgQuantity = statistics?.averageQuantity() else {
                     continuation.resume(returning: nil)

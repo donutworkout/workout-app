@@ -21,7 +21,7 @@ struct ContentView: View {
     var body: some View {
         Group {
             if showDoneView {
-                WatchWorkoutDoneView()
+                WatchWorkoutDoneView(showDoneView: $showDoneView)
             } else if !connectivity.isReachable {
                 WatchNotConnectedView(connectivity: _connectivity)
                 
@@ -66,21 +66,19 @@ struct ContentView: View {
                 workoutStarted = false
             }
         }
-        .onChange(of: showDoneView) { _, newValue in
-            if newValue {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
-                    withAnimation(.easeInOut) {
-                        showDoneView = false
-                        connectivity.selectedWorkoutType = nil
-                        connectivity.shouldStartWorkout = false
-                        print("⌚ Auto-dismiss done view → back to menu")
-                    }
-                }
-            }
-        }
-        .animation(.easeInOut, value: connectivity.selectedWorkoutType)
-        .animation(.easeInOut, value: workoutStarted)
-//        .onAppear {
+//        .onChange(of: showDoneView) { _, newValue in
+//            if newValue {
+//                    withAnimation(.easeInOut) {
+//                        showDoneView = false
+//                        connectivity.selectedWorkoutType = nil
+//                        connectivity.shouldStartWorkout = false
+//                        print("⌚ Auto-dismiss done view → back to menu")
+//                    }
+//            }
+//        }
+//        .animation(.easeInOut, value: connectivity.selectedWorkoutType)
+//        .animation(.easeInOut, value: workoutStarted)
+////        .onAppear {
 //            print("appear stop")
 //            sessionManager.stopWorkout()
 //        }
@@ -111,3 +109,4 @@ struct ContentView: View {
         }
     }
 }
+
