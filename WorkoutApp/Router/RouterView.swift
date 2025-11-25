@@ -10,7 +10,35 @@ struct RouterView: View {
     var body: some View {
         NavigationStack {
             switch router.currentRoute {
+            case .streak:
+                StreakView()
+                    .environmentObject(router)
+
+            case .aboutMe:
+                AboutMeView()
+                    .environmentObject(router)
                 
+                // Tambahkan di dalam switch router.currentRoute
+            case .surveyWorkoutLevel:
+                SurveyWorkoutLevelView(onNext: {
+                    router.navigateTo(.surveyWorkoutDay)
+                })
+                .environmentObject(router)
+                .environmentObject(surveyManager)
+                
+            case .surveyWorkoutDay:
+                WorkoutDayView(onNext: {
+                    // ✅ Cek apakah dari profile atau survey biasa
+                    if router.isEditingFromProfile {
+                        router.isEditingFromProfile = false  // Reset flag
+                        router.navigateTo(.aboutMe)  // Kembali ke AboutMe
+                    } else {
+                        router.navigateTo(.afterSurvey)  // Flow normal ke menu
+                    }
+                })
+                .environmentObject(router)
+                .environmentObject(surveyManager)
+
                 // MARK: - Onboarding & Setup Flow
             case .onboarding:
                 if surveyManager.isSurveyComplete {
@@ -45,10 +73,10 @@ struct RouterView: View {
                     .environmentObject(surveyManager)
                 
                 // MARK: - Main App Flow
-            case .tabBar, .menu, .profile:
-                TabBarView()
-                    .environmentObject(router)
-                    .environmentObject(surveyManager)
+                case .tabBar, .menu, .profile:
+                    TabBarView(selectedTab: router.selectedTab)  // ✅ Pass selectedTab
+                        .environmentObject(router)
+                        .environmentObject(surveyManager)
                 
                 // MARK: - Workout Flow
             case .adjustMenuCardio:
@@ -56,7 +84,7 @@ struct RouterView: View {
                     dailyMenu: router.selectedDailyMenu,
                     vigorousDuration: router.vigorousDuration,
                     moderateDuration: router.moderateDuration)
-                    .environmentObject(router)
+                .environmentObject(router)
                 //.environment(connectivity)
                 
             case .adjustMenuStrength:
@@ -110,7 +138,7 @@ struct RouterView: View {
                 let weekday = Calendar.current.component(.weekday, from: Date())
                 if weekday % 2 == 0 {
                     AdjustMenuCardioView(dailyMenu: router.selectedDailyMenu)
-                    .environmentObject(router)
+                        .environmentObject(router)
                     //.environment(connectivity)
                 } else {
                     AdjustMenuStrengthView()

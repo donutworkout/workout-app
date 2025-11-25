@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct SummaryView: View {
+    @EnvironmentObject var router: Router
     @Environment(\.modelContext) private var modelContext
     @Query private var dailyMenus: [DailyMenu]
         
@@ -26,7 +27,7 @@ struct SummaryView: View {
         let startOfWeek = calendar.date(byAdding: .day, value: mondayOffset, to: today)!
         return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: startOfWeek) }
     }
-
+  
     // Animation states
     @State private var showContent: Bool = false
     @State private var characterScale: CGFloat = 0.5
@@ -66,7 +67,8 @@ struct SummaryView: View {
                     .padding(.horizontal, 20)
                     .opacity(showContent ? 1 : 0)
                     .offset(y: showContent ? 0 : -20)
-
+                    .animateHeader(forTab: 1, currentTab: $router.selectedTab, delay: 0.1)
+                
                 // MARK: - Day Selector with Progress
                 DaySelectorSummaryView(
                     selectedDay: $selectedDay,
@@ -77,7 +79,8 @@ struct SummaryView: View {
                 .padding(.horizontal, 20)
                 .opacity(showContent ? 1 : 0)
                 .offset(y: showContent ? 0 : -20)
-
+                .animateHeader(forTab: 1, currentTab: $router.selectedTab, delay: 0.2)
+                
                 // MARK: - Character with Progress Fill
                 if summaryManager.isLoading {
                     ProgressView()
@@ -88,12 +91,7 @@ struct SummaryView: View {
                         .frame(width: 300, height: 300)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
-                        .scaleEffect(characterScale)
-                        .opacity(characterOpacity)
-                        .rotation3DEffect(
-                            .degrees(showContent ? 0 : 15),
-                            axis: (x: 0, y: 1, z: 0)
-                        )
+                        .animateHeader(forTab: 1, currentTab: $router.selectedTab, delay: 0.3)
                 }
 
                 if let menu = dailyMenus.first(where: { Calendar.current.isDate($0.date, inSameDayAs: weekDates[selectedDay]) }) {
@@ -144,7 +142,18 @@ struct SummaryView: View {
                         Spacer()
                     }
                 }
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color.white)
+                        .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
+                )
+                .padding(.horizontal, 20)
+                .animateHeader(forTab: 1, currentTab: $router.selectedTab, delay: 0.5)
+                
+                Spacer()
             }
+            .padding(.bottom, 40)
         }
         .refreshable {
             await summaryManager.fetchWeeklySummary(dailyMenus: dailyMenus)
@@ -234,10 +243,24 @@ struct DaySelectorSummaryView: View {
     var weekDates: [Date]
     var progress: [Double]
     let weekDays: [String]
-
+    
+    // ✅ Detect hari ini
+    private var todayIndex: Int {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        
+        // Cari index dari weekDates yang match dengan hari ini
+        if let index = weekDates.firstIndex(where: { calendar.isDate($0, inSameDayAs: today) }) {
+            return index
+        }
+        return -1 // Jika tidak ditemukan
+    }
+    
     var body: some View {
         HStack(spacing: 8) {
             ForEach(0..<7, id: \.self) { index in
+                let isToday = index == todayIndex  // ✅ Check apakah hari ini
+                
                 VStack(spacing: 6) {
                     Text(weekDays[index])
                         .font(.system(size: 13, weight: .semibold))
@@ -254,7 +277,7 @@ struct DaySelectorSummaryView: View {
                                 .frame(width: 44, height: 44)
 
                             Circle()
-                                .fill(Color("pinkTextPrimary"))
+                                .fill(Color("pinkTextSecondary"))
                                 .frame(width: 44, height: 44)
                                 .mask(
                                     Rectangle()
@@ -265,7 +288,12 @@ struct DaySelectorSummaryView: View {
 
                             if selectedDay == index {
                                 Circle()
-                                    .stroke(Color("pinkTextPrimary"), lineWidth: 3)
+                                    .stroke(
+                                        isToday
+                                        ? Color("pinkTextPrimary")  // Pink untuk hari ini
+                                        : Color("grayTextPrimary"),  // Abu untuk bukan hari ini
+                                        lineWidth: 3
+                                    )
                                     .frame(width: 46, height: 46)
                             }
 

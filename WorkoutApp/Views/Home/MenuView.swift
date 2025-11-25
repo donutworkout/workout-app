@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import HealthKit 
 
 struct MenuView: View {
     @EnvironmentObject var router: Router
@@ -17,12 +18,6 @@ struct MenuView: View {
     @State private var cardioSpecs: CardioDetails?
     @State private var vigorousDuration: Int = 0
     @State private var moderateDuration: Int = 0
-    
-    // MARK: - Animation States
-    @State private var showContent: Bool = false
-    @State private var workoutCardScale: CGFloat = 0.5
-    @State private var workoutCardOpacity: Double = 0
-    @State private var streakCardOffset: CGFloat = 50
     
     private var userCycle: UserCycle? {
         userCycles.first
@@ -103,15 +98,13 @@ struct MenuView: View {
                     .foregroundColor(.black)
                     .padding(.top, 32)
                     .padding(.horizontal, 20)
-                    .opacity(showContent ? 1 : 0)
-                    .offset(y: showContent ? 0 : -20)
+                    .animateHeader(forTab: 0, currentTab: $router.selectedTab, delay: 0.1)
                 
                 // MARK: - Day Selector
                 DaySelectorView(
                     selectedDayIndex: $cycleViewModel.selectedDayIndex,
                     userCycle: userCycle)
-                    .opacity(showContent ? 1 : 0)
-                    .offset(y: showContent ? 0 : -20)
+                .animateHeader(forTab: 0, currentTab: $router.selectedTab, delay: 0.2)
                 
                 // MARK: - Workout Card
                 CombinedWorkoutCardView(
@@ -134,12 +127,7 @@ struct MenuView: View {
                             }
                         }
                     })
-                    .scaleEffect(workoutCardScale)
-                    .opacity(workoutCardOpacity)
-                    .rotation3DEffect(
-                        .degrees(showContent ? 0 : 15),
-                        axis: (x: 0, y: 1, z: 0)
-                    )
+                .animateCard(forTab: 0, currentTab: $router.selectedTab, delay: 0.3)
                 
                 // MARK: - Streak Section
                 VStack(spacing: 8) {
@@ -150,11 +138,8 @@ struct MenuView: View {
                         .padding(.horizontal, 20)
                     StreakCardView()
                 }
-                .opacity(showContent ? 1 : 0)
-                .offset(y: streakCardOffset)
+                .animateCard(forTab: 0, currentTab: $router.selectedTab, delay: 0.4)
             }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 40)
         }
         .background(Color.white.ignoresSafeArea())
         .onAppear {
@@ -166,28 +151,6 @@ struct MenuView: View {
             cycleViewModel.selectedDayIndex = todayIndex()
             loadWeeklyMenu()
             calculateCardioSpecs()
-            
-            // Start entrance animation
-            startEntranceAnimation()
-        }
-    }
-    
-    // MARK: - Entrance Animation Sequence
-    private func startEntranceAnimation() {
-        // Step 1: Show header and day selector (0.3s delay)
-        withAnimation(.easeOut(duration: 0.5).delay(0.3)) {
-            showContent = true
-        }
-        
-        // Step 2: Workout card pop in with bounce (0.5s delay)
-        withAnimation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.5)) {
-            workoutCardScale = 1.0
-            workoutCardOpacity = 1.0
-        }
-        
-        // Step 3: Streak card slide up (0.8s delay)
-        withAnimation(.easeOut(duration: 0.5).delay(0.8)) {
-            streakCardOffset = 0
         }
     }
     
@@ -263,6 +226,7 @@ struct MenuView: View {
 }
 
 struct CombinedWorkoutCardView: View {
+    @State private var showHealthNotConnectedModal = false
     @EnvironmentObject var router: Router
     
     let phase: MenstrualPhase
@@ -385,11 +349,17 @@ struct CombinedWorkoutCardView: View {
                         .lineSpacing(3)
                 }
                 if (menu?.isCardio ?? false) || (menu?.isStrength ?? false) {
-                    PrimaryGlassButton(title: "Start Workout", action: {
-                        HapticManager.shared.trigger(.buttonTap)
-                        onStartWorkout()
-                    })
-                }
+                                PrimaryGlassButton(title: "Start Workout") {
+                                    HapticManager.shared.trigger(.buttonTap)
+                                    
+                                    // ✅ Check HealthKit connection
+                                    if checkHealthKitAuthorization() {
+                                        onStartWorkout()
+                                    } else {
+                                        showHealthNotConnectedModal = true
+                                    }
+                                }
+                            }
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 20)
@@ -401,6 +371,24 @@ struct CombinedWorkoutCardView: View {
         )
         .padding(.horizontal, 20)
     }
+    private func checkHealthKitAuthorization() -> Bool {
+            guard HKHealthStore.isHealthDataAvailable() else {
+                return false
+            }
+            
+            let healthStore = HKHealthStore()
+            
+            // Check untuk workout type yang dibutuhkan
+            let workoutType = HKObjectType.workoutType()
+            let heartRateType = HKObjectType.quantityType(forIdentifier: .heartRate)!
+            let activeEnergyType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
+            
+            // Check authorization status
+            let workoutStatus = healthStore.authorizationStatus(for: workoutType)
+            
+            // Return true jika sudah authorized
+            return workoutStatus == .sharingAuthorized
+        }
 }
 
 // MARK: - Day Selector (Final Fixed Version)
@@ -481,7 +469,7 @@ struct DaySelectorView: View {
                                         ? Color.gray.opacity(0.3) // abu
                                         : (
                                             isSelected
-                                            ? Color("pinkTextPrimary") // pink tua kalau dipilih
+                                            ? Color("pinkTextSecondary") // pink tua kalau dipilih
                                             : (
                                                 isToday
                                                 ? Color("pinkTextTertiary") // pink muda kalau hari ini tapi tdk dipilih
@@ -573,6 +561,8 @@ struct PhaseCardView: View {
 
 // MARK: - Streak Card
 struct StreakCardView: View {
+    @EnvironmentObject var router: Router  // ✅ Tambahkan ini
+    
     @State private var progressAnim: CGFloat = 0
     let currentStreak: Int = 7
     let targetStreak: Int = 20
@@ -583,69 +573,74 @@ struct StreakCardView: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            // Character on the Left
+            // Character on the Left (tidak bisa diklik)
             Image("charStreak")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 100, height: 100)
             
-            // Card on the Right
-            VStack(spacing: 8) {
-                // Streak Counter
-                HStack(spacing: 4) {
-                    Text("\(currentStreak) / \(targetStreak)")
-                        .font(.system(size: 32, weight: .bold))
-                        .foregroundColor(Color("pinkTextPrimary"))
-                    
-                    Spacer()
-                }
-                
-                Text("Day Streak")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.black)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                
-                // Progress Bar
-                GeometryReader { geometry in
-                    ZStack(alignment: .leading) {
-                        // Background
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.gray.opacity(0.15))
-                            .frame(width: geometry.size.width, height: 20)
+            // Card on the Right (bisa diklik)
+            Button {
+                router.navigateTo(.streak)  // ✅ Navigasi ke StreakView
+            } label: {
+                VStack(spacing: 8) {
+                    // Streak Counter
+                    HStack(spacing: 4) {
+                        Text("\(currentStreak) / \(targetStreak)")
+                            .font(.system(size: 32, weight: .bold))
+                            .foregroundColor(Color("pinkTextPrimary"))
                         
-                        // Progress Fill with Fire Icon
-                        ZStack(alignment: .trailing) {
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(
-                                    LinearGradient(
-                                        colors: [Color("pinkTextPrimary"), Color("pinkTextPrimary").opacity(0.85)],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
-                                )
-                                .frame(width: max(20, progressAnim * geometry.size.width), height: 20)
-                            
-                            // Fire Icon at the end
-                            if progressAnim > 0 {
-                                Image("fireStreakRed")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 26, height: 26)
-                                    .offset(x: 8)
-                            }
-                        }
-                        .frame(width: max(20, progressAnim * geometry.size.width), height: 20, alignment: .leading)
+                        Spacer()
                     }
+                    
+                    Text("Day Streak")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    // Progress Bar
+                    GeometryReader { geometry in
+                        ZStack(alignment: .leading) {
+                            // Background
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.gray.opacity(0.15))
+                                .frame(width: geometry.size.width, height: 20)
+                            
+                            // Progress Fill with Fire Icon
+                            ZStack(alignment: .trailing) {
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [Color("pinkTextPrimary"), Color("pinkTextPrimary").opacity(0.85)],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
+                                    .frame(width: max(20, progressAnim * geometry.size.width), height: 20)
+                                
+                                // Fire Icon at the end
+                                if progressAnim > 0 {
+                                    Image("fireStreakRed")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 26, height: 26)
+                                        .offset(x: 8)
+                                }
+                            }
+                            .frame(width: max(20, progressAnim * geometry.size.width), height: 20, alignment: .leading)
+                        }
+                    }
+                    .frame(height: 20)
                 }
-                .frame(height: 20)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color.white)
+                        .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 3)
+                )
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
-            .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(Color.white)
-                    .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 3)
-            )
+            .buttonStyle(PlainButtonStyle())  // ✅ Agar tidak ada efek highlight default
         }
         .padding(.horizontal, 20)
         .onAppear {

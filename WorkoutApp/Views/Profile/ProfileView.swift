@@ -14,7 +14,7 @@ struct ProfileView: View {
 
     @Query(sort: \UserProfile.createdAt, order: .reverse)
     private var profiles: [UserProfile]
-
+    
     // User & cycle data
     private var currentProfile: UserProfile? { profiles.first }
     private var userName: String { currentProfile?.name ?? "User" }
@@ -79,10 +79,11 @@ struct ProfileView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.top, 32)
                     .padding(.horizontal, 20)
-
-                // MARK: - User Profile Card (Simple HStack)
-                NavigationLink {
-                    // Navigate to profile detail
+                    .animateHeader(forTab: 2, currentTab: $router.selectedTab, delay: 0.1)
+                
+                // MARK: - User Profile Card
+                Button {
+                    router.navigateTo(.aboutMe)
                 } label: {
                     HStack(spacing: 14) {
                         Image("profile")
@@ -110,14 +111,17 @@ struct ProfileView: View {
                     )
                 }
                 .padding(.horizontal, 20)
+                .animateHeader(forTab: 2, currentTab: $router.selectedTab, delay: 0.2)
 
-                // MARK: - Main Cycle Card (Same Size as MenuView)
+                
+                // MARK: - Main Cycle Card
                 VStack(spacing: 0) {
                     // Info banner
                     VStack(alignment: .leading, spacing: 3) {
                         Text("You're on Day \(currentCycleDay) - \(cyclePhaseText)")
                             .font(.system(size: 15, weight: .bold))
                             .foregroundColor(.black)
+                        
                         Text("Next period predicted: \(nextPeriodDate)")
                             .font(.system(size: 12))
                             .foregroundColor(.gray)
@@ -136,10 +140,8 @@ struct ProfileView: View {
                         .fill(Color("pinkTextTertiary"))
                     )
                     
-                    // Mascot illustration (9:16 ratio, same as MenuView)
                     Image("menuCardio")
                         .resizable()
-//                        .scaledToFill()
                         .frame(maxWidth: .infinity)
                         .clipped()
                     
@@ -188,7 +190,7 @@ struct ProfileView: View {
                         }
                         .padding(.horizontal, 18)
                         
-                        // Calendar grid - FIXED HEIGHT
+                        // Calendar grid
                         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 7), spacing: 6) {
                             ForEach(0..<42, id: \.self) { index in
                                 if index < daysInMonth.count, let date = daysInMonth[index] {
@@ -209,7 +211,7 @@ struct ProfileView: View {
                                 }
                             }
                         }
-                        .frame(height: 252) // 6 rows × 36 height + 5 × 6 spacing = 252
+                        .frame(height: 252)
                         .padding(.horizontal, 18)
                         .padding(.bottom, 10)
                         
@@ -223,6 +225,7 @@ struct ProfileView: View {
                                     .font(.system(size: 12))
                                     .foregroundColor(.black)
                             }
+                            
                             HStack(spacing: 6) {
                                 Circle()
                                     .stroke(Color.blue, lineWidth: 2)
@@ -231,12 +234,13 @@ struct ProfileView: View {
                                     .font(.system(size: 12))
                                     .foregroundColor(.black)
                             }
+                            
                             Spacer()
                         }
                         .padding(.horizontal, 18)
                         .padding(.bottom, 6)
                         
-                        // PrimaryGlassButton
+                        // Edit Button
                         PrimaryGlassButton(title: isEditing ? "Save Changes" : "Edit Calendar") {
                             withAnimation(.spring()) {
                                 if isEditing {
@@ -261,9 +265,8 @@ struct ProfileView: View {
                 .shadow(color: .black.opacity(0.06), radius: 10, x: 0, y: 4)
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
-            }
-            .onAppear {
-                loadCycleDates()
+                .animateHeader(forTab: 2, currentTab: $router.selectedTab, delay: 0.3)
+
             }
         }
         .background(Color.white.ignoresSafeArea())
