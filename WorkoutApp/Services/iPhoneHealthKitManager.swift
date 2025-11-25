@@ -14,6 +14,13 @@ final class iPhoneHealthKitManager {
     private let healthStore = HKHealthStore()
 
         private init() {}
+    
+    func isAuthorized() -> Bool {
+        guard HKHealthStore.isHealthDataAvailable() else { return false }
+        let status = healthStore.authorizationStatus(for: HKObjectType.workoutType())
+        return status == .sharingAuthorized
+    }
+
 
         // MARK: - Authorization
         func requestAuthorization(completion: @escaping (Bool, Error?) -> Void) {
