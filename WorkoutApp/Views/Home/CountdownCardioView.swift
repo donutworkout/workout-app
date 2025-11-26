@@ -61,7 +61,7 @@ struct CountdownCardioView: View {
     init(activityName: String = "Indoor Walk",
          imageName: String = "indoorWalk",
          onCountdownComplete: @escaping () -> Void = {}) {
-        self.activityName = activityName
+        self.activityName = "Cardio Workout"
         self.imageName = imageName
         self.onCountdownComplete = onCountdownComplete
     }

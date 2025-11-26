@@ -97,7 +97,7 @@ struct RouterView: View {
                     .environmentObject(router)
                 
             case .startCardio:
-                StartCardioView()
+                StartCardioView(activityName: router.selectedCardioMenu ?? "Cardio")
                     .environmentObject(router)
                 
             case .startStrength:
