@@ -109,7 +109,7 @@ struct StartStrengthView: View {
                             // Workout complete - go to summary or home
                             connectivity.stopWorkoutFromPhone()
                             sessionManager.reset()
-                            router.navigateTo(.menu)
+                            router.navigateTo(.finishWorkout)
                         }
                     }
                 }
@@ -129,7 +129,7 @@ struct StartStrengthView: View {
                         connectivity.stopWorkoutFromPhone()
                         showPausePopup = false
                         isPaused = false
-                        router.navigateTo(.finishWorkout)
+                        router.navigateTo(.halfwayWorkout)
                     }
                 )
                 .transition(.scale.combined(with: .opacity))

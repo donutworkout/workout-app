@@ -10,6 +10,7 @@ import SwiftUI
 struct FinishWorkoutView: View {
     @EnvironmentObject var router: Router
     @Environment(iPhoneConnectivityManager.self) private var connectivity
+    @Environment(\.modelContext) private var modelContext
 
     var characterImage: String = "charCongrats"
 
@@ -89,6 +90,9 @@ struct FinishWorkoutView: View {
         .navigationBarBackButtonHidden(true)
         .onAppear {
             HapticManager.shared.trigger(.workoutCompleted)
+            
+            StreakManager.shared.updateStreak(context: modelContext)
+            
             // Trigger character animation
             characterScale = 1.15
             characterOpacity = 1

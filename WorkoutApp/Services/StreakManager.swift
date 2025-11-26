@@ -17,11 +17,14 @@ class StreakManager {
         let streaks = try? context.fetch(descriptor)
         
         let streak: Streak
+        let isNewStreak: Bool
         if let existing = streaks?.first {
             streak = existing
+            isNewStreak = false
         } else {
             streak = Streak()
             context.insert(streak)
+            isNewStreak = true
         }
         
         let calendar = Calendar.current
@@ -37,7 +40,16 @@ class StreakManager {
             print("📅 New month! Reset workout count")
         }
         
-        if daysDifference == 0 {
+        print("Current streak: \(streak.currentStreak)")
+        print("Last workout date: \(streak.lastWorkoutDate)")
+        
+        if isNewStreak {
+            streak.currentStreak = 1
+            streak.longestStreak = 1
+            streak.lastWorkoutDate = Date()
+            streak.workoutsThisMonth = 1
+            print("🎉 First workout! Streak started at 1")
+        } else if daysDifference == 0 {
             print("✅ Already completed workout today")
         } else if daysDifference == 1 {
             // Consecutive day

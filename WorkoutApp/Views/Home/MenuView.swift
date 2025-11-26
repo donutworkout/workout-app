@@ -668,7 +668,7 @@ struct StreakCardView: View {
             withAnimation(.easeOut(duration: 1.2)) {
                 progressAnim = progress
             }
-            
+
             loadStreak()
         }
     }
@@ -677,6 +677,7 @@ struct StreakCardView: View {
         let progress = StreakManager.shared.getMonthlyProgress(context: modelContext)
         currentStreak = progress.completed
         targetStreak = progress.goal
+        print("Current home streak: \(currentStreak)")
     }
 }
 
