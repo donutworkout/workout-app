@@ -23,7 +23,7 @@ struct StartCardioView: View {
     @State private var timeElapsed: TimeInterval = 0
     @State private var calories: Int = 0
     @State private var distance: Double = 0.0
-    @State private var bpm: Int = 90
+    @State private var bpm: Int = 0
     @State private var showPausePopup: Bool = false
     @State private var showHRAlert: Bool = false
     

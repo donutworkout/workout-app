@@ -12,10 +12,8 @@ import SwiftUI
 struct AdjustMenuStrengthView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-
     @Environment(iPhoneConnectivityManager.self) private var connectivity
 
-    @State private var selectedMenu: StrengthMenuType = .bodyweight
     @State private var workouts: [Exercise] = []
 
     @EnvironmentObject var router: Router
@@ -32,86 +30,36 @@ struct AdjustMenuStrengthView: View {
     var onNext: (() -> Void)? = nil
 
     init(dailyMenu: DailyMenu? = nil) {
-
-        // Warna segmented control kustom (pink)
-        let pinkColor = UIColor(named: "pinkTextPrimary") ?? UIColor.systemPink
-        let selectedAttrs: [NSAttributedString.Key: Any] = [
-            .foregroundColor: UIColor.white
-        ]
-        let normalAttrs: [NSAttributedString.Key: Any] = [
-            .foregroundColor: UIColor.black
-        ]
-        let appearance = UISegmentedControl.appearance()
-        appearance.selectedSegmentTintColor = pinkColor
-        appearance.setTitleTextAttributes(selectedAttrs, for: .selected)
-        appearance.setTitleTextAttributes(normalAttrs, for: .normal)
-      
-        self.dailyMenu = dailyMenu  
+        self.dailyMenu = dailyMenu
     }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 20) {
-                // MARK: - Segmented Control
-                Picker("Menu Type", selection: $selectedMenu) {
-                    ForEach(StrengthMenuType.allCases, id: \.self) { type in
-                        Text(type.rawValue)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .padding(.horizontal)
-                .padding(.top, 8)
-                .onChange(of: selectedMenu) { _, newValue in
-                    let name = newValue.rawValue.lowercased()
-                    let mapping = mapActivityToHKType(name)
-
-                    self.workoutType = mapping.type
-
-                    iPhoneConnectivityManager.shared.sendSelectedWorkout(
-                        mapping.type,
-                        activityName: newValue.rawValue,   // "Bodyweight" / "Gym"
-                        isIndoor: mapping.isIndoor
-                    )
-                }
-
                 // MARK: - Workout Cards
                 VStack(spacing: 16) {
-                    if selectedMenu == .bodyweight {
-                        ForEach(workouts) { workout in
-                            WorkoutItemCard(workout: workout)
-                        }
-                    } else {
-                        Spacer()
-
-                        Text("Do your own gym routine! :)")
-
-                        Spacer()
+                    ForEach(Array(workouts.enumerated()), id: \.element) { index, workout in
+                        WorkoutItemCard(workout: workout)
+                            .pageCardAnimation(delay: 0.2 + Double(index) * 0.1)
                     }
                 }
                 .padding(.horizontal)
                 .padding(.top, 8)
-                .padding(.bottom, 24)  // extra space so last card isn't obscured by bottom button
+                .padding(.bottom, 24)
             }
         }
         .safeAreaInset(edge: .bottom) {
             VStack {
                 PrimaryGlassButton(title: "Start Now") {
-                    if selectedMenu == .bodyweight {
-                        sessionManager.prepareWorkout(with: workouts)
-                        router.workoutExercises = workouts
-                    } else {
-                        sessionManager.prepareWorkout(with: [])
-                        router.workoutExercises = []
-                    }
+                    sessionManager.prepareWorkout(with: workouts)
+                    router.workoutExercises = workouts
 
-                    let name = selectedMenu.rawValue.lowercased()
-                    let mapping = mapActivityToHKType(name)
-
+                    let mapping = mapActivityToHKType("bodyweight")
                     router.selectedWorkoutType = mapping.type
 
                     iPhoneConnectivityManager.shared.sendSelectedWorkout(
                         mapping.type,
-                        activityName: selectedMenu.rawValue,
+                        activityName: "Bodyweight",
                         isIndoor: mapping.isIndoor
                     )
 
@@ -126,6 +74,7 @@ struct AdjustMenuStrengthView: View {
                 .padding(.horizontal)
                 .padding(.top, 8)
                 .padding(.bottom, 8)
+                .pageCardAnimation(delay: 0.3)
             }
             .background(Color.white.opacity(0.95))
         }
@@ -207,20 +156,6 @@ struct AdjustMenuStrengthView: View {
         }
     }
 }
-
-// MARK: - Enums & Models
-enum StrengthMenuType: String, CaseIterable {
-    case bodyweight = "Bodyweight"
-    case gym = "Gym"
-}
-
-//struct WorkoutItem: Identifiable {
-//    var id = UUID()
-//    var image: String
-//    var name: String
-//    var sets: Int
-//    var reps: String
-//}
 
 extension AdjustMenuStrengthView {
     private var userCycle: UserCycle? {

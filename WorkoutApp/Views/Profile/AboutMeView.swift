@@ -31,6 +31,20 @@ struct AboutMeView: View {
     @State private var hasChanges: Bool = false
     @State private var showValidation: Bool = false
     
+    // MARK: - Animation States
+    @State private var headerOpacity: Double = 0
+    @State private var profileImageScale: CGFloat = 0.5
+    @State private var profileImageOpacity: Double = 0
+    @State private var profileImageRotation: Double = -20
+    
+    @State private var personalCardScale: CGFloat = 0.7
+    @State private var personalCardOpacity: Double = 0
+    @State private var personalCardRotation: Double = 20
+    
+    @State private var planCardScale: CGFloat = 0.7
+    @State private var planCardOpacity: Double = 0
+    @State private var planCardRotation: Double = 20
+    
     private var currentYear: Int {
         Calendar.current.component(.year, from: Date())
     }
@@ -120,9 +134,8 @@ struct AboutMeView: View {
             hasChanges = false
             showValidation = false
             
-            // ✅ Set ke profile tab dan navigate
             router.selectedTab = 2
-            router.navigateTo(.profile)  // Ini akan trigger TabBarView dengan selectedTab = 2
+            router.navigateTo(.profile)
         } catch {
             print("❌ Error saving profile: \(error.localizedDescription)")
         }
@@ -131,14 +144,14 @@ struct AboutMeView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // MARK: - Header
+            // MARK: - Header (dengan animasi fade in)
             HStack {
                 // X Button
                 Button {
                     if hasChanges {
-                        showUnsavedAlert = true  // Tampilkan alert jika ada perubahan
+                        showUnsavedAlert = true
                     } else {
-                        dismiss()  // Langsung close jika tidak ada perubahan
+                        dismiss()
                     }
                 } label: {
                     Image(systemName: "xmark")
@@ -157,14 +170,16 @@ struct AboutMeView: View {
                 
                 Spacer()
                 
-                // Save button (HANYA SATU)
                 if hasChanges {
                     Button {
-                        saveAndDismiss()  // Save dan auto dismiss
+                        saveAndDismiss()
                     } label: {
-                        Text("Save")
-                            .font(.system(size: 14, weight: .semibold))
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(Color("pinkTextPrimary"))
+                            .frame(width: 40, height: 40)
+                            .background(Color("pinkTextPrimary").opacity(0.15))
+                            .clipShape(Circle())
                     }
                 } else {
                     Color.clear.frame(width: 40, height: 40)
@@ -173,18 +188,25 @@ struct AboutMeView: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
             .background(Color.white)
-
+            .opacity(headerOpacity)
             
             // MARK: - Content
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 16) {
-                    // Profile Image
+                    // Profile Image (dengan animasi heboh)
                     Image("profile")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 100, height: 100)
                         .clipShape(Circle())
                         .padding(.top, 12)
+                        .scaleEffect(profileImageScale)
+                        .opacity(profileImageOpacity)
+                        .rotation3DEffect(
+                            .degrees(profileImageRotation),
+                            axis: (x: 0, y: 1, z: 0),
+                            perspective: 0.5
+                        )
                     
                     // MARK: - Personal Info Card (Frame 1)
                     VStack(alignment: .leading, spacing: 12) {
@@ -348,6 +370,13 @@ struct AboutMeView: View {
                     .cornerRadius(16)
                     .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
                     .padding(.horizontal, 20)
+                    .scaleEffect(personalCardScale)
+                    .opacity(personalCardOpacity)
+                    .rotation3DEffect(
+                        .degrees(personalCardRotation),
+                        axis: (x: 0.3, y: 1, z: 0),
+                        perspective: 0.5
+                    )
                     
                     // MARK: - Plan Setup Card (Frame 2)
                     VStack(alignment: .leading, spacing: 12) {
@@ -387,12 +416,11 @@ struct AboutMeView: View {
                                 .cornerRadius(12)
                         }
                         
-                        // Di AboutMeView.swift
                         PrimaryGlassButton(title: "Change in Survey") {
                             if hasChanges && isFormValid {
                                 saveUserProfile()
                             }
-                            router.isEditingFromProfile = true  // ✅ Set flag
+                            router.isEditingFromProfile = true
                             dismiss()
                             
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -407,6 +435,13 @@ struct AboutMeView: View {
                     .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
                     .padding(.horizontal, 20)
                     .padding(.bottom, 30)
+                    .scaleEffect(planCardScale)
+                    .opacity(planCardOpacity)
+                    .rotation3DEffect(
+                        .degrees(planCardRotation),
+                        axis: (x: 0.3, y: 1, z: 0),
+                        perspective: 0.5
+                    )
                 }
             }
         }
@@ -414,6 +449,7 @@ struct AboutMeView: View {
         .navigationBarHidden(true)
         .onAppear {
             loadUserProfile()
+            startEntranceAnimation()
         }
         .alert("Unsaved Changes", isPresented: $showUnsavedAlert) {
             Button("Discard", role: .destructive) {
@@ -423,6 +459,37 @@ struct AboutMeView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("You have unsaved changes. Do you want to discard them?")
+        }
+    }
+    
+    // MARK: - Animation Function
+    private func startEntranceAnimation() {
+        print("🎬 AboutMeView - Starting entrance animation!")
+        
+        // Step 1: Header fade in (0.1s)
+        withAnimation(.easeOut(duration: 0.4).delay(0.1)) {
+            headerOpacity = 1.0
+        }
+        
+        // Step 2: Profile Image dengan bounce + rotation (0.3s)
+        withAnimation(.spring(response: 0.8, dampingFraction: 0.65).delay(0.3)) {
+            profileImageScale = 1.0
+            profileImageOpacity = 1.0
+            profileImageRotation = 0
+        }
+        
+        // Step 3: Personal Info Card dengan bounce + rotation (0.5s)
+        withAnimation(.spring(response: 0.8, dampingFraction: 0.65).delay(0.5)) {
+            personalCardScale = 1.0
+            personalCardOpacity = 1.0
+            personalCardRotation = 0
+        }
+        
+        // Step 4: Plan Setup Card dengan bounce + rotation (0.7s)
+        withAnimation(.spring(response: 0.8, dampingFraction: 0.65).delay(0.7)) {
+            planCardScale = 1.0
+            planCardOpacity = 1.0
+            planCardRotation = 0
         }
     }
     
@@ -439,19 +506,14 @@ struct AboutMeView: View {
         guard let profile = currentProfile else { return }
         name = profile.name
         
-        // Convert age to year of birth
         let birthYear = currentYear - profile.age
         yearOfBirth = "\(birthYear)"
         
         height = "\(profile.height)"
         weight = "\(profile.weight)"
         
-        // ✅ Load workout preferences from UserWorkout
         if let workout = currentWorkout {
-            // Workout Level
             workoutLevel = workout.workoutLevel.displayName
-            
-            // Workout Days - format as comma-separated string
             let days = workout.workoutDaysPreference.map { $0.displayName }
             workoutDays = days.joined(separator: ", ")
         } else {

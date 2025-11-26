@@ -30,6 +30,33 @@ struct CountdownCardioView: View {
     @State private var scale: CGFloat = 0.5
     @State private var opacity: Double = 0
 
+    // ✅ TAMBAHKAN: Check if activity should show distance
+    private var shouldShowDistance: Bool {
+        let distanceActivities = ["Outdoor Run", "Indoor Run", "Outdoor Walk", "Indoor Walk",
+                                  "Cycling", "Swimming"]
+        return distanceActivities.contains(activityName)
+    }
+
+    // ✅ TAMBAHKAN: Check if swimming
+    private var isSwimming: Bool {
+        return activityName == "Swimming"
+    }
+
+    // ✅ TAMBAHKAN: Distance value formatting
+    private var distanceValue: String {
+        if isSwimming {
+            // Swimming: show in meters
+            return String(format: "%.0f", distance * 1000)
+        } else {
+            // Other activities: show in kilometers
+            return String(format: "%.2f", distance)
+        }
+    }
+
+    // ✅ TAMBAHKAN: Distance label
+    private var distanceLabel: String {
+        return isSwimming ? "METERS" : "KILOMETERS"
+    }
     
     init(activityName: String = "Indoor Walk",
          imageName: String = "indoorWalk",
@@ -50,6 +77,7 @@ struct CountdownCardioView: View {
                         .scaledToFit()
                         .frame(height: 380)
                         .padding(.top, 20)
+                        .pageImageAnimation(delay: 0.2)
                     
                     Text(formattedTime)
                         .font(.system(size: 36, weight: .bold))
@@ -63,14 +91,33 @@ struct CountdownCardioView: View {
                         .shadow(color: .gray.opacity(0.15), radius: 6, x: 0, y: 3)
                 )
                 .padding(.horizontal)
+                .pageHeaderAnimation(delay: 0.1)
                 
-//                // MARK: - Stats
-//                HStack(spacing: 16) {
-//                    StatCardItem(icon: "flame.fill", value: "\(calories)", label: "KCAL")
-//                    StatCardItem(icon: "figure.walk", value: String(format: "%.1f", distance), label: "KILOMETERS")
-//                    StatCardItem(icon: "heart.fill", value: "\(bpm)", label: "BPM")
-//                }
-//                .padding(.horizontal)
+                // MARK: - Stats (✅ CONDITIONAL)
+                HStack(spacing: 16) {
+                    StatCardItem(
+                        icon: "flame.fill",
+                        value: "\(calories)",
+                        label: "KCAL"
+                    )
+                    
+                    // ✅ Only show distance for specific activities
+                    if shouldShowDistance {
+                        StatCardItem(
+                            icon: isSwimming ? "figure.pool.swim" : "figure.walk",
+                            value: distanceValue,
+                            label: distanceLabel
+                        )
+                    }
+                    
+                    StatCardItem(
+                        icon: "heart.fill",
+                        value: "\(bpm)",
+                        label: "BPM"
+                    )
+                }
+                .padding(.horizontal)
+                .pageCardAnimation(delay: 0.3)
                 
                 Spacer()
                 
@@ -88,6 +135,7 @@ struct CountdownCardioView: View {
                     .padding(.horizontal)
                     .padding(.bottom, 40)
                     .disabled(showPausePopup)
+                    .pageCardAnimation(delay: 0.4)
                 }
                 
                 // MARK: - Pause Popup
@@ -95,8 +143,7 @@ struct CountdownCardioView: View {
                     Alert(
                         characterImage: "characterFreeze",
                         onResume:  {
-                                showExitAlert = false
-                            
+                            showExitAlert = false
                         },
                         onEndWorkout: {
                             timer?.invalidate()
@@ -110,42 +157,24 @@ struct CountdownCardioView: View {
             // MARK: - Countdown Overlay
             if showCountdown {
                 ZStack {
-                    // Semi-transparent overlay
                     Color.black.opacity(0.4)
                         .ignoresSafeArea()
                     
                     VStack(spacing: 0) {
-//                        // Teks "Get Ready!"
-//                        Text("Get Ready!")
-//                            .font(.system(size: 22, weight: .semibold, design: .rounded))
-//                            .foregroundColor(.white.opacity(0.9))
-//                            .textCase(.uppercase)
-//                            .tracking(1)
-//                            .padding(.bottom, 20)
-                        
-                        // Countdown number + circle
                         ZStack {
                             Circle()
-                                .stroke(Color("pinkTextPrimary").opacity(0.3), lineWidth: 4)
+                                .stroke(Color("pinkTextPrimary").opacity(0.9), lineWidth: 4)
                                 .frame(width: 150, height: 150)
                             Circle()
-                                .fill(Color("pinkTextPrimary").opacity(0.13))
+                                .fill(Color("pinkTextPrimary").opacity(0.9))
                                 .frame(width: 122, height: 122)
                             Text("\(countdown)")
                                 .font(.system(size: 72, weight: .bold, design: .rounded))
-                                .foregroundColor(Color("pinkTextPrimary"))
+                                .foregroundColor(Color.white.opacity(0.7))
                                 .monospacedDigit()
                         }
                         .scaleEffect(scale)
                         .opacity(opacity)
-                        
-//                        Spacer()
-                        
-//                        // Hint bawah
-//                        Text("Starting workout...")
-//                            .font(.system(size: 14, weight: .medium))
-//                            .foregroundColor(.white.opacity(0.7))
-//                            .padding(.top, 24)
                     }
                     .padding(.bottom, 60)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -166,14 +195,12 @@ struct CountdownCardioView: View {
                     }
                 }
             }
-
         }
         .navigationTitle(activityName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button(action: {
-                    // Instead of navigating directly → show alert first
                     showPausePopup = true
                     isPaused = true
                     timer?.invalidate()
@@ -203,12 +230,11 @@ struct CountdownCardioView: View {
         showCountdown = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             SoundManager.shared.playSound("countdownMusic", withExtension: "mp3")
-            }
+        }
         HapticManager.shared.trigger(.countdownTick)
         
-        // Countdown overlay timer
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { t in
-            countdown -= 1  // ✅ 3→2→1→0
+            countdown -= 1
             
             if countdown > 0 {
                 HapticManager.shared.trigger(.countdownTick)
@@ -228,7 +254,7 @@ struct CountdownCardioView: View {
                     showCountdown = false
                 }
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {  // ✅ Match animation duration
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     onCountdownComplete()
                     startTimer()
                 }
