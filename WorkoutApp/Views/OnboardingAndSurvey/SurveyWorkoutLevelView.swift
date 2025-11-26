@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SurveyWorkoutLevelView: View {
     @EnvironmentObject var surveyManager: SurveyManager
+    @EnvironmentObject var router: Router  // ✅ Tambahkan
     
     var onNext: () -> Void
     
@@ -59,16 +60,14 @@ struct SurveyWorkoutLevelView: View {
             ScrollView {
                 VStack(spacing: 32) {
                     
-                    // MARK: - Header
-//                    Text("Survey")
-//                        .font(.headline)
-//                        .foregroundColor(.black)
-//                        .padding(.top, 20)
-                    
                     // MARK: - Title & Character
                     HStack(alignment: .bottom) {
                         VStack(alignment: .leading, spacing: 8) {
-                            SurveyProgressText(currentPage: 3, totalPages: 5)
+                            // ✅ Hanya tampilkan SurveyProgressText jika BUKAN dari AboutMe
+                            if !router.isEditingFromProfile {
+                                SurveyProgressText(currentPage: 3, totalPages: 5)
+                            }
+                            
                             Text("Workout\nLevel")
                                 .font(.system(.title, weight: .semibold))
                                 .foregroundColor(Color("pinkTextPrimary"))
@@ -81,7 +80,6 @@ struct SurveyWorkoutLevelView: View {
                             .offset(x: move ? 9 : -54)
                     }
                     .padding(.horizontal)
-//                    .padding(.top, 10)
                     
                     // MARK: - Question Sections
                     Group {
@@ -126,7 +124,7 @@ struct SurveyWorkoutLevelView: View {
             PrimaryGlassButton(title: "Next", action: saveAndNext)
                 .padding(.horizontal)
                 .padding(.vertical)
-                .disabled(!isAllAnswered) // Disable jika belum semua section terisi
+                .disabled(!isAllAnswered)
                 .opacity(isAllAnswered ? 1 : 0.5)
             
         }
@@ -137,7 +135,7 @@ struct SurveyWorkoutLevelView: View {
             }
         }
         .onAppear {
-            // Initialize selections from surveyManager HANYA jika ada nilai valid
+            // Initialize selections from surveyManager
             if let frequency = surveyManager.tempWorkoutTimesAWeek {
                 selectedFrequency = [frequency.displayName]
             }
@@ -174,20 +172,16 @@ extension SurveyWorkoutLevelView {
         if let intensityString = selectedIntensity.first,
            let intensity = intensityFromDisplayName(intensityString) {
             surveyManager.updateTempWorkoutIntensity(intensity)
-            print("✅ Intensity saved: \(intensity.rawValue) - Display: \(intensity.displayName)")
+            print("✅ Intensity saved: \(intensity.rawValue)")
         }
                 
         if let experienceString = selectedExperience.first,
            let experience = experienceFromDisplayName(experienceString) {
             surveyManager.updateTempWorkoutExperience(experience)
-            print("✅ Experience saved: \(experience.rawValue) - Display: \(experience.displayName)")
+            print("✅ Experience saved: \(experience.rawValue)")
         }
         
         surveyManager.updateTempWorkoutLevel()
         onNext()
     }
-}
-
-#Preview {
-    SurveyWorkoutLevelView(onNext: {})
 }

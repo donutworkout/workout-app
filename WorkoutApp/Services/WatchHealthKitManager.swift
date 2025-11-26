@@ -48,7 +48,5 @@ final class WatchHealthKitManager {
                 return
             }
         }
-        
-        
     }
 }

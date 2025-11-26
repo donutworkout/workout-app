@@ -8,19 +8,37 @@
 import SwiftUI
 
 struct WatchWorkoutDoneView: View {
+    @Environment(WatchConnectivityManager.self) private var connectivity
     @Environment(WorkoutSessionManager.self) private var sessionManager
 
     @State private var elapsedTime: Int = 302  // contoh: 5 menit 2 detik (bisa diganti dari parent view)
     @State private var currentTime: String = Self.formatCurrentTime()
     private let clockTimer = Timer.publish(every: 1, on: .main, in: .common)
         .autoconnect()
+    
+    @Binding var showDoneView: Bool
+
 
     var body: some View {
         ZStack {
             Color("grayBackground")
                 .ignoresSafeArea()
-
+            
             VStack(spacing: 0) {
+                HStack {
+                    Button {
+                        endAndDismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                    .buttonStyle(.plain)
+                    
+                    Spacer()
+                }
+                .padding(.horizontal, 12)
+                .padding(.top, 6)
                 VStack(spacing: 0) {
                     Image("charCongrats")
                         .resizable()
@@ -31,7 +49,7 @@ struct WatchWorkoutDoneView: View {
                         .font(.system(size: 20, weight: .semibold))
                         .foregroundColor(Color.white)
                 }
-                .padding(.top, -20)
+//                .padding(.top, -20)
 
                 // MARK: - Static Stats
                 VStack(alignment: .leading, spacing: 0) {
@@ -82,6 +100,12 @@ struct WatchWorkoutDoneView: View {
         return formatter.string(from: Date())
     }
 
+    private func endAndDismiss() {
+        connectivity.selectedWorkoutType = nil
+        connectivity.shouldStartWorkout = false
+        showDoneView = false
+    }
+
     // MARK: - Reusable Row
     @ViewBuilder
     private func statRow(icon: String, value: String, label: String)
@@ -103,16 +127,16 @@ struct WatchWorkoutDoneView: View {
         formatter.dateFormat = "HH:mm"
         currentTime = formatter.string(from: Date())
     }
-    
+
     // MARK: - Formating Distance
-    
+
     private func formatDistance(_ meters: Double) -> String {
-           if meters >= 1000 {
-               return String(format: "%.2f km", meters / 1000)
-           } else {
-               return String(format: "%.0f m", meters)
-           }
-       }
+        if meters >= 1000 {
+            return String(format: "%.2f km", meters / 1000)
+        } else {
+            return String(format: "%.0f m", meters)
+        }
+    }
 
     private func formatTime(_ seconds: Int) -> String {
         let h = seconds / 3600
@@ -122,6 +146,6 @@ struct WatchWorkoutDoneView: View {
     }
 }
 
-#Preview("Done") {
-    WatchWorkoutDoneView()
-}
+//#Preview("Done") {
+//    WatchWorkoutDoneView(showDoneView: Binding<Bool>)
+//}

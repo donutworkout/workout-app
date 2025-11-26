@@ -62,26 +62,7 @@ class WorkoutSessionManager: NSObject {
     // MARK: - Start Workout
     
     func startWorkout(of type: HKWorkoutActivityType, isIndoor: Bool) {
-        guard HKHealthStore.isHealthDataAvailable() else { return }
-        
-        let typesToShare: Set = [HKQuantityType.workoutType()]
-        let typesToRead = typesToRead(for: type)
-        
-        healthStore.requestAuthorization(
-            toShare: typesToShare,
-            read: typesToRead
-        ) { (success, error) in
-            if success {
-                DispatchQueue.main.async {
-                    self.beginWorkout(of: type, isIndoor: isIndoor)
-                }
-            } else {
-                print(
-                    "Authorization failed:",
-                    error?.localizedDescription ?? "unknown"
-                )
-            }
-        }
+        beginWorkout(of: type, isIndoor: isIndoor)
     }
     
     //MARK: - Begin Workout
@@ -158,11 +139,17 @@ class WorkoutSessionManager: NSObject {
                     self.workoutSession = nil
                     self.workoutBuilder = nil
                     if let workout = workout {
+                        let activeEnergyQuantity = builder.statistics(for: HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)!)?.sumQuantity()
+                        let basalEnergyQuantity = builder.statistics(for: HKQuantityType.quantityType(forIdentifier: .basalEnergyBurned)!)?.sumQuantity()
+                        let activeKcals = activeEnergyQuantity?.doubleValue(for: .kilocalorie()) ?? 0
+                        let basalKcals = basalEnergyQuantity?.doubleValue(for: .kilocalorie()) ?? 0
+                        let totalKcals = activeKcals + basalKcals
+                        
                         let summary: [String: Any] = [
                                 "cmd": "workoutSummary",
                                 "duration": workout.duration,
-                                "activeEnergy": workout.totalEnergyBurned?.doubleValue(for: .kilocalorie()) ?? 0,
-                                "totalEnergy": workout.totalEnergyBurned?.doubleValue(for: .kilocalorie()) ?? 0,
+                                "activeEnergy": activeKcals,
+                                "totalEnergy": totalKcals,
                                 "distance": workout.totalDistance?.doubleValue(for: .meter()) ?? 0,
                                 "avgHeartRate": self.averageHeartRate
                             ]

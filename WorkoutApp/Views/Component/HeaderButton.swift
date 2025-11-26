@@ -16,53 +16,47 @@ struct HeaderButton: View {
     var body: some View {
         HStack {
             Button(action: onClose) {
-                ZStack {
-                    Circle()
-                        .fill(Color(.systemGray5))
-                        .glassEffect(.regular)
-                        .frame(width: 30, height: 30)    // lebih kecil natural iOS
-                    
-                    Image(systemName: "xmark")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(.gray)
-                }
+                Image(systemName: "xmark")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.gray)
+                    .frame(width: 40, height: 40)
+                    .background(Color.gray.opacity(0.1))
+                    .clipShape(Circle())
             }
             
             Spacer()
             
-            // MARK: - Title (iOS size default)
+            // MARK: - Title
             Text(title)
-                .font(.headline)                     // default iPhone style
+                .font(.system(size: 18, weight: .semibold))
                 .foregroundColor(.black)
             
             Spacer()
             
             // MARK: - Edit / Save Button
             if isEditing {
+                // ✅ Save Button (Checkmark)
                 Button(action: onEditToggle) {
-                    ZStack {
-                        Circle()
-                            .fill(Color("pinkTextPrimary"))
-                            .glassEffect(.regular)
-                            .frame(width: 30, height: 30)  // lebih kecil
-                        
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.white)
-                    }
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(Color("pinkTextPrimary"))
+                        .frame(width: 40, height: 40)
+                        .background(Color("pinkTextPrimary").opacity(0.15))
+                        .clipShape(Circle())
                 }
             } else {
+                // ✅ Edit Button (Text)
                 Button(action: onEditToggle) {
                     Text("Edit")
-                        .font(.callout)                 // lebih kecil, seperti iOS
+                        .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(Color("pinkTextPrimary"))
-                        .padding(.vertical, 4)
+                        .frame(width: 40, height: 40)
                 }
             }
         }
-        .padding(.horizontal)
-        .padding(.top, 6)
-        .padding(.bottom, 10)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .background(Color.white)
     }
 }
 
@@ -83,5 +77,5 @@ struct HeaderButton: View {
         )
     }
     .padding()
-    .background(Color.white)
+    .background(Color.gray.opacity(0.1))
 }

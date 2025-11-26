@@ -55,12 +55,12 @@ struct FinishWorkoutView: View {
                     summaryItem(title: "Workout Time",
                                 value: formatTime(connectivity.summaryDuration))
                     Divider()
-                    summaryItem(title: "Active Calories",
+                    summaryItem(title: "Active Kilocalories",
                                 value: "\(Int(connectivity.summaryActiveEnergy)) kcal")
                 }
                 Divider()
                 HStack {
-                    summaryItem(title: "Total Calories",
+                    summaryItem(title: "Total Kilocalories",
                                 value: "\(Int(connectivity.summaryTotalEnergy)) kcal")
                     Divider()
                     summaryItem(title: "Avg. Heart Rate",

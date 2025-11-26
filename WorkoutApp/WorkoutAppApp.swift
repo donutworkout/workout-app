@@ -25,7 +25,8 @@ struct WorkoutAppApp: App {
                 UserCycle.self,
                 Exercise.self,
                 DailyMenu.self,
-                Streak.self
+                Streak.self,
+                WorkoutSessionSummary.self
             ])
             
             let modelConfiguration = ModelConfiguration(

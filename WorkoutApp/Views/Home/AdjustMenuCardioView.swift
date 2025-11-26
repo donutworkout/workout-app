@@ -74,8 +74,10 @@ struct AdjustMenuCardioView: View {
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.black)
                         .padding(.horizontal)
+                        .pageHeaderAnimation(delay: 0.1)
                     
                     menuGrid(for: oneHourMenu)
+                        .pageCardAnimation(delay: 0.2)
                 }
                 .padding(.top, 24)
                 
@@ -85,8 +87,10 @@ struct AdjustMenuCardioView: View {
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.black)
                         .padding(.horizontal)
+                        .pageHeaderAnimation(delay: 0.3)
                     
                     menuGrid(for: thirtyMinuteMenu)
+                        .pageCardAnimation(delay: 0.4)
                 }
                 
                 Spacer()
@@ -119,7 +123,8 @@ struct AdjustMenuCardioView: View {
                 .padding(.horizontal)
                 .padding(.vertical)
                 .opacity(isButtonEnabled ? 1 : 0.5)
-                .disabled(!isButtonEnabled)  // 🔒 disable kalau belum pilih
+                .disabled(!isButtonEnabled)
+                .pageCardAnimation(delay: 0.5)
             }
             .background(Color.white.ignoresSafeArea())
             
