@@ -21,6 +21,7 @@ struct StartStrengthView: View {
     // Misal latihan ke-2 dari 5
     var currentPage: Int = 1
     var totalPages: Int = 5
+    var durationGoal: Int = 30
     
     private var userProfile: UserProfile? {
         userProfiles.first
@@ -108,7 +109,7 @@ struct StartStrengthView: View {
                             // Workout complete - go to summary or home
                             connectivity.stopWorkoutFromPhone()
                             sessionManager.reset()
-                            router.navigateTo(.menu)
+                            router.navigateTo(.finishWorkout)
                         }
                     }
                 }
@@ -128,7 +129,7 @@ struct StartStrengthView: View {
                         connectivity.stopWorkoutFromPhone()
                         showPausePopup = false
                         isPaused = false
-                        router.navigateTo(.finishWorkout)
+                        router.navigateTo(.halfwayWorkout)
                     }
                 )
                 .transition(.scale.combined(with: .opacity))

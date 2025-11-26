@@ -96,8 +96,15 @@ struct RouterView: View {
                 FinishWorkoutView()
                     .environmentObject(router)
                 
+            case .halfwayWorkout:
+                HalfwayWorkoutView()
+                    .environmentObject(router)
+                
             case .startCardio:
-                StartCardioView(activityName: router.selectedCardioMenu ?? "Cardio")
+                StartCardioView(
+                    selectedIntensity: router.selectedIntensity ?? .moderate,
+                    vigorousDuration: router.vigorousDuration,
+                    moderateDuration: router.moderateDuration)
                     .environmentObject(router)
                 
             case .startStrength:

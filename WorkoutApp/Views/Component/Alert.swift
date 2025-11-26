@@ -48,7 +48,7 @@ struct Alert: View {
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                 onEndWorkout()
                                 connectivity.stopWorkoutFromPhone()
-                                router.navigateTo(.finishWorkout)
+//                                router.navigateTo(.finishWorkout)
                             }
                         }
                     }

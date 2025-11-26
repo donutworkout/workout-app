@@ -13,7 +13,6 @@ struct MenuView: View {
     
     @StateObject var cycleViewModel: CycleViewModel
     @StateObject var menuViewModel: MenuViewModel
-//    @State private var selectedDayIndex: Int = 0
     
     @State private var cardioSpecs: CardioDetails?
     @State private var vigorousDuration: Int = 0
@@ -131,11 +130,6 @@ struct MenuView: View {
                 
                 // MARK: - Streak Section
                 VStack(spacing: 8) {
-                    Text("Streak")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(.black)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 20)
                     StreakCardView()
                 }
                 .animateCard(forTab: 0, currentTab: $router.selectedTab, delay: 0.4)
@@ -567,22 +561,23 @@ struct PhaseCardView: View {
 // MARK: - Streak Card
 struct StreakCardView: View {
     @EnvironmentObject var router: Router  // ✅ Tambahkan ini
+    @Environment(\.modelContext) private var modelContext
     
     @State private var progressAnim: CGFloat = 0
-    let currentStreak: Int = 7
-    let targetStreak: Int = 20
+    @State private var currentStreak: Int = 0
+    @State private var targetStreak: Int = 0
     
     var progress: CGFloat {
         return CGFloat(currentStreak) / CGFloat(targetStreak)
     }
     
     var body: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: 0) {
             // Character on the Left (tidak bisa diklik)
             Image("charStreak")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 100, height: 100)
+                .frame(width: 175, height: 175)
             
             // Card on the Right (bisa diklik)
             Button {
@@ -653,7 +648,16 @@ struct StreakCardView: View {
             withAnimation(.easeOut(duration: 1.2)) {
                 progressAnim = progress
             }
+
+            loadStreak()
         }
+    }
+    
+    private func loadStreak() {
+        let progress = StreakManager.shared.getMonthlyProgress(context: modelContext)
+        currentStreak = progress.completed
+        targetStreak = progress.goal
+        print("Current home streak: \(currentStreak)")
     }
 }
 

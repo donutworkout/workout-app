@@ -25,6 +25,7 @@ struct WorkoutAppApp: App {
                 UserCycle.self,
                 Exercise.self,
                 DailyMenu.self,
+                Streak.self,
                 WorkoutSessionSummary.self
             ])
             
