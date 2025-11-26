@@ -61,12 +61,18 @@ class StreakManager {
                 streak.longestStreak = streak.currentStreak
             }
             print("🔥 Streak: \(streak.currentStreak) | Month: \(streak.workoutsThisMonth)")
-        } else {
-            // Streak broken
-            streak.currentStreak = 1
-            streak.lastWorkoutDate = Date()
-            streak.workoutsThisMonth += 1  // ✅ Still count for monthly goal
-            print("💔 Streak reset | Month: \(streak.workoutsThisMonth)")
+        } else if daysDifference > 1 {
+            if wereMissedDaysRestDays(from: lastWorkout, to: today, context: context) {
+                streak.lastWorkoutDate = Date()
+                streak.workoutsThisMonth += 1
+                print("😌 Rest days in between - streak maintained at \(streak.currentStreak)")
+            } else {
+                // Streak broken
+                streak.currentStreak = 0
+                streak.lastWorkoutDate = Date()
+                streak.workoutsThisMonth += 1  // ✅ Still count for monthly goal
+                print("💔 Streak reset | Month: \(streak.workoutsThisMonth)")
+            }
         }
         
         try? context.save()
@@ -102,6 +108,32 @@ class StreakManager {
         let percentage = min(Double(completed) / Double(goal), 1.0)
         
         return (completed, goal, percentage)
+    }
+    
+    private func wereMissedDaysRestDays(from lastDate: Date, to currentDate: Date, context: ModelContext) -> Bool {
+        let calendar = Calendar.current
+        let descriptor = FetchDescriptor<DailyMenu>()
+        guard let menus = try? context.fetch(descriptor) else {
+            return false
+        }
+        
+        var date = calendar.date(byAdding: .day, value: 1, to: lastDate)!
+        
+        while date < currentDate {
+            // Check if this date had a workout day scheduled
+            let dayMenu = menus.first { menu in
+                calendar.isDate(menu.date, inSameDayAs: date)
+            }
+            
+            // If it was a workout day (not rest), streak should break
+            if let menu = dayMenu, menu.category != .rest {
+                return false  // Found a workout day that was missed
+            }
+            
+            date = calendar.date(byAdding: .day, value: 1, to: date)!
+        }
+        
+        return true  // All missed days were rest days
     }
 }
 
