@@ -71,6 +71,22 @@ class WorkoutSummaryManager: ObservableObject {
             summaries[dayIndex] = summary
         }
         
+        let fridayIndex = 4
+        if let fridayDate = Calendar.current.date(byAdding: .day, value: fridayIndex, to: monday) {
+            // Make sure dummy data only added during debugging/development
+            #if DEBUG
+            let dummyFridaySummary = DaySummary(
+                totalDuration: 1943, // 30 minutes
+                activeCalories: 186,
+                basalCalories: 100,
+                totalCalories: 225,
+                avgHeartRate: 129,
+                workoutCount: 1
+            )
+            summaries[fridayIndex] = dummyFridaySummary
+            #endif
+        }
+        
         await MainActor.run { [summaries] in
             self.weeklySummaries = summaries
             self.isLoading = false

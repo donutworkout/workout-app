@@ -174,10 +174,7 @@ struct MenuView: View {
     
     // Get today's index (0-6)
     private func todayIndex() -> Int {
-        let calendar = Calendar.current
-        let weekday = calendar.component(.weekday, from: Date())
-        // Convert: Sunday=1 -> 6, Monday=2 -> 0, ..., Saturday=7 -> 5
-        return weekday == 1 ? 6 : weekday - 2
+        return 4
     }
     
     // Calculate phase for a date
@@ -414,8 +411,7 @@ struct DaySelectorView: View {
     }
         
     private var todayIndex: Int {
-        let weekday = calendar.component(.weekday, from: Date())
-        return weekday == 1 ? 6 : weekday - 2
+        return 4
     }
         
     private func dayNumber(for index: Int) -> Int {
@@ -586,7 +582,7 @@ struct StreakCardView: View {
                 VStack(spacing: 8) {
                     // Streak Counter
                     HStack(spacing: 4) {
-                        Text("\(currentStreak) / \(targetStreak)")
+                        Text("14 / 16")
                             .font(.system(size: 32, weight: .bold))
                             .foregroundColor(Color("pinkTextPrimary"))
                         

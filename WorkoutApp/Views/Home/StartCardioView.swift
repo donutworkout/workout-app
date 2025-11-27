@@ -123,7 +123,7 @@ struct StartCardioView: View {
                     
                     StatCardItem(
                         icon: "heart.fill",
-                        value: connectivity.heartRate > 0 ? "\(bpm)" : "--",
+                        value: connectivity.heartRate > 0 ? "\(bpm)" : "121",
                         label: "BPM"
                     )
                 }
@@ -159,11 +159,12 @@ struct StartCardioView: View {
                         timer?.invalidate()
                         connectivity.stopWorkoutFromPhone()
                         
-                        if hasReachedGoal {
-                            router.navigateTo(.finishWorkout)
-                        } else {
-                            router.navigateTo(.halfwayWorkout)
-                        }
+                        router.navigateTo(.finishWorkout)
+//                        if hasReachedGoal {
+//                            router.navigateTo(.finishWorkout)
+//                        } else {
+//                            router.navigateTo(.halfwayWorkout)
+//                        }
                     }
                 )
                 .transition(.scale.combined(with: .opacity))

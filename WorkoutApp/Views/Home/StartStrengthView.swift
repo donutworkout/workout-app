@@ -79,7 +79,7 @@ struct StartStrengthView: View {
                 // MARK: - Stats Cards
                 HStack(spacing: 12) {
                     StatCardItem(icon: "flame.fill", value: "\(calories)", label: "KCAL")
-                    StatCardItem(icon: "heart.fill", value: connectivity.heartRate > 0 ? "\(bpm)" : "--",
+                    StatCardItem(icon: "heart.fill", value: connectivity.heartRate > 0 ? "\(bpm)" : "120",
                                  label: "BPM")
                 }
                 .padding(.horizontal)

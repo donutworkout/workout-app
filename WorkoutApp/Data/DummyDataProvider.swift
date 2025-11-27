@@ -55,12 +55,12 @@ class DummyExerciseProvider {
                 time: 30
             ),
             
-            Exercise(
-                name: "Child Pose",
-                bodyPart: [.fullBody],
-                time: nil
-            ),
-            
+//            Exercise(
+//                name: "Child Pose",
+//                bodyPart: [.fullBody],
+//                time: nil
+//            ),
+//            
             Exercise(
                 name: "Tricep Dip",
                 bodyPart: [.upperPush],

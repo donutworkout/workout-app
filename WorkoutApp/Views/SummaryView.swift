@@ -17,7 +17,7 @@ struct SummaryView: View {
     @State private var selectedDay: Int = 0
 
     let weekDays = ["M", "T", "W", "T", "F", "S", "S"]
-    //let progress: [Double] = [1.0, 0.9, 0.3, 0.6, 0.2, 0.4, 0.7]
+    let progress: [Double] = [1.0, 0, 1.0, 0, 1.0, 0, 0]
     
     var weekDates: [Date] {
         let calendar = Calendar.current
@@ -33,24 +33,24 @@ struct SummaryView: View {
     @State private var characterScale: CGFloat = 0.5
     @State private var characterOpacity: Double = 0
 
-    // Computed progress based on actual workout data
-    var progress: [Double] {
-        var progressArray: [Double] = []
-        for dayIndex in 0..<7 {
-            guard let summary = summaryManager.weeklySummaries[dayIndex] else {
-                progressArray.append(0.0)
-                continue
-            }
-            if summary.workoutCount > 0 {
-                let minutes = summary.totalDuration / 60
-                let progress = min(minutes / 30.0, 1.0)
-                progressArray.append(progress)
-            } else {
-                progressArray.append(0.0)
-            }
-        }
-        return progressArray
-    }
+//    // Computed progress based on actual workout data
+//    var progress: [Double] {
+//        var progressArray: [Double] = []
+//        for dayIndex in 0..<7 {
+//            guard let summary = summaryManager.weeklySummaries[dayIndex] else {
+//                progressArray.append(0.0)
+//                continue
+//            }
+//            if summary.workoutCount > 0 {
+//                let minutes = summary.totalDuration / 60
+//                let progress = min(minutes / 30.0, 1.0)
+//                progressArray.append(progress)
+//            } else {
+//                progressArray.append(0.0)
+//            }
+//        }
+//        return progressArray
+//    }
 
     var currentDaySummary: DaySummary {
         summaryManager.weeklySummaries[selectedDay] ?? DaySummary()
@@ -156,9 +156,10 @@ struct SummaryView: View {
             await summaryManager.fetchWeeklySummary(dailyMenus: dailyMenus)
             
             let calendar = Calendar.current
-            let today = calendar.startOfDay(for: Date())
+//            let today = calendar.startOfDay(for: Date())
+            let friday = weekDates[4]
 
-            if let index = weekDates.firstIndex(where: { calendar.isDate($0, inSameDayAs: today) }) {
+            if let index = weekDates.firstIndex(where: { calendar.isDate($0, inSameDayAs: friday) }) {
                 selectedDay = index
             }
             
@@ -237,16 +238,9 @@ struct DaySelectorSummaryView: View {
     
     // ✅ Detect hari ini
     private var todayIndex: Int {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        
-        // Cari index dari weekDates yang match dengan hari ini
-        if let index = weekDates.firstIndex(where: { calendar.isDate($0, inSameDayAs: today) }) {
-            return index
-        }
-        return -1 // Jika tidak ditemukan
+        return 4
     }
-    
+        
     var body: some View {
         HStack(spacing: 8) {
             ForEach(0..<7, id: \.self) { index in
