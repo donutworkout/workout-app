@@ -118,7 +118,7 @@ struct ProfileView: View {
                 VStack(spacing: 0) {
                     // Info banner
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("You're on Day \(currentCycleDay) - \(cyclePhaseText)")
+                        Text("You're on Day 12 - Follicular Phase")
                             .font(.system(size: 15, weight: .bold))
                             .foregroundColor(.black)
                         
@@ -193,12 +193,14 @@ struct ProfileView: View {
                         // Calendar grid
                         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 7), spacing: 6) {
                             ForEach(0..<42, id: \.self) { index in
+                                let tomorrow = calendar.date(byAdding: .day, value: 1, to: Date()) ?? Date()
+                                
                                 if index < daysInMonth.count, let date = daysInMonth[index] {
                                     DayCell(
                                         date: date,
                                         isMenstrual: isMenstrualDate(date),
                                         isOvulation: isOvulationDate(date),
-                                        isToday: calendar.isDateInToday(date),
+                                        isToday: calendar.isDate(date, inSameDayAs: tomorrow),
                                         isEditing: isEditing,
                                         onTap: {
                                             toggleMenstrualDate(date)
@@ -354,7 +356,7 @@ struct ProfileView: View {
         guard !menstrualDates.isEmpty else { return }
         let firstMenstrualDate = menstrualDates.sorted().first!
         if let ovulationStart = calendar.date(byAdding: .day, value: 5, to: firstMenstrualDate) {
-            for i in 0..<6 {
+            for i in 0..<7 {
                 if let ovulationDay = calendar.date(byAdding: .day, value: i, to: ovulationStart) {
                     ovulationDates.insert(ovulationDay)
                 }

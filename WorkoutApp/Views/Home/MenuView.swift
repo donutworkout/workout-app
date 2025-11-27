@@ -560,8 +560,8 @@ struct StreakCardView: View {
     @Environment(\.modelContext) private var modelContext
     
     @State private var progressAnim: CGFloat = 0
-    @State private var currentStreak: Int = 0
-    @State private var targetStreak: Int = 0
+    @State private var currentStreak: Int = 14
+    @State private var targetStreak: Int = 16
     
     var progress: CGFloat {
         return CGFloat(currentStreak) / CGFloat(targetStreak)
