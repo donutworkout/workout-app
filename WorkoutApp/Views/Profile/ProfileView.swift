@@ -354,7 +354,7 @@ struct ProfileView: View {
         guard !menstrualDates.isEmpty else { return }
         let firstMenstrualDate = menstrualDates.sorted().first!
         if let ovulationStart = calendar.date(byAdding: .day, value: 5, to: firstMenstrualDate) {
-            for i in 0..<6 {
+            for i in 0..<7 {
                 if let ovulationDay = calendar.date(byAdding: .day, value: i, to: ovulationStart) {
                     ovulationDates.insert(ovulationDay)
                 }
