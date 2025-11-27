@@ -270,6 +270,9 @@ struct ProfileView: View {
             }
         }
         .background(Color.white.ignoresSafeArea())
+        .onAppear {
+            loadCycleDates()
+        }
     }
 
     // MARK: - Calendar Logic

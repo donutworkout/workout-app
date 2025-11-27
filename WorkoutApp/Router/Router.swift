@@ -4,7 +4,7 @@ import HealthKit
 enum Route {
     case onboarding
     case healthConnect
-    case watchConnect
+//    case watchConnect
     case survey
     case surveyWorkoutLevel  // ✅ TAMBAHKAN
     case surveyWorkoutDay    // ✅ TAMBAHKAN
@@ -22,6 +22,7 @@ enum Route {
     case afterSurvey
     case aboutMe
     case streak
+    case halfwayWorkout
 }
 
 
@@ -42,6 +43,7 @@ final class Router: ObservableObject {
     @Published var cardioSpecs: CardioDetails? = nil
     @Published var vigorousDuration: Int = 0
     @Published var moderateDuration: Int = 0
+    @Published var selectedIntensity: IntensityLevel? = nil
     
     // In your Router class
     init(surveyManager: SurveyManager? = nil) {

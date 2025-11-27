@@ -15,18 +15,18 @@ struct AdjustMenuCardioView: View {
     
     @State private var selectedMenu: String? = nil
     @State private var showCustomAlert = false
+    
     var onNext: () -> Void = {}
     let dailyMenu: DailyMenu?
     let vigorousDuration: Int
     let moderateDuration: Int
-    
-    // MARK: - Cardio Menu (Dipisah per durasi)
-    private let oneHourMenu = [
+
+    private let oneHourMenu = [ //mod
         "Outdoor Walk", "Indoor Walk",
         "Cycling", "Swimming"
     ]
     
-    private let thirtyMinuteMenu = [
+    private let thirtyMinuteMenu = [ //vig
         "Badminton", "Basketball",
         "Volleyball", "Tennis",
         "Outdoor Run", "Indoor Run"
@@ -58,7 +58,7 @@ struct AdjustMenuCardioView: View {
     init(
         dailyMenu: DailyMenu? = nil,
         vigorousDuration: Int = 0,
-        moderateDuration: Int = 0
+        moderateDuration: Int = 0,
     ) {
         self.dailyMenu = dailyMenu
         self.vigorousDuration = vigorousDuration
@@ -105,6 +105,15 @@ struct AdjustMenuCardioView: View {
                     let mapping = mapActivityToHKType(selectedMenu)
                     let type = mapping.type
                     let isIndoor = mapping.isIndoor
+                    
+                    if oneHourMenu.contains(selectedMenu) {
+                        router.selectedIntensity = .moderate
+                    } else if thirtyMinuteMenu.contains(selectedMenu) {
+                        router.selectedIntensity = .vigorous
+                    } else {
+                        router.selectedIntensity = .moderate  // Default fallback if needed
+                    }
+                    
                     router.selectedWorkoutType = type
                     router.selectedCardioMenu = selectedMenu
                     connectivity.startWorkoutFromPhone(type: type, isIndoor: isIndoor)
@@ -232,6 +241,7 @@ struct AdjustMenuCardioView: View {
         .transition(.opacity)
     }
 }
+
 
 //#Preview {
 //    NavigationStack {

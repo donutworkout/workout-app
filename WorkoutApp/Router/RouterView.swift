@@ -54,18 +54,18 @@ struct RouterView: View {
                 }
                 
             case .healthConnect:
-                HealthConnectView(
-                    onAllow: { router.navigateTo(.watchConnect) },
-                    onSkip: { router.navigateTo(.watchConnect) }
-                )
-                .environmentObject(router)
+            HealthConnectView(
+            onAllow: { router.navigateTo(.survey) },
+            onSkip: { router.navigateTo(.survey) }
+            )
+            .environmentObject(router)
                 
-            case .watchConnect:
-                ConnectWatchView(
-                    onAllow: { router.navigateTo(.survey) },
-                    onSkip: { router.navigateTo(.survey) }
-                )
-                .environmentObject(router)
+//            case .watchConnect:
+//                ConnectWatchView(
+//                    onAllow: { router.navigateTo(.survey) },
+//                    onSkip: { router.navigateTo(.survey) }
+//                )
+//                .environmentObject(router)
                 
             case .survey:
                 SurveyView()
@@ -96,8 +96,16 @@ struct RouterView: View {
                 FinishWorkoutView()
                     .environmentObject(router)
                 
+            case .halfwayWorkout:
+                HalfwayWorkoutView()
+                    .environmentObject(router)
+                
             case .startCardio:
-                StartCardioView(activityName: router.selectedCardioMenu ?? "Cardio")
+                StartCardioView(
+                    selectedIntensity: router.selectedIntensity ?? .moderate,
+                    vigorousDuration: router.vigorousDuration,
+                    moderateDuration: router.moderateDuration,
+                    activityName: router.selectedCardioMenu ?? "Cardio Workout")
                     .environmentObject(router)
                 
             case .startStrength:
