@@ -9,9 +9,17 @@ import Foundation
 import SwiftData
 
 enum BodyPart: String, Codable, CaseIterable {
-    case fullBody
-    case upperPush
-    case upperPull
+    case squat
+    case push
+    case pull
+    case hinge
+    case plank
+    case glutes
+    case core
+    case chest
+    case shoulders
+    case back
+    case arms
 }
 
 @Model

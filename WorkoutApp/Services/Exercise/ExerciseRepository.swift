@@ -42,17 +42,22 @@ class ExerciseRepository {
         //  Filter by level + bodyPart
         switch level {
         case .beginner, .intermediate:
-            // Beginners only get full-body exercises
-            filtered = filtered.filter { exercise in
-                exercise.bodyPart.contains(.fullBody)
+            let bodyPartsToInclude: [BodyPart] = [.squat, .push, .pull, .hinge, .plank]
+            var selectedExercises: [Exercise] = []
+            
+            for part in bodyPartsToInclude {
+                if let exerciseForPart = filtered.first(where: { $0.bodyPart.contains(part) }) {
+                    selectedExercises.append(exerciseForPart)
+                }
             }
-            print("  🟢 Beginner filter: \(filtered.count)")
+            filtered = selectedExercises
+            print("🟢 Beginner/intermediate selected one per body part: \(filtered.count)")
             
         case .advanced:
             // Advanced: isolate specific muscle group (strict)
             if let bodyPart = bodyPart {
                 filtered = filtered.filter { exercise in
-                    exercise.bodyPart.contains(.upperPull) || exercise.bodyPart.contains(.upperPush)
+                    exercise.bodyPart.contains(.pull) || exercise.bodyPart.contains(.push)
                 }
                 print("  🔴 Advanced strict \(bodyPart.rawValue) filter: \(filtered.count)")
             }
