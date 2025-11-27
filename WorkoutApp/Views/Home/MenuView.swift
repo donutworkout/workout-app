@@ -346,7 +346,6 @@ struct CombinedWorkoutCardView: View {
                 if (menu?.isCardio ?? false) || (menu?.isStrength ?? false) {
                     PrimaryGlassButton(title: "Start Workout") {
                         HapticManager.shared.trigger(.buttonTap)
-                        // Pastikan iPhoneHealthKitManager sudah diimport di file Anda
                         if iPhoneHealthKitManager.shared.isAuthorized() {
                             onStartWorkout()
                         } else {

@@ -178,8 +178,6 @@ class WatchConnectivityManager: NSObject {
                             print("🛑 Stop command executed on watch")
 
                         }
-
-                    // Mirror confirmation from iPhone
                     case .started:
                         print("✅ iPhone confirmed workout started")
                     }
