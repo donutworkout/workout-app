@@ -17,7 +17,6 @@ struct SummaryView: View {
     @State private var selectedDay: Int = 0
 
     let weekDays = ["M", "T", "W", "T", "F", "S", "S"]
-    //let progress: [Double] = [1.0, 0.9, 0.3, 0.6, 0.2, 0.4, 0.7]
     
     var weekDates: [Date] {
         let calendar = Calendar.current
@@ -32,6 +31,7 @@ struct SummaryView: View {
     @State private var showContent: Bool = false
     @State private var characterScale: CGFloat = 0.5
     @State private var characterOpacity: Double = 0
+    @State private var showNoWorkoutText: Bool = false
 
     // Computed progress based on actual workout data
     var progress: [Double] {
@@ -103,8 +103,9 @@ struct SummaryView: View {
                             .frame(maxWidth: .infinity)
                             .padding(.top, 20)
                             .padding(.horizontal, 20)
-                            .opacity(showContent ? 1 : 0)
-                            .offset(y: showContent ? 0 : -10)
+                            .opacity(showNoWorkoutText ? 1 : 0)
+                            .offset(y: showNoWorkoutText ? 0 : 10)
+                            .animation(.easeOut(duration: 0.6).delay(0.4), value: showNoWorkoutText)
                     } else if currentDaySummary.workoutCount == 0 {
                         Text("No workout data yet.")
                             .font(.title3)
@@ -113,8 +114,9 @@ struct SummaryView: View {
                             .frame(maxWidth: .infinity)
                             .padding(.top, 20)
                             .padding(.horizontal, 20)
-                            .opacity(showContent ? 1 : 0)
-                            .offset(y: showContent ? 0 : -10)
+                            .opacity(showNoWorkoutText ? 1 : 0)
+                            .offset(y: showNoWorkoutText ? 0 : 10)
+                            .animation(.easeOut(duration: 0.6).delay(0.4), value: showNoWorkoutText)
                     } else {
                         VStack(spacing: 12) {
                             HStack {
@@ -162,8 +164,18 @@ struct SummaryView: View {
                 selectedDay = index
             }
             
+            // Trigger animasi no workout text
+            withAnimation(.easeOut(duration: 0.6).delay(0.6)) {
+                showNoWorkoutText = true
+            }
         }
-        .onChange(of: selectedDay) { _, _ in }
+        .onChange(of: selectedDay) { _, _ in
+            // Reset animasi saat ganti hari
+            showNoWorkoutText = false
+            withAnimation(.easeOut(duration: 0.4).delay(0.2)) {
+                showNoWorkoutText = true
+            }
+        }
     }
 
     // MARK: - Entrance Animation Sequence

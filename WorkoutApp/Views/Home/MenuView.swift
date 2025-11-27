@@ -1,6 +1,6 @@
 import SwiftUI
 import SwiftData
-import HealthKit 
+import HealthKit
 
 struct MenuView: View {
     @EnvironmentObject var router: Router
@@ -36,15 +36,15 @@ struct MenuView: View {
     
     private var selectedPhase: MenstrualPhase {
         let phase = cycleViewModel.phase(for: cycleViewModel.selectedDayIndex) ?? .menstruation
-//        
-//        print("🔍 selectedDayIndex: \(cycleViewModel.selectedDayIndex)")
-//        print("🔍 selectedPhase from ViewModel: \(phase)")
-//        print("🔍 phasesForWeek count: \(cycleViewModel.phasesForWeek.count)")
+        //
+        //        print("🔍 selectedDayIndex: \(cycleViewModel.selectedDayIndex)")
+        //        print("🔍 selectedPhase from ViewModel: \(phase)")
+        //        print("🔍 phasesForWeek count: \(cycleViewModel.phasesForWeek.count)")
         
         // Debug: print all phases
-//        for (index, phaseData) in cycleViewModel.phasesForWeek.enumerated() {
-//            print("🔍 Index \(index): \(phaseData.date) -> \(phaseData.phase)")
-//        }
+        //        for (index, phaseData) in cycleViewModel.phasesForWeek.enumerated() {
+        //            print("🔍 Index \(index): \(phaseData.date) -> \(phaseData.phase)")
+        //        }
         
         return phase
     }
@@ -221,6 +221,8 @@ struct MenuView: View {
 
 struct CombinedWorkoutCardView: View {
     @State private var showHealthNotConnectedModal = false
+    @State private var isHealthConnected = false
+    @State private var isWatchConnected = false
     @EnvironmentObject var router: Router
     
     let phase: MenstrualPhase
@@ -280,7 +282,6 @@ struct CombinedWorkoutCardView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            
             // MARK: - Phase Header
             Text("\(phase.rawValue.capitalized) Phase")
                 .font(.system(size: 15, weight: .semibold))
@@ -299,22 +300,13 @@ struct CombinedWorkoutCardView: View {
                     .fill(Color("pinkTextTertiary"))
                 )
             
-            // MARK: - Abu-abu dan Gambar
-//            ZStack {
-//                // Abu-abu full kiri-kanan
-//                Color.gray.opacity(0.15)
-//                    .frame(maxWidth: .infinity)
-//                    .frame(height: 180)
-//                    .clipShape(Rectangle())
-                
-                // Gambar di tengah
+            // MARK: - Image
             Image(cardInfo.image)
                 .resizable()
                 .frame(maxWidth: .infinity)
                 .clipped()
-//            }
             
-            // MARK: - Konten bawah (judul, deskripsi, tombol)
+            // MARK: - Content Section
             VStack(alignment: .leading, spacing: 20) {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(alignment: .center) {
@@ -343,13 +335,21 @@ struct CombinedWorkoutCardView: View {
                         .foregroundColor(.black.opacity(0.7))
                         .lineSpacing(3)
                 }
+                
+                // MARK: - Start Workout Button
                 if (menu?.isCardio ?? false) || (menu?.isStrength ?? false) {
                     PrimaryGlassButton(title: "Start Workout") {
                         HapticManager.shared.trigger(.buttonTap)
-                        // Pastikan iPhoneHealthKitManager sudah diimport di file Anda
-                        if iPhoneHealthKitManager.shared.isAuthorized() {
+                        
+                        // ✅ Update status koneksi saat tombol diklik
+                        updateConnectionStatus()
+                        
+                        // Cek apakah KEDUANYA sudah connect
+                        if isHealthConnected && isWatchConnected {
+                            // Langsung start workout
                             onStartWorkout()
                         } else {
+                            // Tampilkan modal jika salah satu belum connect
                             showHealthNotConnectedModal = true
                         }
                     }
@@ -358,10 +358,14 @@ struct CombinedWorkoutCardView: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 20)
         }
+        // ✅ Sheet modal
         .sheet(isPresented: $showHealthNotConnectedModal) {
-            HealthNotConnectedView()
-                .presentationDetents([.medium])
-                .presentationDragIndicator(.visible)
+            HealthNotConnectedView(
+                isHealthConnected: isHealthConnected,
+                isWatchConnected: isWatchConnected
+            )
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.visible)
         }
         .background(
             RoundedRectangle(cornerRadius: 20)
@@ -369,26 +373,19 @@ struct CombinedWorkoutCardView: View {
                 .shadow(color: .black.opacity(0.06), radius: 10, x: 0, y: 4)
         )
         .padding(.horizontal, 20)
-    }
-    private func checkHealthKitAuthorization() -> Bool {
-            guard HKHealthStore.isHealthDataAvailable() else {
-                return false
-            }
-            
-            let healthStore = HKHealthStore()
-            
-            // Check untuk workout type yang dibutuhkan
-            let workoutType = HKObjectType.workoutType()
-            let heartRateType = HKObjectType.quantityType(forIdentifier: .heartRate)!
-            let activeEnergyType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
-            
-            // Check authorization status
-            let workoutStatus = healthStore.authorizationStatus(for: workoutType)
-            
-            // Return true jika sudah authorized
-            return workoutStatus == .sharingAuthorized
+        .onAppear {
+            // ✅ Update status saat view pertama kali muncul
+            updateConnectionStatus()
         }
+    }
+    
+    // ✅ Helper function untuk update status koneksi
+    private func updateConnectionStatus() {
+        isHealthConnected = iPhoneHealthKitManager.shared.isAuthorized()
+        isWatchConnected = WatchConnectivityManager.shared.isReachable
+    }
 }
+
 
 // MARK: - Day Selector (Final Fixed Version)
 struct DaySelectorView: View {
@@ -412,17 +409,17 @@ struct DaySelectorView: View {
             calendar.date(byAdding: .day, value: day, to: monday)
         }
     }
-        
+    
     private var todayIndex: Int {
         let weekday = calendar.component(.weekday, from: Date())
         return weekday == 1 ? 6 : weekday - 2
     }
-        
+    
     private func dayNumber(for index: Int) -> Int {
         guard index < weekDates.count else { return index + 1 }
         return calendar.component(.day, from: weekDates[index])
     }
-        // Get phase for a specific index
+    // Get phase for a specific index
     private func phaseForIndex(_ index: Int) -> MenstrualPhase? {
         guard let cycle = userCycle, index < weekDates.count else { return nil }
         
@@ -465,16 +462,16 @@ struct DaySelectorView: View {
                             Circle()
                                 .fill(
                                     isPastDay
-                                        ? Color.gray.opacity(0.3) // abu
+                                    ? Color.gray.opacity(0.3) // abu
+                                    : (
+                                        isSelected
+                                        ? Color("pinkTextSecondary") // pink tua kalau dipilih
                                         : (
-                                            isSelected
-                                            ? Color("pinkTextSecondary") // pink tua kalau dipilih
-                                            : (
-                                                isToday
-                                                ? Color("pinkTextTertiary") // pink muda kalau hari ini tapi tdk dipilih
-                                                : Color("pinkTextTertiary") // pink muda default
-                                            )
+                                            isToday
+                                            ? Color("pinkTextTertiary") // pink muda kalau hari ini tapi tdk dipilih
+                                            : Color("pinkTextTertiary") // pink muda default
                                         )
+                                    )
                                 )
                                 .frame(width: 44, height: 44)
                             
@@ -483,8 +480,8 @@ struct DaySelectorView: View {
                                 .font(.system(size: 16, weight: .semibold))
                                 .foregroundColor(
                                     isPastDay
-                                        ? .gray.opacity(0.6)
-                                        : (isSelected ? .white : .black.opacity(0.8))
+                                    ? .gray.opacity(0.6)
+                                    : (isSelected ? .white : .black.opacity(0.8))
                                 )
                         }
                     }
@@ -648,7 +645,7 @@ struct StreakCardView: View {
             withAnimation(.easeOut(duration: 1.2)) {
                 progressAnim = progress
             }
-
+            
             loadStreak()
         }
     }
