@@ -36,54 +36,74 @@ class WorkoutSplitGenerator {
             
         case .beginner:
             if totalDays >= 3 {
-                baseSplit = [.strength, .cardio, .strength]
+                baseSplit = [.strengthGeneric, .cardio, .strengthGeneric]
                 // If more than 3 days, repeat pattern
                 while baseSplit.count < totalDays {
-                    baseSplit.append(contentsOf: [.cardio, .strength])
+                    baseSplit.append(contentsOf: [.cardio, .strengthGeneric])
                 }
             } else {
                 // Less than 3 days: just alternate
                 for i in 0..<totalDays {
-                    baseSplit.append(i % 2 == 0 ? .cardio : .strength)
+                    baseSplit.append(i % 2 == 0 ? .cardio : .strengthGeneric)
                 }
             }
             
         case .intermediate:
             if totalDays == 4 {
-                baseSplit = [.strength, .cardio, .strength, .cardio]
+                baseSplit = [.strengthGeneric, .cardio, .strengthGeneric, .cardio]
                 // If more than 3 days, repeat pattern
                 while baseSplit.count < totalDays {
-                    baseSplit.append(contentsOf: [.strength, .cardio])
+                    baseSplit.append(contentsOf: [.strengthGeneric, .cardio])
                 }
             } else if totalDays >= 5 {
                 // 5+ days: 3 strength, 2 cardio, repeat pattern
-                baseSplit = [.strength, .cardio, .strength, .cardio, .strength]
+                baseSplit = [.strengthGeneric, .cardio, .strengthGeneric, .cardio, .strengthGeneric]
                 while baseSplit.count < totalDays {
-                    baseSplit.append(contentsOf: [.cardio, .strength])
+                    baseSplit.append(contentsOf: [.cardio, .strengthGeneric])
                 }
             } else {
                 // Less than 4 days: alternate
                 for i in 0..<totalDays {
-                    baseSplit.append(i % 2 == 0 ? .strength : .cardio)
+                    baseSplit.append(i % 2 == 0 ? .strengthGeneric : .cardio)
                 }
             }
                         
         case .advanced:
             if totalDays == 5 {
-                // 5 days: 3 strength (lower-upper-lower), 2 cardio
-                baseSplit = [.strength, .cardio, .strength, .cardio, .strength]
-            } else if totalDays == 6 {
-                // 6+ days: 4 strength (lower-upper-lower-upper), 2 cardio
-                baseSplit = [.strength, .cardio, .strength, .cardio, .strength, .strength]
-                while baseSplit.count < totalDays {
-                    baseSplit.append(.cardio)
+                    baseSplit = [
+                        .strengthLower,
+                        .cardio,
+                        .strengthUpper,
+                        .cardio,
+                        .strengthLower
+                    ]
+                } else if totalDays == 6 {
+                    baseSplit = [
+                        .strengthLower,
+                        .cardio,
+                        .strengthUpper,
+                        .cardio,
+                        .strengthLower,
+                        .strengthUpper
+                    ]
+                } else if totalDays == 4 {
+                    baseSplit = [
+                        .strengthLower,
+                        .strengthUpper,
+                        .cardio,
+                        .cardio
+                    ]
+                } else if totalDays == 3 {
+                    baseSplit = [
+                        .strengthLower,
+                        .cardio,
+                        .strengthUpper
+                    ]
+                } else {
+                    for i in 0..<totalDays {
+                        baseSplit.append(i == 0 ? .strengthLower : .strengthUpper)
+                    }
                 }
-            } else {
-                // Less than 5 days: prioritize strength
-                for i in 0..<totalDays {
-                    baseSplit.append(i < 3 ? .strength : .cardio)
-                }
-            }
         }
 
         baseSplit = Array(baseSplit.prefix(totalDays))
@@ -143,7 +163,7 @@ class WorkoutSplitGenerator {
         // alternating strength/cardio
         var workoutPattern: [MenuCategory] = []
         for i in 0..<totalDays {
-            workoutPattern.append(i % 2 == 0 ? .strength : .cardio)
+            workoutPattern.append(i % 2 == 0 ? .strengthGeneric : .cardio)
         }
         
         let gap = 7.0 / Double(restDays + 1)
@@ -220,6 +240,34 @@ extension WorkoutSplitGenerator {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM dd"
         return formatter.string(from: date)
+    }
+    
+    func determineIsLowerDay(
+            currentDate: Date,
+            schedule: [Int: MenuCategory]
+    ) -> Bool {
+        
+        let calendar = Calendar.current
+        let currentWeekday = calendar.component(.weekday, from: currentDate)
+        let currentDayNumber = currentWeekday == 1 ? 7 : currentWeekday - 1
+        
+        // Get all strength days in chronological order (1-7)
+        let strengthDays = schedule
+            .filter {
+                if case .strengthGeneric = $0.value { return true }
+                return false
+            }
+            .map { $0.key }
+            .sorted()
+        
+        // Find which strength day number this is (0, 1, 2, 3...)
+        guard let currentStrengthIndex = strengthDays.firstIndex(of: currentDayNumber) else {
+            return true // default to lower
+        }
+        
+        // Even index (0, 2, 4...) = Lower
+        // Odd index (1, 3, 5...) = Upper
+        return currentStrengthIndex % 2 == 0
     }
 }
 

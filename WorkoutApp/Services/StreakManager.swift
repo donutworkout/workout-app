@@ -126,7 +126,7 @@ class StreakManager {
             }
             
             // If it was a workout day (not rest), streak should break
-            if let menu = dayMenu, menu.category != .rest {
+            if let menu = dayMenu, case .rest = menu.category {
                 return false  // Found a workout day that was missed
             }
             

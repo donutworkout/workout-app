@@ -76,7 +76,7 @@ class WorkoutMenuGenerator {
             
             let menu: DailyMenu
             
-            if category == .strength {
+            if category.isStrength {
                 menu = generateDailyMenu(
                     dayNumber: day,
                     dayName: dayName,
@@ -89,7 +89,7 @@ class WorkoutMenuGenerator {
                     cardioDayIndex: 0
                 )
                 strengthDayCounter += 1
-            } else if category == .cardio {
+            } else if case .cardio = category {
                 menu = generateDailyMenu(
                     dayNumber: day,
                     dayName: dayName,
@@ -149,7 +149,7 @@ class WorkoutMenuGenerator {
                 cardioDayIndex: cardioDayIndex
             )
             
-        case .strength: //generate both bodyweight and gym, not based on level
+        case .strengthGeneric, .strengthLower, .strengthUpper:
             return generateStrengthMenu(
                 dayNumber: dayNumber,
                 dayName: dayName,
@@ -157,7 +157,8 @@ class WorkoutMenuGenerator {
                 level: level,
                 phase: phase,
                 strengthType: strengthType,
-                strengthDayIndex: strengthDayIndex
+                strengthDayIndex: strengthDayIndex,
+                category: category
         )
             
         case .rest:
@@ -196,7 +197,8 @@ class WorkoutMenuGenerator {
             level: WorkoutLevel,
             phase: MenstrualPhase,
             strengthType: StrengthType,
-            strengthDayIndex: Int
+            strengthDayIndex: Int,
+            category: MenuCategory
         ) -> DailyMenu {
             
             print("\n💪 Generating strength workout for \(dayName)...")
@@ -215,7 +217,8 @@ class WorkoutMenuGenerator {
             var exercises = exerciseRepo.getExercises(
                 forLevel: level,
                 phase: phase,
-                count: exerciseCount
+                count: exerciseCount,
+                category: category
             )
             
             // Step 5: Adjust sets/reps based on phase
@@ -230,6 +233,7 @@ class WorkoutMenuGenerator {
                 dayName: dayName,
                 date: date,
                 strengthType: strengthType,
+                category: category,
                 strengthExercises: exercises,
                 intensity: intensity,
                 estimatedDuration: duration

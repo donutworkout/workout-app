@@ -16,14 +16,87 @@ class MenuViewModel: ObservableObject {
     private let modelContext: ModelContext
     private var generator: WorkoutMenuGenerator
     
+    private var lastWorkoutLevel: WorkoutLevel?
+    private var lastWorkoutDays: [WorkoutDayPreference]?
+    
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
         self.generator = WorkoutMenuGenerator(context: modelContext)
+        
+        DummyExerciseProvider.shared.insertDummyData(into: modelContext)
         
         let existingMenus = fetchMenusForCurrentWeek()
         if !existingMenus.isEmpty {
             self.weeklyMenu = existingMenus
             print("📥 Loaded \(existingMenus.count) existing menus on init")
+        }
+    }
+    
+    func generateWeeklyMenuIfNeeded(
+        userCycle: UserCycle,
+        userLevel: WorkoutLevel,
+        chosenDays: [WorkoutDayPreference]
+    ) async {
+        // ✅ Check if profile changed
+        let hasLevelChanged = lastWorkoutLevel != userLevel
+        let hasDaysChanged = lastWorkoutDays != chosenDays
+        
+        let hasProfileChanged = hasLevelChanged || hasDaysChanged
+        
+        print("🔍 Profile check:")
+        print("   Level: \(userLevel.rawValue) (changed: \(hasLevelChanged))")
+        print("   Days: \(chosenDays.map { $0.rawValue }) (changed: \(hasDaysChanged))")
+        
+        guard hasProfileChanged else {
+            print("⚡ Profile unchanged, using existing menus")
+            loadSavedMenus() // Just reload existing menus
+            return
+        }
+        
+        print("🔄 Profile changed! Regenerating weekly menu...")
+        
+        // ✅ Update last saved values
+        lastWorkoutLevel = userLevel
+        lastWorkoutDays = chosenDays
+        
+        // ✅ Delete old menus ONLY when profile changes
+        await deleteMenusForCurrentWeek()
+        
+        // ✅ Generate new menus
+        await generateWeeklyMenu(userCycle: userCycle, userLevel: userLevel, chosenDays: chosenDays)
+    }
+
+    // MARK: - New delete method (add this)
+    private func deleteMenusForCurrentWeek() async {
+        let calendar = Calendar.current
+        let today = Date()
+        let weekday = calendar.component(.weekday, from: today)
+        let daysToMonday = weekday == 1 ? -6 : -(weekday - 2)
+        
+        guard let monday = calendar.date(byAdding: .day, value: daysToMonday, to: today),
+              let nextMonday = calendar.date(byAdding: .day, value: 7, to: monday) else {
+            return
+        }
+        
+        let descriptor = FetchDescriptor<DailyMenu>(
+                predicate: #Predicate { menu in
+                    menu.date >= monday && menu.date < nextMonday
+                }
+        )
+        
+        do {
+            let existingMenus = try modelContext.fetch(descriptor)
+            print("🗑️ Deleting \(existingMenus.count) old menus for current week")
+            
+            for menu in existingMenus {
+                modelContext.delete(menu)
+            }
+            
+            try modelContext.save()
+            weeklyMenu = [] // Clear in-memory cache
+            print("✅ Old menus deleted successfully")
+        } catch {
+            print("❌ Failed to delete old menus: \(error)")
         }
     }
     
@@ -67,19 +140,19 @@ class MenuViewModel: ObservableObject {
     ) async {
         isLoading = true
         
-        if !weeklyMenu.isEmpty {
-            print("✅ Already have \(weeklyMenu.count) menus loaded in memory")
-            return
-        }
-        
-        let existingMenus = fetchMenusForCurrentWeek()
-        
-        if !existingMenus.isEmpty {
-            print("✅ Using existing weekly menu (\(existingMenus.count) days)")
-            weeklyMenu = existingMenus
-            isLoading = false
-            return
-        }
+//        if !weeklyMenu.isEmpty {
+//            print("✅ Already have \(weeklyMenu.count) menus loaded in memory")
+//            return
+//        }
+//        
+//        let existingMenus = fetchMenusForCurrentWeek()
+//        
+//        if !existingMenus.isEmpty {
+//            print("✅ Using existing weekly menu (\(existingMenus.count) days)")
+//            weeklyMenu = existingMenus
+//            isLoading = false
+//            return
+//        }
         
         print("🎯 === GENERATING NEW WEEKLY MENU ===")
         

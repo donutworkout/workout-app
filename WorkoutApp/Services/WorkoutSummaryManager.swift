@@ -79,7 +79,7 @@ class WorkoutSummaryManager: ObservableObject {
     
    
     private func fetchDaySummary(for date: Date, category: MenuCategory) async -> DaySummary {
-            if category == .rest {
+            if case .rest = category {
                 return DaySummary()
             }
             
@@ -107,7 +107,7 @@ class WorkoutSummaryManager: ObservableObject {
                 .walking, .running, .cycling, .swimming,
                 .basketball, .tennis, .badminton, .volleyball, .soccer
             ]
-        case .strength:
+        case .strengthGeneric, .strengthLower, .strengthUpper:
             workoutTypes = [
                 .traditionalStrengthTraining,
                 .functionalStrengthTraining

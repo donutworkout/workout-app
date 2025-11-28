@@ -111,6 +111,7 @@ struct MenuView: View {
                     menu: selectedDayMenu,
                     vigorousDuration: vigorousDuration,
                     moderateDuration: moderateDuration,
+                    workoutLevel: userWorkout?.workoutLevel ?? .beginner,
                     onStartWorkout: {
                         if let menu = selectedDayMenu {
                             router.vigorousDuration = vigorousDuration
@@ -209,7 +210,10 @@ struct MenuView: View {
         let generator = WorkoutMenuGenerator(context: modelContext)
         cardioSpecs = generator.getCardioSpecs(for: workout.workoutLevel, phase: phase)
         
-        let cardioDays = menus.filter { $0.category == .cardio }.count
+        let cardioDays = menus.filter {
+            if case .cardio = $0.category { return true }
+            return false
+        }.count
         
         if let specs = cardioSpecs, cardioDays > 0 {
             vigorousDuration = specs.vigorousDuration / cardioDays
@@ -229,6 +233,7 @@ struct CombinedWorkoutCardView: View {
     let menu: DailyMenu?
     let vigorousDuration: Int
     let moderateDuration: Int
+    let workoutLevel: WorkoutLevel
     var onStartWorkout: () -> Void
     
     private var cardInfo: (image: String, workoutTitle: String, phaseDesc: String, duration: String) {
@@ -255,29 +260,112 @@ struct CombinedWorkoutCardView: View {
             }
         }
         
-        // Determine card content
-        if isCardioDay {
-            return (
-                "menuCardio",
-                "Today's Cardio Menu!",
-                "Don't worry about being perfect! just move and let your body wake up!",
-                duration
-            )
-        } else if isStrengthDay {
-            return (
-                "menuStrength",
-                "Today's Strength Menu!",
-                "Let's wake up those muscles just good vibes and sweat!",
-                duration
-            )
-        } else {
-            return (
-                "menuRest",
-                "Time to rest",
-                "Take your time to relax and enjoy the day!",
-                duration
-            )
+        let imageName: String
+        let title: String
+        let description: String
+        
+        switch (isCardioDay, isStrengthDay) {
+        case (true, _):
+            imageName = "menuCardio"
+            title = "Today's Cardio Day!"
+            
+            switch phase {
+            case .menstruation:
+                switch workoutLevel {
+                case .beginner:
+                    description = "Soft steps today, lovely 💗 Your body’s in recharge mode, so we’ll keep things light with gentle cardio to loosen up without stress."
+                case .intermediate:
+                    description = "Your inner world’s doing its work 🌙 Let’s move slow and steady with low-impact cardio that supports your flow, not fights it."
+                case .advanced:
+                    description = "You’re powerful even in softness 💪✨ This phase calls for ease, so think light, rhythmic cardio to refresh your body without overloading it."
+                }
+            case .follicular:
+                switch workoutLevel {
+                case .beginner:
+                    description = "Your spark is returning 🌞 Let’s ease into fun beginner cardio with light, bouncy movements to wake your energy gently."
+                case .intermediate:
+                    description = "Hello boost phase ⚡ Your stamina’s rising, so we’ll build momentum with steady, feel-good cardio sessions."
+                case .advanced:
+                    description = "Time to fire up 🔥 Your energy’s climbing fast, so dynamic intervals and playful intensity will feel amazing right now."
+                }
+            case .ovulation:
+                switch workoutLevel {
+                case .beginner:
+                    description = "You’re glowing today 🌷 Let’s channel that brightness with short, energetic cardio bursts that are joyful, not overwhelming."
+                case .intermediate:
+                    description = "Peak energy mode ✨ Time for fun, empowering cardio that lets you feel your confidence in motion."
+                case .advanced:
+                    description = "This is your go-time 🔥 High-intensity cardio or power intervals fit your body’s natural high, let’s ride the momentum!"
+                }
+            case .luteal:
+                switch workoutLevel {
+                case .beginner:
+                    description = "It’s okay to slow the pace 🌙 Gentle, steady cardio will keep you balanced while your body prepares for the next cycle."
+                case .intermediate:
+                    description = "Your energy may shift, and that’s normal 💕 We’ll go for mindful, moderate cardio that keeps you moving without draining you."
+                case .advanced:
+                    description = "Honor the rhythm 🌾 Mix strong days with softer cardio flows, staying consistent without burning out is your strength."
+                }
+            }
+            
+        case (_, true):
+            imageName = "menuStrength"
+            title = "Today's Strength Day!"
+            
+            switch phase {
+            case .menstruation:
+                switch workoutLevel {
+                case .beginner:
+                    description = "Hey gentle warrior 🫶 Let’s focus on mobility and soft strength today! Tiny movements that feel good, nothing heavy."
+                case .intermediate:
+                    description = "Your body’s asking for kindness 🌸 We’ll keep strength training low-intensity with controlled reps and restorative transitions."
+                case .advanced:
+                    description = "Strong doesn’t always mean pushing hard 🌙 Try slow, mindful strength drills and deep mobility, perfect for recovery and alignment."
+                }
+            case .follicular:
+                switch workoutLevel {
+                case .beginner:
+                    description = "Fresh start vibes ✨ Simple strength moves will help you build confidence and reconnect with your body."
+                case .intermediate:
+                    description = "You’re ready to grow stronger 🌼 Let’s build stable foundations with moderate reps and progressive challenges."
+                case .advanced:
+                    description = "Your power’s coming alive 💥 Perfect moment for strength sets that push you!"
+                }
+            case .ovulation:
+                switch workoutLevel {
+                case .beginner:
+                    description = "Feeling that spark? 🌸 Light, upbeat strength moves will help you enjoy the extra confidence this phase brings."
+                case .intermediate:
+                    description = "You’re at your strongest 💫 Let’s embrace it with empowering, medium-intensity strength flows."
+                case .advanced:
+                    description = "You’re unstoppable today 🔥 This is the perfect window for tougher strength sets with explosive reps, powerful sequences, full expression."
+                }
+            case .luteal:
+                switch workoutLevel {
+                case .beginner:
+                    description = "Soft and steady wins here 🌼 Light strength work with longer rest will keep your body supported"
+                case .intermediate:
+                    description = "Consistency is your quiet power ✨ Controlled reps and balanced pacing will help you stay steady through this phase."
+                case .advanced:
+                    description = "Your strength is adaptable 🌺 Alternate challenges with restorative strength work, listen in and train with intention."
+                }
+            }
+            
+        default: // Rest day
+            imageName = "menuRest"
+            title = "Time to Rest"
+            switch phase {
+            case .menstruation:
+                description = "Full permission to slow down—rest supports your body’s work today."
+            case .follicular, .ovulation:
+                description = "A pause so muscles can rebuild and your next sessions feel stronger."
+            case .luteal:
+                description = "Let your body reset, lower stress, and gently prepare for a new cycle."
+            }
         }
+        
+        return (imageName, title, description, duration)
+        
     }
     
     var body: some View {
@@ -563,6 +651,10 @@ struct StreakCardView: View {
     @State private var progressAnim: CGFloat = 0
     @State private var currentStreak: Int = 0
     @State private var targetStreak: Int = 0
+    @State private var hasStreakChanged: Bool = false
+    
+    @State private var lastCheckedDay: Date = Calendar.current.startOfDay(for: Date())
+    private var today: Date { Calendar.current.startOfDay(for: Date()) }
     
     var progress: CGFloat {
         return CGFloat(currentStreak) / CGFloat(targetStreak)
@@ -570,16 +662,26 @@ struct StreakCardView: View {
     
     var body: some View {
         HStack(spacing: 0) {
-            // Character on the Left (tidak bisa diklik)
-            Image("charStreak")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 175, height: 175)
+            
+            if hasStreakChanged {
+                Image("charStreak")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 150, height: 150)
+                    .padding(.top, -13)
+                    .padding(.leading, -21)
+//                    .padding(.trailing, 5)
+            } else {
+                Image("charHalfwayDone")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 125, height: 125)
+            }
             
             // Card on the Right (bisa diklik)
-            Button {
-                router.navigateTo(.streak)  // ✅ Navigasi ke StreakView
-            } label: {
+//            Button {
+//                router.navigateTo(.streak)  // ✅ Navigasi ke StreakView
+//            } label: {
                 VStack(spacing: 8) {
                     // Streak Counter
                     HStack(spacing: 4) {
@@ -635,9 +737,10 @@ struct StreakCardView: View {
                     RoundedRectangle(cornerRadius: 20)
                         .fill(Color.white)
                         .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 3)
+                        .frame(width: 230, height: 125, alignment: .trailing)
                 )
-            }
-            .buttonStyle(PlainButtonStyle())  // ✅ Agar tidak ada efek highlight default
+//            }
+//            .buttonStyle(PlainButtonStyle())  // ✅ Agar tidak ada efek highlight default
         }
         .padding(.horizontal, 20)
         .onAppear {
@@ -647,6 +750,21 @@ struct StreakCardView: View {
             }
             
             loadStreak()
+            lastCheckedDay = today
+        }
+        .onChange(of: currentStreak) { oldValue, newValue in
+            // ✅ Triggered when currentStreak changes
+            if oldValue != newValue {
+                hasStreakChanged = true
+                print("🔥 Streak changed from \(oldValue) to \(newValue)")
+            }
+        }
+        .onChange(of: today) { oldValue, newValue in
+            if oldValue != newValue {
+                hasStreakChanged = false
+                lastCheckedDay = newValue
+                print("⏰ New day detected. Reset hasStreakChanged.")
+            }
         }
     }
     
@@ -666,16 +784,26 @@ enum PhaseType: String {
 
 extension MenuView {
     private func loadWeeklyMenu() {
-        guard let cycle = userCycle, let profile = userWorkout else { return }
+        guard let cycle = userCycle else { return }
         
-        // Get user's chosen days (you need to fetch this from somewhere)
-        let chosenDays: [WorkoutDayPreference] = profile.workoutDaysPreference // TODO: Get from profile
-        print("Chosen days: \(chosenDays.map { $0.rawValue })")
+        // ✅ Fetch fresh UserWorkout
+        let workoutFetch = FetchDescriptor<UserWorkout>(
+            sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
+        )
         
+        guard let freshWorkout = try? modelContext.fetch(workoutFetch).first else {
+            print("❌ No UserWorkout found")
+            return
+        }
+        
+        let chosenDays: [WorkoutDayPreference] = freshWorkout.workoutDaysPreference
+        print("✅ Chosen days: \(chosenDays.map { $0.rawValue })")
+        
+        // ✅ Use the new conditional method
         Task {
-            await menuViewModel.generateWeeklyMenu(
+            await menuViewModel.generateWeeklyMenuIfNeeded(
                 userCycle: cycle,
-                userLevel: profile.workoutLevel,
+                userLevel: freshWorkout.workoutLevel,
                 chosenDays: chosenDays
             )
         }

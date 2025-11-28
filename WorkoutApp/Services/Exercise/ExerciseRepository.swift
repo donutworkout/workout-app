@@ -18,7 +18,8 @@ class ExerciseRepository {
         forLevel level: WorkoutLevel,
         phase: MenstrualPhase,
         bodyPart: BodyPart? = nil,
-        count: Int = 5
+        count: Int = 5,
+        category: MenuCategory? = nil
     ) -> [Exercise] {
         
         print("\n🔍 Fetching exercises:")
@@ -54,12 +55,24 @@ class ExerciseRepository {
             print("🟢 Beginner/intermediate selected one per body part: \(filtered.count)")
             
         case .advanced:
-            // Advanced: isolate specific muscle group (strict)
-            if let bodyPart = bodyPart {
-                filtered = filtered.filter { exercise in
-                    exercise.bodyPart.contains(.pull) || exercise.bodyPart.contains(.push)
-                }
-                print("  🔴 Advanced strict \(bodyPart.rawValue) filter: \(filtered.count)")
+            
+            let calendar = Calendar.current
+            let currentWeekday = calendar.component(.weekday, from: Date())
+            let currentDayNumber = currentWeekday == 1 ? 7 : currentWeekday - 1
+            
+            let targetBodyParts: [BodyPart]
+            
+            switch category {
+            case .strengthLower:
+                targetBodyParts = [.squat, .hinge, .glutes, .core]
+            case .strengthUpper:
+                targetBodyParts = [.chest, .shoulders, .back, .arms, .plank]
+            default:
+                targetBodyParts = []
+            }
+            
+            filtered = filtered.filter { exercise in
+                exercise.bodyPart.contains(where: { targetBodyParts.contains($0) })
             }
         }
         

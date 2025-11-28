@@ -8,10 +8,21 @@
 import Foundation
 import SwiftData
 
-enum MenuCategory: String, CaseIterable, Codable {
+enum MenuCategory: Codable {    
     case cardio
-    case strength
+    case strengthGeneric
+    case strengthUpper
+    case strengthLower
     case rest
+    
+    var isStrength: Bool {
+        switch self {
+        case .strengthGeneric, .strengthUpper, .strengthLower:
+            return true
+        default:
+            return false
+        }
+    }
 }
 
 enum CardioOptions: String, CaseIterable, Codable {
@@ -61,12 +72,12 @@ class DailyMenu: Identifiable {
     var dayName: String = ""
     var date: Date = Date()
     
-    var category: MenuCategory = MenuCategory.rest
+    var category: MenuCategory
     var cardioExercisesOption: [CardioOptions]?
     
     var strengthType: StrengthType?
     
-    @Relationship(deleteRule: .cascade, inverse: \Exercise.dailyMenu)
+    @Relationship(deleteRule: .nullify, inverse: \Exercise.dailyMenu)
     var strengthExercises: [Exercise]?
 
     var intensity: String?
@@ -81,9 +92,27 @@ class DailyMenu: Identifiable {
     var moderateDuration: Int?
     var targetHeartRate: Int?
     
-    var isStrength: Bool { category == .strength }
-    var isCardio: Bool { category == .cardio }
-    var isRest: Bool { category == .rest }
+    var isStrength: Bool {
+        if category.isStrength {
+            return true
+        }
+        return false
+    }
+
+    var isCardio: Bool {
+        if case .cardio = category {
+            return true
+        }
+        return false
+    }
+
+    var isRest: Bool {
+        if case .rest = category {
+            return true
+        }
+        return false
+    }
+
       
     init(
         dayNumber: Int,
@@ -129,12 +158,12 @@ class DailyMenu: Identifiable {
             )
     }
     
-    static func strengthDay(dayNumber: Int, dayName: String, date: Date, strengthType: StrengthType, strengthExercises: [Exercise]? = nil, isMenuComplete: Bool = false, intensity: String, estimatedDuration: Int) -> DailyMenu {
+    static func strengthDay(dayNumber: Int, dayName: String, date: Date, strengthType: StrengthType, category: MenuCategory, strengthExercises: [Exercise]? = nil, isMenuComplete: Bool = false, intensity: String, estimatedDuration: Int) -> DailyMenu {
         return DailyMenu(
             dayNumber: dayNumber,
             dayName: dayName,
             date: date,
-            category: .strength,
+            category: category,
             strengthExercises: strengthExercises,
             intensity: "Moderate",
             estimatedDuration: estimatedDuration,

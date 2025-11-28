@@ -95,7 +95,7 @@ struct SummaryView: View {
                 }
 
                 if let menu = dailyMenus.first(where: { Calendar.current.isDate($0.date, inSameDayAs: weekDates[selectedDay]) }) {
-                    if menu.category == .rest {
+                    if case .rest = menu.category {
                         Text("It's your rest day!")
                             .font(.title3)
                             .fontWeight(.semibold)
