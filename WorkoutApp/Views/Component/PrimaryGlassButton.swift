@@ -11,7 +11,8 @@ struct PrimaryGlassButton: View {
     var title: String
     var action: () -> Void
     @State private var isPressed: Bool = false
-
+    var isDisabled: Bool = false
+    
     var body: some View {
         Button(action: {
             withAnimation(.easeInOut(duration: 0.15)) {
@@ -69,6 +70,9 @@ struct PrimaryGlassButton: View {
         .accessibilityAddTraits(.isButton)
         .accessibilityLabel(Text(title))
         .glassEffect(.regular.tint(.clear).interactive())
+        
+        .disabled(isDisabled)
+        .opacity(isDisabled ? 0.7 : 1.0)
     }
 }
 

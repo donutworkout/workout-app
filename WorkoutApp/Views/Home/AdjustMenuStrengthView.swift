@@ -32,6 +32,11 @@ struct AdjustMenuStrengthView: View {
     init(dailyMenu: DailyMenu? = nil) {
         self.dailyMenu = dailyMenu
     }
+    
+    private var isToday: Bool {
+        guard let menuDate = dailyMenu?.date else { return false }
+        return Calendar.current.isDateInToday(menuDate)
+    }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -50,7 +55,10 @@ struct AdjustMenuStrengthView: View {
         }
         .safeAreaInset(edge: .bottom) {
             VStack {
-                PrimaryGlassButton(title: "Start Now") {
+                PrimaryGlassButton(
+                    title: isToday ? "Start Now" : "Not Available Today",
+                    isDisabled: !isToday  // ✅ Disable if not today
+                ) {
                     sessionManager.prepareWorkout(with: workouts)
                     router.workoutExercises = workouts
 

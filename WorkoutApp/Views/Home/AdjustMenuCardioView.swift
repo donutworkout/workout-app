@@ -55,6 +55,11 @@ struct AdjustMenuCardioView: View {
         )
     }
     
+    private var isToday: Bool {
+        guard let menuDate = dailyMenu?.date else { return false }
+        return Calendar.current.isDateInToday(menuDate)
+    }
+    
     init(
         dailyMenu: DailyMenu? = nil,
         vigorousDuration: Int = 0,
@@ -96,7 +101,10 @@ struct AdjustMenuCardioView: View {
                 Spacer()
                 
                 // MARK: - Start Button (Disabled if no selection)
-                PrimaryGlassButton(title: "Start Now") {
+                PrimaryGlassButton(
+                    title: isToday ? "Start Now" : "Not Available Today",
+                    isDisabled: !isToday  // ✅ Disable if not today
+                ) {
                     guard let selectedMenu = selectedMenu else {
                         showCustomAlert = true
                         return

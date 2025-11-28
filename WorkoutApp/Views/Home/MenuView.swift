@@ -429,17 +429,18 @@ struct CombinedWorkoutCardView: View {
                     PrimaryGlassButton(title: "Start Workout") {
                         HapticManager.shared.trigger(.buttonTap)
                         
-                        // ✅ Update status koneksi saat tombol diklik
-                        updateConnectionStatus()
-                        
-                        // Cek apakah KEDUANYA sudah connect
-                        if isHealthConnected && isWatchConnected {
-                            // Langsung start workout
-                            onStartWorkout()
-                        } else {
-                            // Tampilkan modal jika salah satu belum connect
-                            showHealthNotConnectedModal = true
-                        }
+//                        // ✅ Update status koneksi saat tombol diklik
+//                        updateConnectionStatus()
+//                        
+//                        // Cek apakah KEDUANYA sudah connect
+//                        if isHealthConnected && isWatchConnected {
+//                            // Langsung start workout
+//                            onStartWorkout()
+//                        } else {
+//                            // Tampilkan modal jika salah satu belum connect
+//                            showHealthNotConnectedModal = true
+//                        }
+                        onStartWorkout()
                     }
                 }
             }
