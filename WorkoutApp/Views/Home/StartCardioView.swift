@@ -17,9 +17,6 @@ struct StartCardioView: View {
     @Query private var userProfiles: [UserProfile]
     
 //    // MARK: - Props
-//    var activityName: String = "Badminton"
-//    var imageName: String = "charBadminton"
-    
     @State private var timeElapsed: TimeInterval = 0
     @State private var calories: Int = 0
     @State private var distance: Double = 0.0
@@ -172,17 +169,14 @@ struct StartCardioView: View {
             
             if showHRAlert {
                 ZStack {
-                    // ✅ Full screen overlay
                     Color.white.opacity(0.5)
-                        .ignoresSafeArea(.all) // ✅ Cover everything including safe areas
+                        .ignoresSafeArea(.all)
                         .onTapGesture {
                             withAnimation(.spring()) {
                                 showHRAlert = false
                                 connectivity.isWorkoutPaused = false
                             }
                         }
-                    
-                    // ✅ Alert Dialog
                     VStack(spacing: 0) {
                         // MARK: - Content Area
                         VStack(spacing: 12) {
@@ -291,6 +285,8 @@ struct StartCardioView: View {
         .onReceive(NotificationCenter.default.publisher(for: .resumeLocalTimer)) { _ in
             startTimer()
         }
+        
+        
 
     }
     

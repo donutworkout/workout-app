@@ -20,8 +20,8 @@ struct ContentView: View {
     
     var body: some View {
         Group {
-            if showDoneView {
-                WatchWorkoutDoneView(showDoneView: $showDoneView)
+            if showDoneView, let type = connectivity.selectedWorkoutType {
+                WatchWorkoutDoneView(workoutType: type, showDoneView: $showDoneView)
             } else if !connectivity.isReachable {
                 WatchNotConnectedView(connectivity: _connectivity)
                 
@@ -60,28 +60,14 @@ struct ContentView: View {
                 workoutStarted = false
             } else if !newValue && workoutStarted {
                 print("stop workout!!")
-                sessionManager.stopWorkout()
+                if sessionManager.isRunning {
+                    sessionManager.stopWorkout()
+                }
                 WKInterfaceDevice.current().play(.stop)
                 showDoneView = true
                 workoutStarted = false
             }
         }
-//        .onChange(of: showDoneView) { _, newValue in
-//            if newValue {
-//                    withAnimation(.easeInOut) {
-//                        showDoneView = false
-//                        connectivity.selectedWorkoutType = nil
-//                        connectivity.shouldStartWorkout = false
-//                        print("⌚ Auto-dismiss done view → back to menu")
-//                    }
-//            }
-//        }
-//        .animation(.easeInOut, value: connectivity.selectedWorkoutType)
-//        .animation(.easeInOut, value: workoutStarted)
-////        .onAppear {
-//            print("appear stop")
-//            sessionManager.stopWorkout()
-//        }
     }
     
     private func startCountdown(for type: HKWorkoutActivityType) {

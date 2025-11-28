@@ -26,7 +26,7 @@ struct AdjustMenuCardioView: View {
         "Cycling", "Swimming"
     ]
     
-    private let thirtyMinuteMenu = [ //vig
+    private let thirtyMinuteMenu = [ 
         "Badminton", "Basketball",
         "Volleyball", "Tennis",
         "Outdoor Run", "Indoor Run"
