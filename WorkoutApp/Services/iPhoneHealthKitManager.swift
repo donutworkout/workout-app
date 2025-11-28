@@ -78,7 +78,7 @@ final class iPhoneHealthKitManager {
 
             let categoryPredicate = HKQuery.predicateForObjects(
                 withMetadataKey: "WorkoutCategory",
-                allowedValues: [menu.category.rawValue]
+                allowedValues: [menu.category.self]
             )
 
             let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [

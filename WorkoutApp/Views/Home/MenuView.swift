@@ -209,7 +209,10 @@ struct MenuView: View {
         let generator = WorkoutMenuGenerator(context: modelContext)
         cardioSpecs = generator.getCardioSpecs(for: workout.workoutLevel, phase: phase)
         
-        let cardioDays = menus.filter { $0.category == .cardio }.count
+        let cardioDays = menus.filter {
+            if case .cardio = $0.category { return true }
+            return false
+        }.count
         
         if let specs = cardioSpecs, cardioDays > 0 {
             vigorousDuration = specs.vigorousDuration / cardioDays
@@ -577,9 +580,9 @@ struct StreakCardView: View {
                 .frame(width: 175, height: 175)
             
             // Card on the Right (bisa diklik)
-            Button {
-                router.navigateTo(.streak)  // ✅ Navigasi ke StreakView
-            } label: {
+//            Button {
+//                router.navigateTo(.streak)  // ✅ Navigasi ke StreakView
+//            } label: {
                 VStack(spacing: 8) {
                     // Streak Counter
                     HStack(spacing: 4) {
@@ -636,8 +639,8 @@ struct StreakCardView: View {
                         .fill(Color.white)
                         .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 3)
                 )
-            }
-            .buttonStyle(PlainButtonStyle())  // ✅ Agar tidak ada efek highlight default
+//            }
+//            .buttonStyle(PlainButtonStyle())  // ✅ Agar tidak ada efek highlight default
         }
         .padding(.horizontal, 20)
         .onAppear {

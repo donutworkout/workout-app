@@ -65,60 +65,61 @@ class WorkoutViewModel: ObservableObject {
     }
 
     
-    func generateStrengthWorkoutsForDay(
-        dayNumber: Int,
-        dayName: String,
-        date: Date,
-        userCycle: UserCycle,
-        userLevel: WorkoutLevel
-    ) async {
-        isLoading = true
-        errorMessage = nil
-        
-        do {
-            
-            let currentPhase = CyclePhaseCalculator.calculateCurrentPhase(
-                lastPeriodStart: userCycle.cycleStartDate,
-                menstrualDuration: userCycle.menstrualDuration
-            )
-            
-            let dayNumber = getTodaysDayNumber()
-            let dayName = getDayName(dayNumber)
-            
-            async let bodyweightMenu = generator.generateStrengthMenu(
-                dayNumber: dayNumber,
-                dayName: dayName,
-                date: date,
-                level: userLevel,
-                phase: currentPhase,
-                strengthType: .bodyWeight,
-                strengthDayIndex: 0
-            )
-            
-            async let gymMenu = generator.generateStrengthMenu(
-                dayNumber: dayNumber,
-                dayName: dayName,
-                date: date,
-                level: userLevel,
-                phase: currentPhase,
-                strengthType: .gym,
-                strengthDayIndex: 0
-            )
-            
-            let (bwMenu, gMenu) = try await (bodyweightMenu, gymMenu)
-              
-            await MainActor.run {
-                self.bodyweightWorkouts = bwMenu.strengthExercises ?? []
-                self.gymWorkouts = gMenu.strengthExercises ?? []
-            }
-            
-        } catch {
-            errorMessage = "Failed to generate workouts: \(error.localizedDescription)"
-            print("❌ Error: \(error)")
-        }
-        
-        isLoading = false
-    }
+//    func generateStrengthWorkoutsForDay(
+//        dayNumber: Int,
+//        dayName: String,
+//        date: Date,
+//        userCycle: UserCycle,
+//        userLevel: WorkoutLevel
+//    ) async {
+//        isLoading = true
+//        errorMessage = nil
+//        
+//        do {
+//            
+//            let currentPhase = CyclePhaseCalculator.calculateCurrentPhase(
+//                lastPeriodStart: userCycle.cycleStartDate,
+//                menstrualDuration: userCycle.menstrualDuration
+//            )
+//            
+//            let dayNumber = getTodaysDayNumber()
+//            let dayName = getDayName(dayNumber)
+//            
+//            async let bodyweightMenu = generator.generateStrengthMenu(
+//                dayNumber: dayNumber,
+//                dayName: dayName,
+//                date: date,
+//                level: userLevel,
+//                phase: currentPhase,
+//                strengthType: .bodyWeight,
+//                strengthDayIndex: 0,
+//                category: .strength(<#T##MenuCategory.BodySplit?#>)
+//            )
+//            
+//            async let gymMenu = generator.generateStrengthMenu(
+//                dayNumber: dayNumber,
+//                dayName: dayName,
+//                date: date,
+//                level: userLevel,
+//                phase: currentPhase,
+//                strengthType: .gym,
+//                strengthDayIndex: 0
+//            )
+//            
+//            let (bwMenu, gMenu) = try await (bodyweightMenu, gymMenu)
+//              
+//            await MainActor.run {
+//                self.bodyweightWorkouts = bwMenu.strengthExercises ?? []
+//                self.gymWorkouts = gMenu.strengthExercises ?? []
+//            }
+//            
+//        } catch {
+//            errorMessage = "Failed to generate workouts: \(error.localizedDescription)"
+//            print("❌ Error: \(error)")
+//        }
+//        
+//        isLoading = false
+//    }
     
 }
 

@@ -226,7 +226,7 @@ struct DailyMenuCard: View {
     
     var categoryColor: Color {
         switch menu.category {
-        case .strength: return .blue
+        case .strengthGeneric, .strengthLower, .strengthUpper: return .blue
         case .cardio: return .red
         case .rest: return .green
         }
