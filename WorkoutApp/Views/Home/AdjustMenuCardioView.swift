@@ -26,7 +26,7 @@ struct AdjustMenuCardioView: View {
         "Cycling", "Swimming"
     ]
     
-    private let thirtyMinuteMenu = [ //vig
+    private let thirtyMinuteMenu = [ 
         "Badminton", "Basketball",
         "Volleyball", "Tennis",
         "Outdoor Run", "Indoor Run"
@@ -53,6 +53,11 @@ struct AdjustMenuCardioView: View {
             cycleLength: cycle.cycleLength,
             periodDuration: cycle.menstrualDuration
         )
+    }
+    
+    private var isToday: Bool {
+        guard let menuDate = dailyMenu?.date else { return false }
+        return Calendar.current.isDateInToday(menuDate)
     }
     
     init(
@@ -96,7 +101,10 @@ struct AdjustMenuCardioView: View {
                 Spacer()
                 
                 // MARK: - Start Button (Disabled if no selection)
-                PrimaryGlassButton(title: "Start Now") {
+                PrimaryGlassButton(
+                    title: isToday ? "Start Now" : "Not Available Today",
+                    isDisabled: !isToday  // ✅ Disable if not today
+                ) {
                     guard let selectedMenu = selectedMenu else {
                         showCustomAlert = true
                         return

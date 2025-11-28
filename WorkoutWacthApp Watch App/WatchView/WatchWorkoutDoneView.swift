@@ -6,12 +6,15 @@
 //
 
 import SwiftUI
+import HealthKit
 
 struct WatchWorkoutDoneView: View {
     @Environment(WatchConnectivityManager.self) private var connectivity
     @Environment(WorkoutSessionManager.self) private var sessionManager
-
-    @State private var elapsedTime: Int = 302  // contoh: 5 menit 2 detik (bisa diganti dari parent view)
+    
+    let workoutType: HKWorkoutActivityType
+    
+    @State private var elapsedTime: Int = 302
     @State private var currentTime: String = Self.formatCurrentTime()
     private let clockTimer = Timer.publish(every: 1, on: .main, in: .common)
         .autoconnect()
@@ -49,7 +52,6 @@ struct WatchWorkoutDoneView: View {
                         .font(.system(size: 20, weight: .semibold))
                         .foregroundColor(Color.white)
                 }
-//                .padding(.top, -20)
 
                 // MARK: - Static Stats
                 VStack(alignment: .leading, spacing: 0) {
@@ -67,18 +69,19 @@ struct WatchWorkoutDoneView: View {
                         ),
                         label: "Active Energy"
                     )
-
-                    statRow(
-                        icon: "figure.walk",
-                        value: formatDistance(sessionManager.distance),
-                        label: "Distance"
-                    )
+                    if shouldShowDistance(for: workoutType) {
+                        statRow(
+                            icon: "figure.walk",
+                            value: formatDistance(sessionManager.distance),
+                            label: "Distance"
+                        )
+                    }
 
                     statRow(
                         icon: "heart.fill",
                         value: String(
                             format: "%.0f bpm",
-                            sessionManager.heartRate
+                            sessionManager.averageHeartRate
                         ),
                         label: "Avg Heart Rate"
                     )
@@ -105,6 +108,15 @@ struct WatchWorkoutDoneView: View {
         connectivity.shouldStartWorkout = false
         showDoneView = false
     }
+    
+    private func shouldShowDistance(for type: HKWorkoutActivityType) -> Bool {
+        switch type {
+        case .running, .walking, .cycling, .swimming:
+            return true
+        default:
+            return false
+        }
+    }
 
     // MARK: - Reusable Row
     @ViewBuilder
@@ -119,13 +131,6 @@ struct WatchWorkoutDoneView: View {
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundColor(.white)
         }
-    }
-
-    // MARK: - Update Real Clock Only
-    private func updateTime() {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        currentTime = formatter.string(from: Date())
     }
 
     // MARK: - Formating Distance

@@ -11,7 +11,6 @@ import SwiftData
 struct StartStrengthView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var router: Router
-    //@EnvironmentObject var sessionManager: StrengthSessionManager
     
     private let sessionManager = StrengthSessionManager.shared
     private let connectivity = iPhoneConnectivityManager.shared
@@ -33,12 +32,17 @@ struct StartStrengthView: View {
     @State private var calories: Int = 0
     @State private var bpm: Int = 0
     @State private var lastExerciseIndex: Int = 0
+    @State private var hasReachedGoal = false
     
     @State private var showPausePopup: Bool = false
     @State private var showHRAlert: Bool = false
     
     var currentExercise: Exercise? {
         sessionManager.currentExercise
+    }
+    
+    private var totalExercises: Int {
+        sessionManager.exercises.count
     }
     
     var body: some View {
@@ -100,13 +104,10 @@ struct StartStrengthView: View {
                     }
                     
                     NeutralGlassButton(title: "Next") {
-                        //                    router.navigateTo(.restView)
-                        
                         if sessionManager.hasNextExercise {
-                            // Go to rest view, then next exercise
                             router.navigateTo(.restView)
                         } else {
-                            // Workout complete - go to summary or home
+                            hasReachedGoal = true
                             connectivity.stopWorkoutFromPhone()
                             sessionManager.reset()
                             router.navigateTo(.finishWorkout)
@@ -119,17 +120,21 @@ struct StartStrengthView: View {
             if showPausePopup {
                 Alert(
                     characterImage: "characterFreeze",
-                    onResume: {
-                        showPausePopup = false
-                        isPaused = false
+                    onResume: {                        isPaused = false
                         connectivity.resumeWorkoutFromPhone()
+                        showPausePopup = false
+                        
                     },
                     onEndWorkout: {
                         timer?.invalidate()
                         connectivity.stopWorkoutFromPhone()
                         showPausePopup = false
                         isPaused = false
-                        router.navigateTo(.halfwayWorkout)
+                        if hasReachedGoal {
+                            router.navigateTo(.finishWorkout)
+                        } else {
+                            router.navigateTo(.halfwayWorkout)
+                        }
                     }
                 )
                 .transition(.scale.combined(with: .opacity))
@@ -232,15 +237,17 @@ struct StartStrengthView: View {
                 print("🏁 STOP from watch → navigate FinishWorkout")
                 timer?.invalidate()
                 sessionManager.reset()
-                router.navigateTo(.finishWorkout)
+                
+                if hasReachedGoal {
+                        router.navigateTo(.finishWorkout)
+                    } else {
+                        router.navigateTo(.halfwayWorkout)
+                    }
             }
         }
         .onChange(of: connectivity.isWorkoutPaused) { _, paused in
-            if paused {
-                showPausePopup = true
-            } else {
-                showPausePopup = false
-            }
+            isPaused = paused
+            showPausePopup = paused
         }
         .onDisappear { timer?.invalidate() }
     }
@@ -287,7 +294,7 @@ struct StartStrengthView: View {
                     
                     if countMaximumHR() && !showHRAlert {
                         showHRAlert = true
-                        isPaused = true  // Auto-pause when max HR exceeded
+                        isPaused = true
                     }
                 }
             }

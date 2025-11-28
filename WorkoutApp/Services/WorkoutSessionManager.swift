@@ -71,10 +71,6 @@ class WorkoutSessionManager: NSObject {
         let config = HKWorkoutConfiguration()
         config.activityType = type
         config.locationType = isIndoor ? .indoor : .outdoor
-
-        print("🎽 Workout Config:")
-        print("   • type         = \(config.activityType)")
-        print("   • locationType = \(config.locationType.rawValue)")
         
         do {
             workoutSession = try HKWorkoutSession(
