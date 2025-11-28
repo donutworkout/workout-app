@@ -270,6 +270,9 @@ struct ProfileView: View {
             }
         }
         .background(Color.white.ignoresSafeArea())
+        .onAppear {
+            loadCycleDates()
+        }
     }
 
     // MARK: - Calendar Logic
@@ -349,9 +352,9 @@ struct ProfileView: View {
     private func calculateOvulationDates() {
         ovulationDates.removeAll()
         guard !menstrualDates.isEmpty else { return }
-        let lastMenstrualDate = menstrualDates.sorted().last!
-        if let ovulationStart = calendar.date(byAdding: .day, value: 7, to: lastMenstrualDate) {
-            for i in 0..<14 {
+        let firstMenstrualDate = menstrualDates.sorted().first!
+        if let ovulationStart = calendar.date(byAdding: .day, value: 5, to: firstMenstrualDate) {
+            for i in 0..<7 {
                 if let ovulationDay = calendar.date(byAdding: .day, value: i, to: ovulationStart) {
                     ovulationDates.insert(ovulationDay)
                 }

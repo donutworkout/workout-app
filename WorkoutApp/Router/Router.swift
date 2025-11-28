@@ -4,7 +4,7 @@ import HealthKit
 enum Route {
     case onboarding
     case healthConnect
-    case watchConnect
+//    case watchConnect
     case survey
     case surveyWorkoutLevel  // ✅ TAMBAHKAN
     case surveyWorkoutDay    // ✅ TAMBAHKAN

@@ -202,10 +202,10 @@ class WorkoutMenuGenerator {
             print("\n💪 Generating strength workout for \(dayName)...")
             
             // Step 1: Determine body part focus (rotate throughout week)
-            let bodyPartFocus = determineBodyPartFocus(
-                level: level,
-                strengthDayIndex: strengthDayIndex
-            )
+//            let bodyPartFocus = determineBodyPartFocus(
+//                level: level,
+//                strengthDayIndex: strengthDayIndex
+//            )
             
             // Step 3: Calculate exercise count
             let exerciseCount = getExerciseCount(for: level, phase: phase)
@@ -215,7 +215,6 @@ class WorkoutMenuGenerator {
             var exercises = exerciseRepo.getExercises(
                 forLevel: level,
                 phase: phase,
-                bodyPart: bodyPartFocus,
                 count: exerciseCount
             )
             
@@ -243,16 +242,16 @@ extension WorkoutMenuGenerator {
     private func determineBodyPartFocus(level: WorkoutLevel, strengthDayIndex: Int) -> BodyPart? {
         switch level {
             case .advanced :
-                return strengthDayIndex % 2 == 0 ? .upperPull : .upperPush
-            default : return .fullBody
+            return strengthDayIndex % 2 == 0 ? .pull : .push
+            default : return .pull
         }
     }
        
     private func getExerciseCount(for level: WorkoutLevel, phase: MenstrualPhase) -> Int {
         switch level {
-        case .beginner: return 4
+        case .beginner: return 5
         case .intermediate: return 5
-        case .advanced: return 6
+        case .advanced: return 5
         }
     }
     

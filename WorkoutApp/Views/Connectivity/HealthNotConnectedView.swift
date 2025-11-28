@@ -6,91 +6,101 @@
 //
 
 import SwiftUI
-import HealthKit
 
 struct HealthNotConnectedView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var router: Router
-    @State private var pulse = false
     
-    var onConnect: () -> Void = {}
+    var isHealthConnected: Bool
+    var isWatchConnected: Bool
     
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 28) {
+        ZStack {
+            Color.black.opacity(0.18).ignoresSafeArea()
+            
+            VStack {
                 Spacer()
-                // Heart Icon Box - lebih kecil dan smooth beat
-                ZStack {
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.white)
-                        .shadow(color: .gray.opacity(0.18), radius: 6, x: 0, y: 2)
-                        .frame(width: 78, height: 78)    // ukuran diperkecil
+                
+                VStack(spacing: 32) {
+                    // Handle indicator
+                    Capsule()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 46, height: 5)
+                        .padding(.top, 12)
                     
-                    Image(systemName: "heart.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 38, height: 38)
-                        .foregroundColor(.pink)
-                        .scaleEffect(pulse ? 1.12 : 1.0)
-                        .animation(.easeInOut(duration: 0.22), value: pulse)  // beat smooth & natural
-                }
-                
-                Spacer()
-                
-                // Description Text
-                Text("HeyLoona! integrates with Apple Health to automatically track your health metrics.")
-                    .font(.system(size: 16, weight: .regular))
-                    .foregroundColor(.black.opacity(0.75))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 26)
-                    .fixedSize(horizontal: false, vertical: true)  // mencegah terpotong
-                
-                // Instructions Text
-                Text("To manage access permissions to Health, tap Open Settings, then go to Health > Data Access & Devices > HeyLoona!")
-                    .font(.system(size: 16, weight: .regular))
-                    .foregroundColor(.black.opacity(0.75))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 26)
-                    .fixedSize(horizontal: false, vertical: true)
-                
-                // Open Settings Button
-                PrimaryGlassButton(title: "Open Settings") {
-                    if let url = URL(string: "App-Prefs:") {
-                        UIApplication.shared.open(url)
+                    // ✅ Section Health - hanya muncul jika !isHealthConnected
+                    if !isHealthConnected {
+                        VStack(spacing: 14) {
+                            Text("Health Not Connected")
+                                .font(.system(size: 19, weight: .semibold))
+                                .foregroundColor(.black)
+                                .multilineTextAlignment(.center)
+                            
+                            Text("Apple Health access is required to track your health metrics automatically.")
+                                .font(.system(size: 15))
+                                .foregroundColor(.black.opacity(0.75))
+                                .multilineTextAlignment(.center)
+                                .fixedSize(horizontal: false, vertical: true)
+                            
+                            PrimaryGlassButton(title: "Open Health Settings") {
+                                if let url = URL(string: "App-Prefs:root=General") {
+                                    UIApplication.shared.open(url)
+                                }
+                            }
+                            .padding(.top, 6)
+                        }
+                        .padding(.horizontal, 28)
                     }
-                }
-                .padding(.horizontal)
-                .padding(.bottom, 34)
-            }
-            .background(Color.white.ignoresSafeArea())
-            .navigationTitle("Health Connect")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(.black)
+                    
+                    // ✅ Divider - hanya muncul jika KEDUA section tampil
+                    if !isHealthConnected && !isWatchConnected {
+                        Divider().padding(.vertical)
                     }
+                    
+                    // ✅ Section Watch - hanya muncul jika !isWatchConnected
+                    if !isWatchConnected {
+                        VStack(spacing: 14) {
+                            Text("Watch Not Connected")
+                                .font(.system(size: 19, weight: .semibold))
+                                .foregroundColor(.black)
+                                .multilineTextAlignment(.center)
+                            
+                            Text("Make sure your Apple Watch is connected via Bluetooth for workout syncing.")
+                                .font(.system(size: 15))
+                                .foregroundColor(.black.opacity(0.75))
+                                .multilineTextAlignment(.center)
+                                .fixedSize(horizontal: false, vertical: true)
+                            
+                            PrimaryGlassButton(title: "Open Bluetooth Settings") {
+                                if let url = URL(string: "App-Prefs:") {
+                                    UIApplication.shared.open(url)
+                                }
+                            }
+                            .padding(.top, 6)
+                        }
+                        .padding(.horizontal, 28)
+                    }
+                    
+                    Spacer(minLength: 0)
                 }
+                .padding(.vertical, 18)
+                .background(
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .fill(Color.white)
+                        .shadow(color: .black.opacity(0.11), radius: 16, x: 0, y: -2)
+                )
+                .ignoresSafeArea(.all, edges: .bottom)
             }
-            .onAppear {
-                startHeartbeat()
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.black)
+                }
             }
         }
     }
-    
-    // Heartbeat lebih smooth (pause lebih lama dan scale lebih kecil)
-    private func startHeartbeat() {
-        Timer.scheduledTimer(withTimeInterval: 1.1, repeats: true) { _ in
-            withAnimation { pulse = true }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) {
-                withAnimation { pulse = false }
-            }
-        }
-    }
-}
-
-#Preview {
-    HealthNotConnectedView()
 }
