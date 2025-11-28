@@ -144,7 +144,14 @@ struct MenuView: View {
             }
             
             cycleViewModel.selectedDayIndex = todayIndex()
-            loadWeeklyMenu()
+            
+            if router.isEditingFromProfile == true {
+                loadWeeklyMenu(forceCheckProfile: true)
+                router.isEditingFromProfile = false
+            } else {
+                loadWeeklyMenu(forceCheckProfile: false)
+            }
+                
             calculateCardioSpecs()
         }
     }
@@ -433,13 +440,14 @@ struct CombinedWorkoutCardView: View {
                         updateConnectionStatus()
                         
                         // Cek apakah KEDUANYA sudah connect
-                        if isHealthConnected && isWatchConnected {
-                            // Langsung start workout
-                            onStartWorkout()
-                        } else {
-                            // Tampilkan modal jika salah satu belum connect
-                            showHealthNotConnectedModal = true
-                        }
+//                        if isHealthConnected && isWatchConnected {
+//                            // Langsung start workout
+//                            onStartWorkout()
+//                        } else {
+//                            // Tampilkan modal jika salah satu belum connect
+//                            showHealthNotConnectedModal = true
+//                        }
+                        onStartWorkout()
                     }
                 }
             }
@@ -783,7 +791,7 @@ enum PhaseType: String {
 }
 
 extension MenuView {
-    private func loadWeeklyMenu() {
+    private func loadWeeklyMenu(forceCheckProfile: Bool = false) {
         guard let cycle = userCycle else { return }
         
         // ✅ Fetch fresh UserWorkout
@@ -804,7 +812,8 @@ extension MenuView {
             await menuViewModel.generateWeeklyMenuIfNeeded(
                 userCycle: cycle,
                 userLevel: freshWorkout.workoutLevel,
-                chosenDays: chosenDays
+                chosenDays: chosenDays,
+                forceProfileCheck: forceCheckProfile
             )
         }
     }
