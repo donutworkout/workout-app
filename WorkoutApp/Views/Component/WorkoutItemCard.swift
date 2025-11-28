@@ -73,14 +73,13 @@ struct WorkoutItemCard: View {
                 }
                 
                 Button(action: {
-//                    if workout.time != nil {
-//                        time += 10
-//                        HapticManager.shared.trigger(.adjustReps)
-//                    } else {
-//                        sets += 1
-//                        HapticManager.shared.trigger(.adjustReps)
-//                    }
-                    reps += 1
+                    if workout.time != nil {
+                        time += 10
+                        HapticManager.shared.trigger(.adjustReps)
+                    } else {
+                        reps += 1
+                        HapticManager.shared.trigger(.adjustReps)
+                    }
                     HapticManager.shared.trigger(.adjustReps)
                 }) {
                     Image(systemName: "plus")

@@ -85,7 +85,7 @@ struct StartCardioView: View {
                     Image("char\(activityName.replacingOccurrences(of: " ", with: ""))")
                         .resizable()
                         .scaledToFit()
-                        .frame(height: 320)
+                        .frame(height: 300)
                         .padding(.top, 8)
                 }
                 
