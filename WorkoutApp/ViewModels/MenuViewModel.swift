@@ -35,35 +35,48 @@ class MenuViewModel: ObservableObject {
     func generateWeeklyMenuIfNeeded(
         userCycle: UserCycle,
         userLevel: WorkoutLevel,
-        chosenDays: [WorkoutDayPreference]
+        chosenDays: [WorkoutDayPreference],
+        forceProfileCheck: Bool = false
     ) async {
-        // ✅ Check if profile changed
-        let hasLevelChanged = lastWorkoutLevel != userLevel
-        let hasDaysChanged = lastWorkoutDays != chosenDays
+        loadSavedMenus()
         
-        let hasProfileChanged = hasLevelChanged || hasDaysChanged
-        
-        print("🔍 Profile check:")
-        print("   Level: \(userLevel.rawValue) (changed: \(hasLevelChanged))")
-        print("   Days: \(chosenDays.map { $0.rawValue }) (changed: \(hasDaysChanged))")
-        
-        guard hasProfileChanged else {
-            print("⚡ Profile unchanged, using existing menus")
-            loadSavedMenus() // Just reload existing menus
+        if weeklyMenu.isEmpty {
+                print("🎯 No menus for this week → first time generate")
+                lastWorkoutLevel = userLevel
+                lastWorkoutDays  = chosenDays
+                await deleteMenusForCurrentWeek()
+                await generateWeeklyMenu(userCycle: userCycle, userLevel: userLevel, chosenDays: chosenDays)
+                return
+            }
+
+            // Kalau tidak dipaksa cek, dan level/days belum pernah diset → jadikan baseline, jangan regenerate
+        if !forceProfileCheck && lastWorkoutLevel == nil && lastWorkoutDays == nil {
+            print("🧩 Set baseline profile without regenerating")
+            lastWorkoutLevel = userLevel
+            lastWorkoutDays  = chosenDays
             return
         }
-        
-        print("🔄 Profile changed! Regenerating weekly menu...")
-        
-        // ✅ Update last saved values
-        lastWorkoutLevel = userLevel
-        lastWorkoutDays = chosenDays
-        
-        // ✅ Delete old menus ONLY when profile changes
-        await deleteMenusForCurrentWeek()
-        
-        // ✅ Generate new menus
-        await generateWeeklyMenu(userCycle: userCycle, userLevel: userLevel, chosenDays: chosenDays)
+
+            // Hitung perubahan profil
+            let hasLevelChanged = lastWorkoutLevel != userLevel
+            let hasDaysChanged  = lastWorkoutDays != chosenDays
+            let hasProfileChanged = hasLevelChanged || hasDaysChanged
+
+            print("🔍 Profile check:")
+            print("   Level changed: \(hasLevelChanged)")
+            print("   Days changed : \(hasDaysChanged)")
+
+            guard hasProfileChanged else {
+                print("⚡ Profile unchanged, keep existing menus")
+                return
+            }
+
+            print("🔄 Profile changed (or force check), regenerating weekly menu…")
+            lastWorkoutLevel = userLevel
+            lastWorkoutDays  = chosenDays
+
+            await deleteMenusForCurrentWeek()
+            await generateWeeklyMenu(userCycle: userCycle, userLevel: userLevel, chosenDays: chosenDays)
     }
 
     // MARK: - New delete method (add this)
@@ -182,6 +195,7 @@ class MenuViewModel: ObservableObject {
         }
         
         weeklyMenu = newMenus
+//        loadSavedMenus()
         isLoading = false
     }
         
