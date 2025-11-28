@@ -49,11 +49,11 @@ class DummyExerciseProvider {
                 time: nil
             ),
             
-            Exercise(
-                name: "Wall Press",
-                bodyPart: [.push],
-                time: nil
-            ),
+//            Exercise(
+//                name: "Wall Press",
+//                bodyPart: [.push],
+//                time: nil
+//            ),
             
             Exercise(
                 name: "Bent Over Row",
@@ -61,11 +61,11 @@ class DummyExerciseProvider {
                 time: nil
             ),
             
-            Exercise(
-                name: "Bicep Curl",
-                bodyPart: [.pull, .arms],
-                time: nil
-            ),
+//            Exercise(
+//                name: "Bicep Curl",
+//                bodyPart: [.pull, .arms],
+//                time: nil
+//            ),
             
             Exercise(
                 name: "Single Leg Deadlift",
@@ -129,7 +129,7 @@ class DummyExerciseProvider {
             
             Exercise(
                 name: "Wall Push Up",
-                bodyPart: [.chest],
+                bodyPart: [.chest, .push],
                 time: nil
             ),
             
@@ -168,21 +168,21 @@ class DummyExerciseProvider {
     }
     
     // MARK: - Clear All Exercises (for testing)
-    func clearAllExercises(from context: ModelContext) {
-        let exercises = createDummyExercises()
-        
-        for exercise in exercises {
-            context.insert(exercise)
-        }
-        
-        do {
-            try context.delete(model: Exercise.self)
-            try context.delete(model: DailyMenu.self)
-            try context.save()
-            print("✅ Cleared all exercises from database")
-            print("there's \(exercises.count) left in the database")
-        } catch {
-            print("❌ Failed to clear exercises: \(error)")
-        }
-    }
+//    func clearAllExercises(from context: ModelContext) {
+//        let exercises = createDummyExercises()
+//        
+//        for exercise in exercises {
+//            context.insert(exercise)
+//        }
+//        
+//        do {
+//            try context.delete(model: Exercise.self)
+//            try context.delete(model: DailyMenu.self)
+//            try context.save()
+//            print("✅ Cleared all exercises from database")
+//            print("there's \(exercises.count) left in the database")
+//        } catch {
+//            print("❌ Failed to clear exercises: \(error)")
+//        }
+//    }
 }

@@ -77,7 +77,7 @@ class DailyMenu: Identifiable {
     
     var strengthType: StrengthType?
     
-    @Relationship(deleteRule: .cascade, inverse: \Exercise.dailyMenu)
+    //@Relationship(deleteRule: .cascade, inverse: \Exercise.dailyMenu)
     var strengthExercises: [Exercise]?
 
     var intensity: String?

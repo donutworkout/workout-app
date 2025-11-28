@@ -76,8 +76,8 @@ struct WorkoutAppApp: App {
             let context = WorkoutAppApp.modelContainer.mainContext
             
             // Clear everything
-            DummyExerciseProvider.shared.clearAllExercises(from: context)
-            clearOldMenus(from: context)
+//            DummyExerciseProvider.shared.clearAllExercises(from: context)
+//            clearOldMenus(from: context)
             
             // Insert fresh exercises (will work because database is empty)
             DummyExerciseProvider.shared.insertDummyData(into: context)

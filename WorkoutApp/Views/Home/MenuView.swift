@@ -343,18 +343,19 @@ struct CombinedWorkoutCardView: View {
                 if (menu?.isCardio ?? false) || (menu?.isStrength ?? false) {
                     PrimaryGlassButton(title: "Start Workout") {
                         HapticManager.shared.trigger(.buttonTap)
-                        
-                        // ✅ Update status koneksi saat tombol diklik
-                        updateConnectionStatus()
-                        
-                        // Cek apakah KEDUANYA sudah connect
-                        if isHealthConnected && isWatchConnected {
-                            // Langsung start workout
-                            onStartWorkout()
-                        } else {
-                            // Tampilkan modal jika salah satu belum connect
-                            showHealthNotConnectedModal = true
-                        }
+//                        
+//                        // ✅ Update status koneksi saat tombol diklik
+//                        updateConnectionStatus()
+//                        
+//                        // Cek apakah KEDUANYA sudah connect
+//                        if isHealthConnected && isWatchConnected {
+//                            // Langsung start workout
+//                            onStartWorkout()
+//                        } else {
+//                            // Tampilkan modal jika salah satu belum connect
+//                            showHealthNotConnectedModal = true
+//                        }
+                        onStartWorkout()
                     }
                 }
             }
@@ -669,16 +670,26 @@ enum PhaseType: String {
 
 extension MenuView {
     private func loadWeeklyMenu() {
-        guard let cycle = userCycle, let profile = userWorkout else { return }
+        guard let cycle = userCycle else { return }
         
-        // Get user's chosen days (you need to fetch this from somewhere)
-        let chosenDays: [WorkoutDayPreference] = profile.workoutDaysPreference // TODO: Get from profile
-        print("Chosen days: \(chosenDays.map { $0.rawValue })")
+        // ✅ Fetch fresh UserWorkout
+        let workoutFetch = FetchDescriptor<UserWorkout>(
+            sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
+        )
         
+        guard let freshWorkout = try? modelContext.fetch(workoutFetch).first else {
+            print("❌ No UserWorkout found")
+            return
+        }
+        
+        let chosenDays: [WorkoutDayPreference] = freshWorkout.workoutDaysPreference
+        print("✅ Chosen days: \(chosenDays.map { $0.rawValue })")
+        
+        // ✅ Use the new conditional method
         Task {
-            await menuViewModel.generateWeeklyMenu(
+            await menuViewModel.generateWeeklyMenuIfNeeded(
                 userCycle: cycle,
-                userLevel: profile.workoutLevel,
+                userLevel: freshWorkout.workoutLevel,
                 chosenDays: chosenDays
             )
         }
