@@ -142,7 +142,8 @@ class DummyExerciseProvider {
     }
     
     // MARK: - Insert Dummy Data into SwiftData
-    func insertDummyData(into context: ModelContext) {
+    @MainActor
+    func insertDummyData(into context: ModelContext) async {
         let exercises = createDummyExercises()
         
         // Check if data already exists
@@ -168,21 +169,21 @@ class DummyExerciseProvider {
     }
     
     // MARK: - Clear All Exercises (for testing)
-//    func clearAllExercises(from context: ModelContext) {
-//        let exercises = createDummyExercises()
-//        
-//        for exercise in exercises {
-//            context.insert(exercise)
-//        }
-//        
-//        do {
-//            try context.delete(model: Exercise.self)
-//            try context.delete(model: DailyMenu.self)
-//            try context.save()
-//            print("✅ Cleared all exercises from database")
-//            print("there's \(exercises.count) left in the database")
-//        } catch {
-//            print("❌ Failed to clear exercises: \(error)")
-//        }
-//    }
+    func clearAllExercises(from context: ModelContext) {
+        let exercises = createDummyExercises()
+        
+        for exercise in exercises {
+            context.insert(exercise)
+        }
+        
+        do {
+            //try context.delete(model: Exercise.self)
+            try context.delete(model: DailyMenu.self)
+            try context.save()
+            print("✅ Cleared all exercises from database")
+            print("there's \(exercises.count) left in the database")
+        } catch {
+            print("❌ Failed to clear exercises: \(error)")
+        }
+    }
 }

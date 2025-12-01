@@ -23,7 +23,16 @@ class MenuViewModel: ObservableObject {
         self.modelContext = modelContext
         self.generator = WorkoutMenuGenerator(context: modelContext)
         
-        DummyExerciseProvider.shared.insertDummyData(into: modelContext)
+        Task {
+            await DummyExerciseProvider.shared.insertDummyData(into: modelContext)
+        }
+        
+        do {
+            try modelContext.save()
+            print("✅ Dummy exercises committed to database")
+        } catch {
+            print("❌ Failed to commit exercises: \(error)")
+        }
         
         let existingMenus = fetchMenusForCurrentWeek()
         if !existingMenus.isEmpty {
@@ -166,6 +175,8 @@ class MenuViewModel: ObservableObject {
 //            isLoading = false
 //            return
 //        }
+        
+        try? await Task.sleep(nanoseconds: 100_000_000)
         
         print("🎯 === GENERATING NEW WEEKLY MENU ===")
         

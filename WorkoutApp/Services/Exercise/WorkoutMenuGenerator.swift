@@ -221,6 +221,14 @@ class WorkoutMenuGenerator {
                 category: category
             )
             
+            exercises = exercises.map { original in
+                Exercise(
+                    name: original.name,
+                    bodyPart: original.bodyPart,
+                    time: original.time
+                )
+            }
+            
             // Step 5: Adjust sets/reps based on phase
             exercises = adjustExercisesForPhase(exercises, level: level, phase: phase)
             

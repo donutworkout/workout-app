@@ -57,7 +57,7 @@ struct AdjustMenuStrengthView: View {
             VStack {
                 PrimaryGlassButton(
                     title: isToday ? "Start Now" : "Not Available Today",
-                    isDisabled: !isToday  // ✅ Disable if not today
+                    isDisabled: !isToday
                 ) {
                     sessionManager.prepareWorkout(with: workouts)
                     router.workoutExercises = workouts
@@ -108,9 +108,11 @@ struct AdjustMenuStrengthView: View {
                 activityName: "Bodyweight",
                 isIndoor: mapping.isIndoor
             )
-            DummyExerciseProvider.shared.insertDummyData(into: modelContext)
-
-            loadBodyWeightExercises()
+            
+            Task {
+                await DummyExerciseProvider.shared.insertDummyData(into: modelContext)
+                loadBodyWeightExercises()
+            }
         }
         .onChange(of: connectivity.isWorkoutActive) { _, active in
             if active {
@@ -123,6 +125,15 @@ struct AdjustMenuStrengthView: View {
     }
 
     private func loadBodyWeightExercises() {
+        print("🔍 DEBUG: loadBodyWeightExercises called")
+        print("🔍 dailyMenu exists: \(dailyMenu != nil)")
+        
+        if let menu = dailyMenu {
+            print("🔍 dailyMenu.strengthExercises exists: \(menu.strengthExercises != nil)")
+            print("🔍 dailyMenu.strengthExercises count: \(menu.strengthExercises?.count ?? 0)")
+            print("🔍 dailyMenu.strengthExercises isEmpty: \(menu.strengthExercises?.isEmpty ?? true)")
+        }
+        
         if let menu = dailyMenu, let savedExercises = menu.strengthExercises, !savedExercises.isEmpty {
             print("✅ Loading \(savedExercises.count) saved exercises from DailyMenu")
             workouts = savedExercises

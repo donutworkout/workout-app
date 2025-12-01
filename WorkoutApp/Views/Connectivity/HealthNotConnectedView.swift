@@ -19,14 +19,14 @@ struct HealthNotConnectedView: View {
             Color.black.opacity(0.18).ignoresSafeArea()
             
             VStack {
-                Spacer()
+//                Spacer()
                 
                 VStack(spacing: 32) {
                     // Handle indicator
-                    Capsule()
-                        .fill(Color.gray.opacity(0.3))
-                        .frame(width: 46, height: 5)
-                        .padding(.top, 12)
+//                    Capsule()
+//                        .fill(Color.gray.opacity(0.3))
+//                        .frame(width: 46, height: 5)
+//                        .padding(.top, 12)
                     
                     // ✅ Section Health - hanya muncul jika !isHealthConnected
                     if !isHealthConnected {
@@ -50,11 +50,12 @@ struct HealthNotConnectedView: View {
                             .padding(.top, 6)
                         }
                         .padding(.horizontal, 28)
+                        .padding(.top, 21)
                     }
                     
                     // ✅ Divider - hanya muncul jika KEDUA section tampil
                     if !isHealthConnected && !isWatchConnected {
-                        Divider().padding(.vertical)
+                        Divider()/*.padding(.vertical)*/
                     }
                     
                     // ✅ Section Watch - hanya muncul jika !isWatchConnected
@@ -83,7 +84,7 @@ struct HealthNotConnectedView: View {
                     
                     Spacer(minLength: 0)
                 }
-                .padding(.vertical, 18)
+                .padding(.top, 25)
                 .background(
                     RoundedRectangle(cornerRadius: 24, style: .continuous)
                         .fill(Color.white)
@@ -93,14 +94,14 @@ struct HealthNotConnectedView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.black)
-                }
-            }
-        }
+//        .toolbar {
+//            ToolbarItem(placement: .topBarLeading) {
+//                Button(action: { dismiss() }) {
+//                    Image(systemName: "xmark")
+//                        .font(.system(size: 16, weight: .semibold))
+//                        .foregroundColor(.black)
+//                }
+//            }
+//        }
     }
 }
