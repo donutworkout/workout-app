@@ -2,58 +2,61 @@
 //  TabBarView.swift
 //  WorkoutApp
 //
-//  Created by Valencia Melita Christy on 17/10/25.
+//  Created by Jennifer Evelyn on 29/10/25.
 //
 
 import SwiftUI
 
 struct TabBarView: View {
     @EnvironmentObject var router: Router
-    @State private var previousTab: Int = 0
+    @State private var selectedTab: Int
+    @Environment(\.modelContext) private var modelContext
+    
+    init(selectedTab: Int = 0) {
+        _selectedTab = State(initialValue: selectedTab)
+    }
     
     var body: some View {
-        TabView(selection: $router.selectedTab) {
-            //View()
-            //.tag(0)
-            //.tabItem { Label("Home", systemImage: "") }
+        TabView(selection: $selectedTab) {
             
-            //View()
-            //.tag(1)
-            //.tabItem { Label("Summary", systemImage: "") }
-            
-            //View()
-            //.tag(2)
-            //.tabItem { Label("History", systemImage: "") }
-    }
-        .accentColor(Color.blue)
-        .onChange(of: router.selectedTab) {_, newTab in
-            if previousTab != newTab {
-                let route: Route
-                switch newTab {
-                case 0:
-                    route = .home
-                case 1:
-                    route = .summary
-                case 2:
-                    route = .profile
-                default:
-                    route = .home
-                }
-                router.setCurrentRoute(route)
-                previousTab = newTab
+            // MARK: - Menu Tab
+            NavigationStack {
+                MenuView(modelContext: modelContext)
             }
+            .tabItem {
+                Label("Menu", systemImage: "menucard.fill")
+            }
+            .tag(0)
+            
+            // MARK: - Summary Tab
+            NavigationStack {
+                SummaryView()
+            }
+            .tabItem {
+                Label("Summary", systemImage: "text.line.3.summary")
+            }
+            .tag(1)
+            
+            // MARK: - Profile Tab
+            NavigationStack {
+                ProfileView()
+            }
+            .tabItem {
+                Label("Profile", systemImage: "person.crop.circle")
+            }
+            .tag(2)
         }
+        .accentColor(Color("pinkTextPrimary"))
         .onAppear {
-            router.setCurrentRoute(.home)
-            previousTab = router.selectedTab
+            router.selectedTab = selectedTab
+        }
+        .onChange(of: selectedTab) { _, newValue in
+            router.selectedTab = newValue
         }
     }
 }
 
 #Preview {
-    NavigationStack {
-        TabBarView()
-            .environmentObject(Router())
-    }
+    TabBarView()
+        .environmentObject(Router())
 }
-

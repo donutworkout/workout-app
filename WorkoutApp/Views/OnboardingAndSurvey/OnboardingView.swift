@@ -2,75 +2,143 @@
 //  OnboardingView.swift
 //  WorkoutApp
 //
-//  Created by Jennifer Evelyn on 15/10/25.
+//  Created by Jennifer Evelyn on 17/11/25.
 //
 
 import SwiftUI
-import AuthenticationServices
+import Lottie
 
 struct OnboardingView: View {
-    @State private var navigateToSurvey = false
     @EnvironmentObject var router: Router
+    
+    // Continuous animations
+    @State private var wiggle = false
+    @State private var bgWiggle = false
+    
+    // MARK: - Entrance Animation States
+    @State private var showContent: Bool = false
+    @State private var characterScale: CGFloat = 0.5
+    @State private var characterOpacity: Double = 0
+    @State private var titleOpacity: Double = 0
+    @State private var titleOffset: CGFloat = 20
+    @State private var buttonOpacity: Double = 0
+    @State private var buttonScale: CGFloat = 0.8
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 24) {
-                Spacer()
-                
-                VStack(spacing: 8) {
-                    Text("Welcome to the Arena")
-                        .font(.largeTitle.bold())
-                        .foregroundColor(Color("pinkTextPrimary"))
-                    
-                    Text("Get stronger every single day!")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color("pinkTextSecondary"))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-                
-                Image("character")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 300)
-                    .padding(.vertical, 16)
-                    .accessibilityLabel("Mascot character")
-                
-                Spacer()
-                
-                SignInWithAppleButton(.signIn) { request in
-                    request.requestedScopes = [.fullName, .email]
-                } onCompletion: { result in
-                    switch result {
-                    case .success(let authResults):
-                        if let credential = authResults.credential as? ASAuthorizationAppleIDCredential {
-                            let userID = credential.user
-                            let identityToken = credential.identityToken.flatMap { String(data: $0, encoding: .utf8) }
-                            let authorizationCode = credential.authorizationCode.flatMap { String(data: $0, encoding: .utf8) }
-                            print("✅ Apple Sign-In success: user=\(userID), token=\(identityToken ?? "nil"), code=\(authorizationCode ?? "nil")")
+            ZStack {
+                // Background with breathing motion
+                BackgroundPink()
+                    .scaleEffect(bgWiggle ? 1.09 : 1)
+                    .onAppear {
+                        withAnimation(.easeInOut(duration: 3).repeatForever(autoreverses: true)) {
+                            bgWiggle = true
                         }
-                        withAnimation(.easeInOut) {
-                            router.navigateTo(.survey)
-                        }
-                        
-                    case .failure(let error):
-                        print("❌ Apple Sign-In failed: \(error.localizedDescription)")
                     }
-                }
-                .frame(height: 50)
-                .clipShape(RoundedRectangle(cornerRadius: 24))
-                .padding(.horizontal)
-                .padding(.bottom, 40)
                 
+                VStack(spacing: 24) {
+                    Spacer()
+                    
+                    // MARK: - Character with Entrance + Wiggle Animation
+                    CharLogin()
+                        .scaleEffect(characterScale * 1.25)
+                        .opacity(characterOpacity)
+                        .rotation3DEffect(
+                            .degrees(showContent ? 0 : 15),
+                            axis: (x: 0, y: 1, z: 0)
+                        )
+                        .rotationEffect(.degrees(wiggle ? 3 : -3))
+                        .onAppear {
+                            // Start wiggle after entrance animation
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                                withAnimation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true)) {
+                                    wiggle = true
+                                }
+                            }
+                        }
+                    
+                    // MARK: - Title with Fade In
+                    VStack(spacing: 8) {
+                        Text("Hey, I'm Loona!")
+                            .font(.title.bold())
+                            .foregroundColor(Color("pinkTextPrimary"))
+                        
+                        Text("Let's get stronger every cycle")
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color("pinkTextSecondary"))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
+                    .padding(.top, 20)
+                    .opacity(titleOpacity)
+                    .offset(y: titleOffset)
+                    
+                    Spacer()
+                    
+                    // MARK: - Button with Pop Animation
+                    PrimaryGlassButton(title: "Start Your Journey") {
+                        router.navigateTo(.healthConnect)
+                        HapticManager.shared.trigger(.buttonTap)
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 40)
+                    .opacity(buttonOpacity)
+                    .scaleEffect(buttonScale)
+                }
+                .padding()
+                .navigationBarBackButtonHidden(true)
             }
-            .padding()
-            .background(Color(.systemBackground))
-            .navigationBarBackButtonHidden(true)
+        }
+        .onAppear {
+            startEntranceAnimation()
+        }
+    }
+    
+    // MARK: - Entrance Animation Sequence
+    private func startEntranceAnimation() {
+        // Step 1: Character pop in with bounce (0.3s delay)
+        withAnimation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.3)) {
+            characterScale = 1.0
+            characterOpacity = 1.0
+            showContent = true
+        }
+        
+        // Step 2: Title fade in + slide up (0.6s delay)
+        withAnimation(.easeOut(duration: 0.6).delay(0.6)) {
+            titleOpacity = 1.0
+            titleOffset = 0
+        }
+        
+        // Step 3: Button pop in (0.9s delay)
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.7).delay(0.9)) {
+            buttonOpacity = 1.0
+            buttonScale = 1.0
         }
     }
 }
 
 #Preview {
     OnboardingView()
+        .environmentObject(Router())
+}
+
+// MARK: - Background Pink
+struct BackgroundPink: View {
+    var body: some View {
+        Image("backgroundOnboarding")
+            .resizable()
+            .scaledToFill()
+            .ignoresSafeArea()
+    }
+}
+
+// MARK: - Character Image
+struct CharLogin: View {
+    var body: some View {
+        Image("charLogin")
+            .resizable()
+            .scaledToFit()
+            .padding(.top, 20)
+    }
 }

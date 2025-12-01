@@ -10,13 +10,17 @@ import SwiftUI
 @main
 struct WorkoutWacthApp_Watch_AppApp: App {
     
-    init() {
-         HealthKitManager.shared.requestAuthorization()
-     }
-    
+//    init() {
+//        WatchHealthKitManager.shared.requestAuthorization()
+//    }
+    @State private var sessionManager = WorkoutSessionManager.shared
+    @State private var connectivity = WatchConnectivityManager.shared
+
     var body: some Scene {
         WindowGroup {
-            WatchWorkoutListView()
+            ContentView()
+                .environment(sessionManager)
+                .environment(connectivity)
         }
     }
 }

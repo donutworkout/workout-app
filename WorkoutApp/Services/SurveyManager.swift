@@ -8,7 +8,8 @@
 import SwiftUI
 import SwiftData
 
-//@Observable
+@MainActor
+@Observable
 class SurveyManager : ObservableObject {
     var modelContext: ModelContext
     
@@ -19,20 +20,21 @@ class SurveyManager : ObservableObject {
     var tempHeight: Int = 0
     
     // Temporary data (UserCycle)
-    var tempIsCycleRegular: Bool = true
+    var tempIsCycleRegular: Bool? = nil
     var tempCycleStartDate: Date = Date()
     var tempCycleEndDate: Date = Date()
+    var tempMenstrualDuration: Int = 0
     var tempCycleLength: Int = 0
     var tempCycleSymptoms: [CycleSymptoms] = []
-    var tempCycleEnergy: CycleEnergy = .stable
-    var tempCycleMoodAffectsMotivation: CycleMoodAffectsMotivation = .never
+    var tempCycleEnergy: CycleEnergy? = nil
+    var tempCycleMoodAffectsMotivation: CycleMoodAffectsMotivation? = nil
     
     // Temporary data (UserWorkout)
-    var tempWorkoutMotivation: WorkoutMotivation = .keepFit
-    var tempWorkoutTimesAWeek: WorkoutTimesAWeek = .twoToThreeTimes // berapa kali olahraga dalam seminggu
-    var tempWorkoutDuration: WorkoutDuration = .thirtyToSixtyMinutes
-    var tempWorkoutIntensity: WorkoutIntensity = .light
-    var tempWorkoutExperience: WorkoutExperience = .oneToThreeMonths // sudah berapa lama berolahraga
+    var tempWorkoutMotivation: WorkoutMotivation? = nil
+    var tempWorkoutTimesAWeek: WorkoutTimesAWeek? = nil // berapa kali olahraga dalam seminggu
+    var tempWorkoutDuration: WorkoutDuration? = nil
+    var tempWorkoutIntensity: WorkoutIntensity? = nil
+    var tempWorkoutExperience: WorkoutExperience? = nil // sudah berapa lama berolahraga
     var tempWorkoutLevel: WorkoutLevel = .beginner
     var tempWorkoutDaysPreference: [WorkoutDayPreference] = []
     
@@ -44,6 +46,36 @@ class SurveyManager : ObservableObject {
     var isProfileComplete: Bool = false
     var isWorkoutComplete: Bool = false
     var isCycleComplete: Bool = false
+    
+    var isSurveyComplete: Bool {
+        return isProfileComplete && isWorkoutComplete && isCycleComplete
+    }
+    
+    var currentCyclePhase: MenstrualPhase {
+        return CyclePhaseCalculator.calculateCurrentPhase(
+            lastPeriodStart: tempCycleStartDate,
+            cycleLength: tempCycleLength,
+            menstrualDuration: 5 //bisa diganti pake hasil dari rumus nanti
+        )
+    }
+    
+    var daysUntilNextPeriod: Int? {
+        guard let nextPeriod = CyclePhaseCalculator.predictNextPeriod(
+            lastPeriodStart: tempCycleStartDate,
+            cycleLength: tempCycleLength > 0 ? tempCycleLength : 28
+        ) else { return nil }
+        
+        let calendar = Calendar.current
+        return calendar.dateComponents([.day], from: Date(), to: nextPeriod).day
+    }
+    
+    var currentDayInCycle: Int {
+        let calendar = Calendar.current
+        let daysSinceStart = calendar.dateComponents([.day], from: tempCycleStartDate, to: Date()).day ?? 0
+
+        let length = tempCycleLength > 0 ? tempCycleLength : 28
+        return (daysSinceStart % length) + 1
+    }
     
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
@@ -92,11 +124,11 @@ class SurveyManager : ObservableObject {
             
             // Populate temp data
             if let existingWorkout = userWorkout {
-                tempWorkoutMotivation = existingWorkout.workoutMotivation
-                tempWorkoutTimesAWeek = existingWorkout.workoutTimesAWeek
-                tempWorkoutDuration = existingWorkout.workoutDuration
-                tempWorkoutIntensity = existingWorkout.workoutIntensity
-                tempWorkoutExperience = existingWorkout.workoutExperience
+                tempWorkoutMotivation = existingWorkout.workoutMotivation ?? .keepFit
+                tempWorkoutTimesAWeek = existingWorkout.workoutTimesAWeek ?? .twoToThreeTimes
+                tempWorkoutDuration = existingWorkout.workoutDuration ?? .thirtyToSixtyMinutes
+                tempWorkoutIntensity = existingWorkout.workoutIntensity ?? .light
+                tempWorkoutExperience = existingWorkout.workoutExperience ?? .oneToThreeMonths
                 tempWorkoutLevel = existingWorkout.workoutLevel
                 tempWorkoutDaysPreference = existingWorkout.workoutDaysPreference
             }
@@ -122,10 +154,11 @@ class SurveyManager : ObservableObject {
                 tempIsCycleRegular = existingCycle.isCycleRegular
                 tempCycleStartDate = existingCycle.cycleStartDate
                 tempCycleEndDate = existingCycle.cycleEndDate
+                tempMenstrualDuration = existingCycle.menstrualDuration
                 tempCycleLength = existingCycle.cycleLength
                 tempCycleSymptoms = existingCycle.cycleSymptoms
-                tempCycleEnergy = existingCycle.cycleEnergy
-                tempCycleMoodAffectsMotivation = existingCycle.cycleMoodAffectsMotivation
+                tempCycleEnergy = existingCycle.cycleEnergy ?? .stable
+                tempCycleMoodAffectsMotivation = existingCycle.cycleMoodAffectsMotivation ?? .never
             }
         }
     }
@@ -151,6 +184,8 @@ class SurveyManager : ObservableObject {
             intermediateScore += 3
         case .everyday:
             advancedScore += 3
+        case .none:
+            beginnerScore += 1
         }
         
         // 2. Duration evaluation (per session)
@@ -161,6 +196,8 @@ class SurveyManager : ObservableObject {
             intermediateScore += 3
         case .aboveSixtyMinutes:
             advancedScore += 3
+        case .none:
+            beginnerScore += 1
         }
         
         // 3. Intensity evaluation
@@ -175,6 +212,8 @@ class SurveyManager : ObservableObject {
             advancedScore += 1
         case .superIntense:
             advancedScore += 3
+        case .none:
+            beginnerScore += 1
         }
         
         // 4. Experience evaluation (adherence/consistency)
@@ -189,6 +228,8 @@ class SurveyManager : ObservableObject {
             advancedScore += 1
         case .moreThanSixMonths:
             advancedScore += 3
+        case .none:
+            beginnerScore += 1
         }
         
         // Determine level based on highest score
@@ -223,7 +264,7 @@ class SurveyManager : ObservableObject {
         }
         
         isProfileComplete = true
-        print("UserProfile finalized")
+        print("UserProfile finalized ✅")
         save()
     }
     
@@ -234,11 +275,11 @@ class SurveyManager : ObservableObject {
         if userWorkout == nil {
             // Create new workout
             let newWorkout = UserWorkout(
-                workoutMotivation: tempWorkoutMotivation,
-                workoutTimesAWeek: tempWorkoutTimesAWeek,
-                workoutDuration: tempWorkoutDuration,
-                workoutIntensity: tempWorkoutIntensity,
-                workoutExperience: tempWorkoutExperience,
+                workoutMotivation: tempWorkoutMotivation ?? .keepFit,
+                workoutTimesAWeek: tempWorkoutTimesAWeek ?? .twoToThreeTimes,
+                workoutDuration: tempWorkoutDuration ?? .underThirtyMinutes,
+                workoutIntensity: tempWorkoutIntensity ?? .light,
+                workoutExperience: tempWorkoutExperience ?? .underOneMonth,
                 workoutLevel: tempWorkoutLevel,
                 workoutDaysPreference: tempWorkoutDaysPreference
             )
@@ -258,6 +299,7 @@ class SurveyManager : ObservableObject {
         
         print("UserWorkout finalized")
         isWorkoutComplete = true
+        print("workout complete true ✅")
         save()
     }
     
@@ -266,13 +308,14 @@ class SurveyManager : ObservableObject {
         if userCycle == nil {
             // Create new cycle
             let newCycle = UserCycle(
-                isCycleRegular: tempIsCycleRegular,
+                isCycleRegular: tempIsCycleRegular ?? true,
                 cycleStartDate: tempCycleStartDate,
                 cycleEndDate: tempCycleEndDate,
                 cycleLength: tempCycleLength,
+                menstrualDuration: tempMenstrualDuration,
                 cycleSymptoms: tempCycleSymptoms,
-                cycleEnergy: tempCycleEnergy,
-                cycleMoodAffectsMotivation: tempCycleMoodAffectsMotivation
+                cycleEnergy: tempCycleEnergy ?? .stable,
+                cycleMoodAffectsMotivation: tempCycleMoodAffectsMotivation ?? .never
             )
             newCycle.user = userProfile
             userCycle = newCycle
@@ -282,6 +325,7 @@ class SurveyManager : ObservableObject {
             userCycle?.isCycleRegular = tempIsCycleRegular
             userCycle?.cycleStartDate = tempCycleStartDate
             userCycle?.cycleEndDate = tempCycleEndDate
+            userCycle?.menstrualDuration = tempMenstrualDuration
             userCycle?.cycleLength = tempCycleLength
             userCycle?.cycleSymptoms = tempCycleSymptoms
             userCycle?.cycleEnergy = tempCycleEnergy
@@ -289,6 +333,7 @@ class SurveyManager : ObservableObject {
         }
         
         isCycleComplete = true
+        print("cycle complete true ✅")
         save()
     }
     
@@ -354,6 +399,10 @@ class SurveyManager : ObservableObject {
         tempCycleEndDate = end_date
     }
     
+    func updateTempMenstrualDuration(_ duration: Int) {
+        tempMenstrualDuration = duration
+    }
+    
     func updateTempCycleLength(_ length: Int) {
         tempCycleLength = length
     }
@@ -393,6 +442,7 @@ class SurveyManager : ObservableObject {
         }
     }
     
+
     func verifyLatestData() {
         print("\n🗄️ --- SwiftData Latest Data Check ---")
         
@@ -435,11 +485,11 @@ class SurveyManager : ObservableObject {
             
             if let workout = workouts.first {
                 print("💪 Latest Workout:")
-                print("   • Motivation: \(workout.workoutMotivation.displayName)")
-                print("   • Frequency: \(workout.workoutTimesAWeek.displayName)")
-                print("   • Duration: \(workout.workoutDuration.displayName)")
-                print("   • Intensity: \(workout.workoutIntensity.displayName)")
-                print("   • Level: \(workout.workoutLevel.displayName)")
+                print("   • Motivation: \((workout.workoutMotivation ?? .keepFit).displayName)")
+                print("   • Frequency: \((workout.workoutTimesAWeek ?? .twoToThreeTimes).displayName)")
+                print("   • Duration: \((workout.workoutDuration ?? .thirtyToSixtyMinutes).displayName)")
+                print("   • Intensity: \((workout.workoutIntensity ?? .light).displayName)")
+                print("   • Level: \((workout.workoutLevel ?? .beginner).displayName)")
                 let days = workout.workoutDaysPreference.map { $0.displayName }.joined(separator: ", ")
                 print("   • Days: \(days)")
             } else {
@@ -469,8 +519,9 @@ class SurveyManager : ObservableObject {
                 print("   • Length: \(cycle.cycleLength)")
                 let symptoms = cycle.cycleSymptoms.map { $0.displayName }.joined(separator: ", ")
                 print(#"   • Symptoms: \((symptoms.isEmpty ? "None" : symptoms))"#)
-                print("   • Energy: \(cycle.cycleEnergy.displayName)")
-                print("   • Mood Affects Motivation: \(cycle.cycleMoodAffectsMotivation.displayName)")
+                print("   • Energy: \((cycle.cycleEnergy ?? .stable).displayName)")
+                print("   • Mood Affects Motivation: \((cycle.cycleMoodAffectsMotivation ?? .never).displayName)")
+                print("   • Current Phase: \(currentCyclePhase)")
             } else {
                 print("💪 No saved workouts yet.")
             }
@@ -490,4 +541,3 @@ extension ModelContext {
         }
     }
 }
-

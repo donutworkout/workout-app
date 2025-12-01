@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		786D1E512EA0B6A1006D891B /* WatchConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 786D1E502EA0B6A1006D891B /* WatchConnectivity.framework */; };
 		786D1E532EA0B6C1006D891B /* WatchConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 786D1E522EA0B6C1006D891B /* WatchConnectivity.framework */; };
+		9094C6D42EBCE4DB0057A140 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 9094C6D32EBCE4DB0057A140 /* Lottie */; };
+		9094C6DE2EBCE8170057A140 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 9094C6DD2EBCE8170057A140 /* Lottie */; };
+		9094C6E42EBCE81C0057A140 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 9094C6E32EBCE81C0057A140 /* Lottie */; };
 		E194453E2E9E54EE000187BC /* WorkoutWacthApp Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = E194451E2E9E54EC000187BC /* WorkoutWacthApp Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -51,6 +54,36 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		9094C6E22EBCE8170057A140 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9094C6E82EBCE81C0057A140 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9094C6EA2EBCE8730057A140 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E19445422E9E54EE000187BC /* Embed Watch Content */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -79,8 +112,10 @@
 		786D1E552EA0B9F7006D891B /* Exceptions for "WorkoutApp" folder in "WorkoutWacthApp Watch App" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Services/HealthKitManager.swift,
+				Music/countdownMusic.mp3,
 				Services/WatchConnectivityManager.swift,
+				Services/WatchHealthKitManager.swift,
+				Services/WorkoutMapping.swift,
 				Services/WorkoutSessionManager.swift,
 			);
 			target = E194451D2E9E54EC000187BC /* WorkoutWacthApp Watch App */;
@@ -137,6 +172,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				786D1E512EA0B6A1006D891B /* WatchConnectivity.framework in Frameworks */,
+				9094C6D42EBCE4DB0057A140 /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -144,6 +180,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9094C6DE2EBCE8170057A140 /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -151,6 +188,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9094C6E42EBCE81C0057A140 /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -226,6 +264,7 @@
 				E19444E12E9E53B5000187BC /* Frameworks */,
 				E19444E22E9E53B5000187BC /* Resources */,
 				E19445422E9E54EE000187BC /* Embed Watch Content */,
+				9094C6EA2EBCE8730057A140 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -237,6 +276,7 @@
 			);
 			name = WorkoutApp;
 			packageProductDependencies = (
+				9094C6D32EBCE4DB0057A140 /* Lottie */,
 			);
 			productName = WorkoutApp;
 			productReference = E19444E42E9E53B5000187BC /* WorkoutApp.app */;
@@ -249,6 +289,7 @@
 				E19444F12E9E53B7000187BC /* Sources */,
 				E19444F22E9E53B7000187BC /* Frameworks */,
 				E19444F32E9E53B7000187BC /* Resources */,
+				9094C6E22EBCE8170057A140 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -260,6 +301,7 @@
 			);
 			name = WorkoutAppTests;
 			packageProductDependencies = (
+				9094C6DD2EBCE8170057A140 /* Lottie */,
 			);
 			productName = WorkoutAppTests;
 			productReference = E19444F52E9E53B7000187BC /* WorkoutAppTests.xctest */;
@@ -272,6 +314,7 @@
 				E19444FB2E9E53B7000187BC /* Sources */,
 				E19444FC2E9E53B7000187BC /* Frameworks */,
 				E19444FD2E9E53B7000187BC /* Resources */,
+				9094C6E82EBCE81C0057A140 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -283,6 +326,7 @@
 			);
 			name = WorkoutAppUITests;
 			packageProductDependencies = (
+				9094C6E32EBCE81C0057A140 /* Lottie */,
 			);
 			productName = WorkoutAppUITests;
 			productReference = E19444FF2E9E53B7000187BC /* WorkoutAppUITests.xctest */;
@@ -364,7 +408,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1640;
-				LastUpgradeCheck = 1640;
+				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					E19444E32E9E53B5000187BC = {
 						CreatedOnToolsVersion = 16.4;
@@ -399,6 +443,9 @@
 			);
 			mainGroup = E19444DB2E9E53B5000187BC;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				9094C6D22EBCE4DB0057A140 /* XCRemoteSwiftPackageReference "lottie-ios" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E19444E52E9E53B5000187BC /* Products */;
 			projectDirPath = "";
@@ -540,18 +587,21 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = WorkoutApp/WorkoutApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = YR734YSZQS;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WorkoutApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "HeyLoona!";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "We need your permission for this app to read Health data";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "We need your permission for this app to write Health data";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -560,9 +610,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dawnhazed.WorkoutApp2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -573,18 +627,21 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = WorkoutApp/WorkoutApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = YR734YSZQS;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = WorkoutApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "HeyLoona!";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "We need your permission for this app to read Health data";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "We need your permission for this app to write Health data";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -593,9 +650,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dawnhazed.WorkoutApp2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -658,6 +719,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -715,6 +777,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -806,7 +869,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "WorkoutWacthApp-Watch-App-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = WorkoutWacthApp;
+				INFOPLIST_KEY_CFBundleDisplayName = "HeyLoona!";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "We need your permission for this app to read Health data";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "We need your permission for this app to write Health data";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
@@ -839,7 +902,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "WorkoutWacthApp-Watch-App-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = WorkoutWacthApp;
+				INFOPLIST_KEY_CFBundleDisplayName = "HeyLoona!";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "We need your permission for this app to read Health data";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "We need your permission for this app to write Health data";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
@@ -1005,6 +1068,35 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		9094C6D22EBCE4DB0057A140 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.5.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		9094C6D32EBCE4DB0057A140 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9094C6D22EBCE4DB0057A140 /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
+		};
+		9094C6DD2EBCE8170057A140 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9094C6D22EBCE4DB0057A140 /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
+		};
+		9094C6E32EBCE81C0057A140 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9094C6D22EBCE4DB0057A140 /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E19444DC2E9E53B5000187BC /* Project object */;
 }

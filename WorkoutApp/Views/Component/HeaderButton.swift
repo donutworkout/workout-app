@@ -16,69 +16,66 @@ struct HeaderButton: View {
     var body: some View {
         HStack {
             Button(action: onClose) {
-                ZStack {
-                    Circle()
-                        .fill(Color.secondary)
-                        .glassEffect(.regular)
-                        .frame(width: 36, height: 36)
-                    Image(systemName: "xmark")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(.grayTextPrimary)
-                }
+                Image(systemName: "xmark")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.gray)
+                    .frame(width: 40, height: 40)
+                    .background(Color.gray.opacity(0.1))
+                    .clipShape(Circle())
             }
             
             Spacer()
             
-            // Title
+            // MARK: - Title
             Text(title)
-                .font(.system(size: 20, weight: .medium))
+                .font(.system(size: 18, weight: .semibold))
                 .foregroundColor(.black)
             
             Spacer()
             
-            // Edit / Save Button (lingkaran saat editing)
+            // MARK: - Edit / Save Button
             if isEditing {
+                // ✅ Save Button (Checkmark)
                 Button(action: onEditToggle) {
-                    ZStack {
-                        Circle()
-                            .fill(Color("pinkTextPrimary"))
-                            .glassEffect(.regular)
-                            .frame(width: 36, height: 36)
-                        Image(systemName: "checkmark")
-                            .font(.title3)
-                            .foregroundStyle(.white)
-                    }
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(Color("pinkTextPrimary"))
+                        .frame(width: 40, height: 40)
+                        .background(Color("pinkTextPrimary").opacity(0.15))
+                        .clipShape(Circle())
                 }
             } else {
+                // ✅ Edit Button (Text)
                 Button(action: onEditToggle) {
                     Text("Edit")
-                        .font(.title3)
+                        .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(Color("pinkTextPrimary"))
-                        .padding(.vertical, 6)
+                        .frame(width: 40, height: 40)
                 }
             }
         }
-        .padding(.horizontal)
-        .padding(.top, 8)
-        .padding(.bottom, 12)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .background(Color.white)
     }
 }
 
-#Preview("Editing") {
+#Preview("HeaderButton") {
     VStack(spacing: 20) {
         HeaderButton(
-            title: "About Me",
+            title: "Menstrual Cycle",
             isEditing: false,
             onClose: {},
             onEditToggle: {}
         )
+        
         HeaderButton(
-            title: "About Me",
+            title: "Menstrual Cycle",
             isEditing: true,
             onClose: {},
             onEditToggle: {}
         )
     }
     .padding()
-    .background(Color.white)
+    .background(Color.gray.opacity(0.1))
 }

@@ -39,6 +39,10 @@ struct PickerSheetView: View {
             .pickerStyle(.wheel)
             .labelsHidden()
             .frame(height: 180)
+            .onChange(of: selection) { _ in
+                            HapticManager.shared.trigger(.pickerSelection)
+                        }
+
             
             // MARK: - Done Button (same style as PrimaryGlassButton)
             PrimaryGlassButton(title: "Done") {

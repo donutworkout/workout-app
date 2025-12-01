@@ -9,14 +9,36 @@ import SwiftUI
 
 struct ConnectWatchView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var router: Router
+    @State private var jump = false
+
     
     var onAllow: () -> Void = {}
     var onSkip: () -> Void = {}
     
+    private func startJumping() {
+        // Lompat ke atas
+        withAnimation(.easeOut(duration: 0.35)) {
+            jump = true
+        }
+        
+        // Turun lagi setelah 0.35 detik
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            withAnimation(.easeIn(duration: 0.35)) {
+                jump = false
+            }
+            
+            // Jeda lucu 0.3 detik, lalu ulangi
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                startJumping()
+            }
+        }
+    }
+
     var body: some View {
         NavigationStack {
-            VStack(spacing: 28) {
-                Spacer()
+            VStack(spacing: 32) {
+//                Spacer()
                 
                 // MARK: - Title Text
                 Text("Connect your watch to track your moves effortlessly")
@@ -24,17 +46,19 @@ struct ConnectWatchView: View {
                     .foregroundColor(Color("pinkTextPrimary"))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
+                Spacer()
                 
                 // MARK: - Watch Icon Box
                 ZStack {
-                    Image(systemName: "applewatch")
+                    Image("charConnectWatch")
                         .resizable()
-                        .scaledToFit()
-                        .frame(width: 100, height: 100)
-                        .foregroundColor(Color("pinkTextPrimary"))
+                        .scaledToFill()
+                        .frame(width: 150, height: 150)
+                        .offset(y: jump ? -35 : 0)
+                        .onAppear {
+                            startJumping()
+                        }
                 }
-                .padding(.top, 10)
-                
                 Spacer()
                 
                 // MARK: - Allow Button
@@ -59,24 +83,19 @@ struct ConnectWatchView: View {
             .toolbar {
                 // Close Button (X)
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(action: { dismiss() }) {
+                    Button(action: { router.navigateTo(.onboarding) }) {
                         Image(systemName: "xmark")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.black)
                     }
                 }
                 
-                // Send Button (Pink Circle, White Icon)
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: onAllow) {
-                        Image(systemName: "arrow.up")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(width: 36, height: 36)
-                            .background(
-                                Circle()
-                                    .fill(Color("pinkTextPrimary"))
-                            )
+            }
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    jump = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                        jump = false
                     }
                 }
             }

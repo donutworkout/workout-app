@@ -1,74 +1,218 @@
-//
-//  RouterView.swift
-//  WorkoutApp
-//
-//  Created by Valencia Melita Christy on 17/10/25.
-//
-
 import SwiftUI
 
 struct RouterView: View {
-    @StateObject private var router = Router()
+    @EnvironmentObject var router: Router
+    @EnvironmentObject var surveyManager: SurveyManager
+    @Environment(iPhoneConnectivityManager.self) private var connectivity
+    @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject var sessionManager: StrengthSessionManager
     
     var body: some View {
-        NavigationStack(path: $router.path) {
-            rootView.navigationDestination(for: Route.self) { route in
-                destinationView(for: route)
+        NavigationStack {
+            switch router.currentRoute {
+            case .streak:
+                StreakView()
+                    .environmentObject(router)
+
+            case .aboutMe:
+                AboutMeView()
+                    .environmentObject(router)
+                
+                // Tambahkan di dalam switch router.currentRoute
+            case .surveyWorkoutLevel:
+                SurveyWorkoutLevelView(onNext: {
+                    router.navigateTo(.surveyWorkoutDay)
+                })
+                .environmentObject(router)
+                .environmentObject(surveyManager)
+                
+            case .surveyWorkoutDay:
+                WorkoutDayView(onNext: {
+                    // ✅ Cek apakah dari profile atau survey biasa
+                    if router.isEditingFromProfile {
+                        router.isEditingFromProfile = false  // Reset flag
+                        router.navigateTo(.aboutMe)  // Kembali ke AboutMe
+                    } else {
+                        router.navigateTo(.afterSurvey)  // Flow normal ke menu
+                    }
+                })
+                .environmentObject(router)
+                .environmentObject(surveyManager)
+
+                // MARK: - Onboarding & Setup Flow
+            case .onboarding:
+                if surveyManager.isSurveyComplete {
+                    TabBarView()
+                        .environmentObject(router)
+                        .environmentObject(surveyManager)
+                        .onAppear {
+                            router.currentRoute = .menu
+                        }
+                } else {
+                    OnboardingView()
+                        .environmentObject(router)
+                }
+                
+            case .healthConnect:
+            HealthConnectView(
+            onAllow: { router.navigateTo(.survey) },
+            onSkip: { router.navigateTo(.survey) }
+            )
+            .environmentObject(router)
+                
+//            case .watchConnect:
+//                ConnectWatchView(
+//                    onAllow: { router.navigateTo(.survey) },
+//                    onSkip: { router.navigateTo(.survey) }
+//                )
+//                .environmentObject(router)
+                
+            case .survey:
+                SurveyView()
+                    .environmentObject(router)
+                    .environmentObject(surveyManager)
+                
+                // MARK: - Main App Flow
+                case .tabBar, .menu, .profile:
+                    TabBarView(selectedTab: router.selectedTab)  // ✅ Pass selectedTab
+                        .environmentObject(router)
+                        .environmentObject(surveyManager)
+                
+                // MARK: - Workout Flow
+            case .adjustMenuCardio:
+                AdjustMenuCardioView(
+                    dailyMenu: router.selectedDailyMenu,
+                    vigorousDuration: router.vigorousDuration,
+                    moderateDuration: router.moderateDuration)
+                .environmentObject(router)
+                //.environment(connectivity)
+                
+            case .adjustMenuStrength:
+                AdjustMenuStrengthView(dailyMenu: router.selectedDailyMenu)
+                    .environmentObject(router)
+                //.environment(connectivity)
+                
+            case .finishWorkout:
+                FinishWorkoutView()
+                    .environmentObject(router)
+                
+            case .halfwayWorkout:
+                HalfwayWorkoutView()
+                    .environmentObject(router)
+                
+            case .startCardio:
+                StartCardioView(
+                    selectedIntensity: router.selectedIntensity ?? .moderate,
+                    vigorousDuration: router.vigorousDuration,
+                    moderateDuration: router.moderateDuration,
+                    activityName: router.selectedCardioMenu ?? "Cardio Workout")
+                    .environmentObject(router)
+                
+            case .startStrength:
+                StartStrengthView()
+                    .environmentObject(router)
+                    .environmentObject(sessionManager)
+                
+            case .restView:
+                RestView(onNext: {
+                    sessionManager.moveToNextExercise()
+                    router.navigateTo(.startStrength)
+                }, level: surveyManager.tempWorkoutLevel)
+                .environmentObject(router)
+                
+                // MARK: - Profile Section (Tetap di dalam TabBar)
+                //            case .editBodyInfo:
+                //                TabBarView(selectedTab: 2) // tab ke-2 = Profile
+                //                    .environmentObject(router)
+                //                    .environmentObject(surveyManager)
+                //
+                //            case .editMotivation:
+                //                TabBarView(selectedTab: 2)
+                //                    .environmentObject(router)
+                //                    .environmentObject(surveyManager)
+                //
+                //            case .editProfile:
+                //                TabBarView(selectedTab: 2)
+                //                    .environmentObject(router)
+                //                    .environmentObject(surveyManager)
+                //
+                //            case .menstrualCycle:
+                //                TabBarView(selectedTab: 2)
+                //                    .environmentObject(router)
+                //                    .environmentObject(surveyManager)
+                
+                // MARK: - Workout Start Flow
+            case .startWorkout:
+                let weekday = Calendar.current.component(.weekday, from: Date())
+                if weekday % 2 == 0 {
+                    AdjustMenuCardioView(dailyMenu: router.selectedDailyMenu)
+                        .environmentObject(router)
+                    //.environment(connectivity)
+                } else {
+                    AdjustMenuStrengthView()
+                        .environmentObject(router)
+                    //.environment(connectivity)
+                }
+                
+                
+            case .countdownView:
+                if let last = router.lastWorkoutSource {
+                    switch last {
+                    case .adjustMenuCardio:
+                        CountdownCardioView(
+                            activityName: router.selectedCardioMenu ?? "Cardio",
+                            imageName: router.selectedCardioMenu?
+                                .lowercased()
+                                .replacingOccurrences(of: " ", with: "") ?? "indoorWalk",
+                            onCountdownComplete: {
+                                print("🚀 CountdownCardio selesai → ke StartCardioView")
+                                router.navigateTo(.startCardio)
+                            }
+                        )
+                        .environmentObject(router)
+                        .environment(iPhoneConnectivityManager.shared)
+                        
+                    case .adjustMenuStrength:
+                        CountdownView(
+                            exercises: router.workoutExercises,
+                            onCountdownComplete: {
+                                print("🚀 CountdownStrength selesai → ke StartStrengthView")
+                                router.navigateTo(.startStrength)
+                            }
+                        )
+                        .environmentObject(router)
+                        .environmentObject(sessionManager)
+                        
+                        // fallback kalau undefined
+                    default:
+                        VStack {
+                            Text("⚠️ Workout Source Not Found")
+                                .font(.headline)
+                                .foregroundColor(.gray)
+                            Button("Back to Menu") {
+                                router.navigateTo(.menu)
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+                    }
+                } else {
+                    VStack {
+                        Text("⚠️ No workout source set")
+                        Button("Back to Menu") {
+                            router.navigateTo(.menu)
+                        }
+                    }
+                }
+            case .afterSurvey:
+                AfterSurveyView()
+                    .environmentObject(router)
             }
         }
-        .environmentObject(router)
-    }
-    
-    @ViewBuilder
-    private var rootView: some View {
-        switch router.currentRoute {
-        case .onboarding:
-            OnboardingView()
-        case .survey:
-            SurveyView()
-        case .home, .summary, .profile:
-            TabBarView()
-        default:
-            OnboardingView()
-        }
-    }
-    
-    //MARK: - Destination View Builder
-    
-    @ViewBuilder
-    private func destinationView(for route: Route) -> some View {
-        switch route {
-        case .onboarding:
-            OnboardingView()
-        case .survey:
-            SurveyView()
-        case .home:
-            TabBarView()
-        case .summary:
-            TabBarView()
-        case .profile:
-            TabBarView()
-        //TODO: nanti bisa ditambahin sendiri buat detail"nya, jangan lupa tambahin di file Router casenya
-        }
-    }
-    
-    // MARK: - Helper Methods
-    private func shouldHideBackButton(for route: Route) -> Bool {
-        // Hide back button only for dashboard routes that come from login
-        switch route {
-        case .home, .summary, .profile:
-            //TODO: ini buat yang back buttonnya ga bakalan keliatan kalau pas di page paling luar (bkn detail page)
-            return true
-        default:
-            return false
+        .onAppear {
+            // ✅ Check on first appear and navigate if needed
+            if router.currentRoute == .onboarding && surveyManager.isSurveyComplete {
+                router.currentRoute = .menu
+            }
         }
     }
 }
-
-//KALO MAU PAKE KE DETAIL TINGGAL KASIH
-// @EnvironmentObject var router: Router -- diatas banget
-// router.navigateTo(.home) (.home bisa diganti sesuai casenya)
-
-
-
-    

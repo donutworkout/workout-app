@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SurveyWorkoutLevelView: View {
     @EnvironmentObject var surveyManager: SurveyManager
+    @EnvironmentObject var router: Router  // ✅ Tambahkan
     
     var onNext: () -> Void
     
@@ -17,6 +18,7 @@ struct SurveyWorkoutLevelView: View {
     @State private var selectedDuration: [String] = []
     @State private var selectedIntensity: [String] = []
     @State private var selectedExperience: [String] = []
+    @State private var move = false
     
     // MARK: - Options
     let workoutFrequency = WorkoutTimesAWeek.allCases.map { $0.displayName }
@@ -45,7 +47,11 @@ struct SurveyWorkoutLevelView: View {
         !selectedFrequency.isEmpty &&
         !selectedDuration.isEmpty &&
         !selectedIntensity.isEmpty &&
-        !selectedExperience.isEmpty
+        !selectedExperience.isEmpty &&
+        selectedFrequency.first != "Not selected" &&
+        selectedDuration.first != "Not selected" &&
+        selectedIntensity.first != "Not selected" &&
+        selectedExperience.first != "Not selected"
     }
     
     // MARK: - Body
@@ -54,16 +60,14 @@ struct SurveyWorkoutLevelView: View {
             ScrollView {
                 VStack(spacing: 32) {
                     
-                    // MARK: - Header
-//                    Text("Survey")
-//                        .font(.headline)
-//                        .foregroundColor(.black)
-//                        .padding(.top, 20)
-                    
                     // MARK: - Title & Character
-                    HStack(alignment: .top) {
+                    HStack(alignment: .bottom) {
                         VStack(alignment: .leading, spacing: 8) {
-                            SurveyProgressText(currentPage: 4, totalPages: 6)
+                            // ✅ Hanya tampilkan SurveyProgressText jika BUKAN dari AboutMe
+                            if !router.isEditingFromProfile {
+                                SurveyProgressText(currentPage: 3, totalPages: 5)
+                            }
+                            
                             Text("Workout\nLevel")
                                 .font(.system(.title, weight: .semibold))
                                 .foregroundColor(Color("pinkTextPrimary"))
@@ -73,9 +77,9 @@ struct SurveyWorkoutLevelView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 120)
+                            .offset(x: move ? 9 : -54)
                     }
                     .padding(.horizontal)
-                    .padding(.top, 10)
                     
                     // MARK: - Question Sections
                     Group {
@@ -126,11 +130,27 @@ struct SurveyWorkoutLevelView: View {
         }
         .background(Color.white.ignoresSafeArea())
         .onAppear {
-            // Initialize selections from surveyManager, converting to display-name arrays
-            selectedFrequency = [surveyManager.tempWorkoutTimesAWeek.displayName]
-            selectedDuration = [surveyManager.tempWorkoutDuration.displayName]
-            selectedIntensity = [surveyManager.tempWorkoutIntensity.displayName]
-            selectedExperience = [surveyManager.tempWorkoutExperience.displayName]
+            withAnimation(.easeInOut(duration: 3.5).repeatForever(autoreverses: true)) {
+                move = true
+            }
+        }
+        .onAppear {
+            // Initialize selections from surveyManager
+            if let frequency = surveyManager.tempWorkoutTimesAWeek {
+                selectedFrequency = [frequency.displayName]
+            }
+            
+            if let duration = surveyManager.tempWorkoutDuration {
+                selectedDuration = [duration.displayName]
+            }
+            
+            if let intensity = surveyManager.tempWorkoutIntensity {
+                selectedIntensity = [intensity.displayName]
+            }
+            
+            if let experience = surveyManager.tempWorkoutExperience {
+                selectedExperience = [experience.displayName]
+            }
         }
     }
 }
@@ -152,20 +172,16 @@ extension SurveyWorkoutLevelView {
         if let intensityString = selectedIntensity.first,
            let intensity = intensityFromDisplayName(intensityString) {
             surveyManager.updateTempWorkoutIntensity(intensity)
-            print("✅ Intensity saved: \(intensity.rawValue) - Display: \(intensity.displayName)")
+            print("✅ Intensity saved: \(intensity.rawValue)")
         }
                 
         if let experienceString = selectedExperience.first,
            let experience = experienceFromDisplayName(experienceString) {
             surveyManager.updateTempWorkoutExperience(experience)
-            print("✅ Experience saved: \(experience.rawValue) - Display: \(experience.displayName)")
+            print("✅ Experience saved: \(experience.rawValue)")
         }
         
         surveyManager.updateTempWorkoutLevel()
         onNext()
     }
-}
-
-#Preview {
-    SurveyWorkoutLevelView(onNext: {})
 }

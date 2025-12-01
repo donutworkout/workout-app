@@ -27,14 +27,12 @@ struct SurveyView: View {
                     case 1:
                         SurveyBodyInfoView(onNext: { currentPage += 1 })
                     case 2:
-                        SurveyMotivationView(onNext: { currentPage += 1 })
-                    case 3:
                         SurveyWorkoutLevelView(onNext: { currentPage += 1 })
-                    case 4:
+                    case 3:
                         WorkoutDayView(onNext: { currentPage += 1 })
-                    case 5:
+                    case 4:
                         SurveyCycleView(onFinish: {
-                            router.navigateTo(.home)
+                            router.navigateTo(.afterSurvey)
                         })
                     default:
                         Text("Selesai ✅")
@@ -88,6 +86,10 @@ struct SurveyView: View {
         .background(Color.white.ignoresSafeArea())
         .navigationTitle("Survey")
         .navigationBarTitleDisplayMode(.inline)
+        // Ketika survey dimulai dari onboarding
+        .onAppear {
+            router.isEditingFromProfile = false  // Pastikan false untuk flow normal
+        }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 if currentPage > 0 {

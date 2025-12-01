@@ -17,6 +17,7 @@ struct SurveyBodyInfoView: View {
     
     @State private var showHeightPicker = false
     @State private var showWeightPicker = false
+    @State private var move = false
     
     let heights = Array(100...220)
     let weights = Array(30...150)
@@ -62,9 +63,9 @@ struct SurveyBodyInfoView: View {
             
             // MARK: - Title & Character
             VStack(spacing: 16) {
-                HStack(alignment: .top) {
+                HStack(alignment: .bottom) {
                     VStack(alignment: .leading, spacing: 8) {
-                        SurveyProgressText(currentPage: 2, totalPages: 6)
+                        SurveyProgressText(currentPage: 2, totalPages: 5)
                         Text("Body Measurement")
                             .font(.system(.title, weight: .semibold))
                             .foregroundColor(Color("pinkTextPrimary"))
@@ -74,9 +75,10 @@ struct SurveyBodyInfoView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 120)
+                        .offset(x: move ? 9 : -54)
                 }
             }
-            .padding(.top, 10)
+//            .padding(.top, 10)
             .padding(.horizontal)
             
             // MARK: - Height Field
@@ -146,6 +148,11 @@ struct SurveyBodyInfoView: View {
                 range: weights,
                 selection: $selectedWeight
             )
+        }
+        .onAppear {
+            withAnimation(.easeInOut(duration: 3.5).repeatForever(autoreverses: true)) {
+                move = true
+            }
         }
         .onAppear {
             if surveyManager.tempHeight > 0 {

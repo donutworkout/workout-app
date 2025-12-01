@@ -5,97 +5,178 @@
 //  Created by Jennifer Evelyn on 24/10/25.
 //
 
+import HealthKit
+import SwiftData
 import SwiftUI
 
 struct AdjustMenuStrengthView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var selectedMenu: StrengthMenuType = .bodyweight
+    @Environment(\.modelContext) private var modelContext
+    @Environment(iPhoneConnectivityManager.self) private var connectivity
 
-    // Workout data
-    let bodyweightWorkouts: [WorkoutItem] = [
-        WorkoutItem(image: "bridge", name: "Bridge", sets: 2, reps: "30 sec"),
-        WorkoutItem(image: "plank", name: "Plank", sets: 3, reps: "30 sec"),
-        WorkoutItem(image: "kneeTap", name: "Knee Tap", sets: 1, reps: "12"),
-        WorkoutItem(image: "catCow", name: "Cat and Cow", sets: 1, reps: "12")
-    ]
-    
-    let gymWorkouts: [WorkoutItem] = [
-        WorkoutItem(image: "catCow", name: "Leg Press", sets: 3, reps: "10"),
-        WorkoutItem(image: "kneeTap", name: "Lat Pulldown", sets: 3, reps: "8"),
-        WorkoutItem(image: "plank", name: "Cable Curl", sets: 3, reps: "12"),
-        WorkoutItem(image: "bridge", name: "Shoulder Press", sets: 3, reps: "10")
-    ]
-    
-    init() {
-        // Warna segmented control kustom (pink)
-        let pinkColor = UIColor(named: "pinkTextPrimary") ?? UIColor.systemPink
-        let selectedAttrs: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.white]
-        let normalAttrs: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.black]
-        let appearance = UISegmentedControl.appearance()
-        appearance.selectedSegmentTintColor = pinkColor
-        appearance.setTitleTextAttributes(selectedAttrs, for: .selected)
-        appearance.setTitleTextAttributes(normalAttrs, for: .normal)
+    @State private var workouts: [Exercise] = []
+
+    @EnvironmentObject var router: Router
+
+    @Query private var userCycles: [UserCycle]
+    @Query private var userProfiles: [UserProfile]
+    @Query private var userWorkouts: [UserWorkout]
+
+    private let sessionManager = StrengthSessionManager.shared
+    let dailyMenu: DailyMenu?
+
+    @State var workoutType: HKWorkoutActivityType = .functionalStrengthTraining
+
+    var onNext: (() -> Void)? = nil
+
+    init(dailyMenu: DailyMenu? = nil) {
+        self.dailyMenu = dailyMenu
     }
     
+    private var isToday: Bool {
+        guard let menuDate = dailyMenu?.date else { return false }
+        return Calendar.current.isDateInToday(menuDate)
+    }
+
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 20) {
-                
-                // MARK: - Segmented Control
-                Picker("Menu Type", selection: $selectedMenu) {
-                    ForEach(StrengthMenuType.allCases, id: \.self) { type in
-                        Text(type.rawValue)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .padding(.horizontal)
-                .padding(.top, 8)
-                
                 // MARK: - Workout Cards
                 VStack(spacing: 16) {
-                    ForEach(selectedMenu == .bodyweight ? bodyweightWorkouts : gymWorkouts) { workout in
+                    ForEach(Array(workouts.enumerated()), id: \.element) { index, workout in
                         WorkoutItemCard(workout: workout)
+                            .pageCardAnimation(delay: 0.2 + Double(index) * 0.1)
                     }
                 }
                 .padding(.horizontal)
                 .padding(.top, 8)
-                
-                // MARK: - Start Button
-                PrimaryGlassButton(title: "Start Now") {
-                    print("Workout started")
+                .padding(.bottom, 24)
+            }
+        }
+        .safeAreaInset(edge: .bottom) {
+            VStack {
+                PrimaryGlassButton(
+                    title: isToday ? "Start Now" : "Not Available Today",
+                    isDisabled: !isToday  // ✅ Disable if not today
+                ) {
+                    sessionManager.prepareWorkout(with: workouts)
+                    router.workoutExercises = workouts
+
+                    let mapping = mapActivityToHKType("bodyweight")
+                    router.selectedWorkoutType = mapping.type
+
+                    iPhoneConnectivityManager.shared.sendSelectedWorkout(
+                        mapping.type,
+                        activityName: "Bodyweight",
+                        isIndoor: mapping.isIndoor
+                    )
+
+                    iPhoneConnectivityManager.shared.startWorkoutFromPhone(
+                        type: mapping.type,
+                        isIndoor: mapping.isIndoor
+                    )
+
+                    router.lastWorkoutSource = .adjustMenuStrength
+                    router.navigateTo(.countdownView)
                 }
                 .padding(.horizontal)
-                .padding(.top, 16)
-                .padding(.bottom, 40)
+                .padding(.top, 8)
+                .padding(.bottom, 8)
+                .pageCardAnimation(delay: 0.3)
             }
+            .background(Color.white.opacity(0.95))
         }
         .background(Color.white.ignoresSafeArea())
         .navigationTitle("Today’s Strength Menu!")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Button(action: { dismiss() }) {
+                Button(action: {
+                    router.navigateTo(.menu)
+                }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.black)
                 }
             }
         }
+        .onAppear {
+            workoutType = .functionalStrengthTraining
+            let mapping = mapActivityToHKType("bodyweight")
+            connectivity.sendSelectedWorkout(
+                mapping.type,
+                activityName: "Bodyweight",
+                isIndoor: mapping.isIndoor
+            )
+            DummyExerciseProvider.shared.insertDummyData(into: modelContext)
+
+            loadBodyWeightExercises()
+        }
+        .onChange(of: connectivity.isWorkoutActive) { _, active in
+            if active {
+                print("🏋️ Watch started workout → go to countdown/start")
+                router.lastWorkoutSource = .adjustMenuStrength
+                router.navigateTo(.countdownView)
+            }
+
+        }
+    }
+
+    private func loadBodyWeightExercises() {
+        if let menu = dailyMenu, let savedExercises = menu.strengthExercises, !savedExercises.isEmpty {
+            print("✅ Loading \(savedExercises.count) saved exercises from DailyMenu")
+            workouts = savedExercises
+            return
+        }
+        
+        guard let cycle = userCycle, let profile = userWorkout else { return }
+
+        let repo = ExerciseRepository(context: modelContext)
+        let generator = WorkoutMenuGenerator(context: modelContext)
+        let level = profile.workoutLevel
+
+        let currentPhase = CyclePhaseCalculator.calculateCurrentPhase(
+            lastPeriodStart: cycle.cycleStartDate,
+            menstrualDuration: cycle.menstrualDuration
+        )
+
+        let specs = generator.getStrengthSpecs(for: level, phase: currentPhase)
+
+        // Fetch exercises
+        let exercises = repo.getExercises(
+            forLevel: level,
+            phase: currentPhase,
+            count: 5
+        )
+
+        // Apply sets and reps to each exercise
+        for i in 0..<exercises.count {
+            exercises[i].sets = specs.sets
+            exercises[i].reps = specs.reps
+        }
+
+        workouts = exercises
+        
+        if let menu = dailyMenu {
+            menu.strengthExercises = exercises
+            try? modelContext.save()
+            print("💾 Saved \(exercises.count) exercises to DailyMenu")
+        }
     }
 }
 
-// MARK: - Enums & Models
-enum StrengthMenuType: String, CaseIterable {
-    case bodyweight = "Bodyweight"
-    case gym = "Gym"
-}
+extension AdjustMenuStrengthView {
+    private var userCycle: UserCycle? {
+        userCycles.first
+    }
 
-struct WorkoutItem: Identifiable {
-    var id = UUID()
-    var image: String
-    var name: String
-    var sets: Int
-    var reps: String
+    private var userProfile: UserProfile? {
+        userProfiles.first
+    }
+
+    private var userWorkout: UserWorkout? {
+        userWorkouts.first
+    }
 }
 
 #Preview {

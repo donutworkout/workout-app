@@ -1,64 +1,65 @@
-//
-//  Router.swift
-//  WorkoutApp
-//
-//  Created by Nadaa Shafa Nadhifa on 14/10/25.
-//
-
 import SwiftUI
+import HealthKit
 
-enum Route: Hashable {
-   //tambahin kalo mau buat page route baru
+enum Route {
     case onboarding
+    case healthConnect
+//    case watchConnect
     case survey
-    case home
-    case summary
+    case surveyWorkoutLevel  // ✅ TAMBAHKAN
+    case surveyWorkoutDay    // ✅ TAMBAHKAN
+    case tabBar
+    case menu
     case profile
-//  case
-//  case
+    case adjustMenuCardio
+    case adjustMenuStrength
+    case startCardio
+    case startStrength
+    case restView
+    case startWorkout
+    case countdownView
+    case finishWorkout
+    case afterSurvey
+    case aboutMe
+    case streak
+    case halfwayWorkout
 }
 
-class Router: ObservableObject {
-    @Published var path = NavigationPath()
-    @Published var currentRoute: Route = .survey
+
+@MainActor
+final class Router: ObservableObject {
+    @Published var currentRoute: Route = .onboarding
+    @Published var isFromProfile: Bool = false
     @Published var selectedTab: Int = 0
-    @Published var routeHistory: [Route] = []
+    @Published var lastWorkoutSource: Route? = nil
+    @Published var selectedWorkoutType: HKWorkoutActivityType? = nil
+    @Published var selectedCardioMenu: String? = nil
+    @Published var workoutExercises: [Exercise] = []
+    
+    @Published var isEditingFromProfile: Bool = false
+    
+    @Published var selectedDailyMenu: DailyMenu? = nil
+    
+    @Published var cardioSpecs: CardioDetails? = nil
+    @Published var vigorousDuration: Int = 0
+    @Published var moderateDuration: Int = 0
+    @Published var selectedIntensity: IntensityLevel? = nil
+    
+    // In your Router class
+    init(surveyManager: SurveyManager? = nil) {
+        if let manager = surveyManager, manager.isSurveyComplete {
+            self.currentRoute = .menu  // ✅ Start at menu if surveys done
+        } else {
+            self.currentRoute = .onboarding  // Start at onboarding if not
+        }
+    }
     
     func navigateTo(_ route: Route) {
         currentRoute = route
-        path.append(route)
-        addToHistory(route)
     }
-    
-    func navigateToWithoutAnimation(_ route: Route) {
-        withTransaction(.init(animation: nil)) {
-            currentRoute = route
-            path.append(route)
-            addToHistory(route)
-        }
-    }
-    
-    func navigateBack() {
-        if !path.isEmpty {
-            path.removeLast()
-        }
-    }
-    
-    func setCurrentRoute(_ route: Route) {
+
+    func goBack(to route: Route = .tabBar) {
         currentRoute = route
-        addToHistory(route)
-    }
-    
-    func selectTab(_ tabIndex: Int, forRoute route: Route? = nil) {
-        selectedTab = tabIndex
-        if let route = route {
-            setCurrentRoute(route)
-        }
-    }
-    
-    private func addToHistory(_ route: Route) {
-        routeHistory.append(route)
     }
 }
-
 
