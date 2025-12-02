@@ -121,7 +121,9 @@ struct TestMenuGeneratorView: View {
     }
     
     func loadDummyData() {
-        DummyExerciseProvider.shared.insertDummyData(into: modelContext)
+        Task {
+            await DummyExerciseProvider.shared.insertDummyData(into: modelContext)
+        }
     }
     
     func generateMenu() {

@@ -54,6 +54,16 @@ class ExerciseRepository {
             filtered = selectedExercises
             print("🟢 Beginner/intermediate selected one per body part: \(filtered.count)")
             
+            if filtered.count < 5 {
+                let usedIDs = Set(filtered.map { $0.id })
+                let remaining = allExercises.filter { !usedIDs.contains($0.id) }
+                let needed = count - filtered.count
+                
+                print("⚠️ Only got \(filtered.count) exercises, need \(needed) more")
+                filtered.append(contentsOf: remaining.prefix(needed))
+                print("✅ Now have \(filtered.count) total exercises")
+            }
+            
         case .advanced:
             
             let calendar = Calendar.current
