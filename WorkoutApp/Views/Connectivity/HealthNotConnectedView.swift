@@ -36,7 +36,7 @@ struct HealthNotConnectedView: View {
                                 .foregroundColor(.black)
                                 .multilineTextAlignment(.center)
                             
-                            Text("Apple Health access is required to track your health metrics automatically.")
+                            Text("Apple Health access is required to track your health metrics automatically.\n\n To manage access to Health, go to Settings > Health > Data Access & Devices > HeyLoona! > Turn On All")
                                 .font(.system(size: 15))
                                 .foregroundColor(.black.opacity(0.75))
                                 .multilineTextAlignment(.center)
@@ -66,7 +66,7 @@ struct HealthNotConnectedView: View {
                                 .foregroundColor(.black)
                                 .multilineTextAlignment(.center)
                             
-                            Text("Make sure your Apple Watch is connected via Bluetooth for workout syncing.")
+                            Text("Make sure your Apple Watch is connected via Bluetooth and ensure the app is open on your Watch for workout syncing.")
                                 .font(.system(size: 15))
                                 .foregroundColor(.black.opacity(0.75))
                                 .multilineTextAlignment(.center)

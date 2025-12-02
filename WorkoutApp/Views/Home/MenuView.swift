@@ -459,7 +459,13 @@ struct CombinedWorkoutCardView: View {
                 isHealthConnected: isHealthConnected,
                 isWatchConnected: isWatchConnected
             )
-            .presentationDetents([.medium])
+            .presentationDetents({
+                if isHealthConnected || isWatchConnected {
+                    [.fraction(0.35)]
+                } else {
+                    [.fraction(0.7)]
+                }
+            }())
             .presentationDragIndicator(.visible)
         }
         .background(
