@@ -324,14 +324,29 @@ struct ProfileView: View {
     }
     
     private func loadCycleDates() {
-        guard let cycle = cycle else { return }
-        let daysBetween = calendar.dateComponents([.day], from: cycle.cycleStartDate, to: cycle.cycleEndDate).day ?? 0
-        for i in 0...daysBetween {
-            if let date = calendar.date(byAdding: .day, value: i, to: cycle.cycleStartDate) {
-                menstrualDates.insert(date)
+        guard let currentProfile = currentProfile else { return }
+        
+        menstrualDates.removeAll()
+        
+        if let allCycles = currentProfile.userCycle {
+            for cycle in allCycles {
+                let daysBetween = calendar.dateComponents([.day], from: cycle.cycleStartDate, to: cycle.cycleEndDate).day ?? 0
+                for i in 0...daysBetween {
+                    if let date = calendar.date(byAdding: .day, value: i, to: cycle.cycleStartDate) {
+                        menstrualDates.insert(date)
+                    }
+                }
             }
         }
-        calculateOvulationDates()
+        
+        iPhoneHealthKitManager.shared.getAllMenstrualDates { healthKitDates in
+            DispatchQueue.main.async {
+                // Merge HealthKit dates with existing dates
+                self.menstrualDates.formUnion(healthKitDates)
+                self.calculateOvulationDates()
+                print("✅ Loaded \(healthKitDates.count) dates from HealthKit")
+            }
+        }
     }
     
     private func saveCycleDates() {

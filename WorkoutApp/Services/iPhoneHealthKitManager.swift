@@ -159,6 +159,87 @@ final class iPhoneHealthKitManager {
         
         healthStore.execute(query)
     }
+    
+    func getAllMenstrualPeriods(completion: @escaping ([DateInterval]) -> Void) {
+        guard let menstrualType = HKCategoryType.categoryType(forIdentifier: .menstrualFlow) else {
+            completion([])
+            return
+        }
+        
+        // Get all menstrual flow samples (no limit)
+        let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
+        
+        let query = HKSampleQuery(
+            sampleType: menstrualType,
+            predicate: nil, // Get ALL samples
+            limit: HKObjectQueryNoLimit, // No limit
+            sortDescriptors: [sortDescriptor]
+        ) { query, results, error in
+            guard let samples = results as? [HKCategorySample], !samples.isEmpty else {
+                completion([])
+                return
+            }
+            
+            // Group consecutive days into periods
+            var periods: [DateInterval] = []
+            var currentPeriodStart: Date?
+            var currentPeriodEnd: Date?
+            
+            let calendar = Calendar.current
+            
+            for sample in samples {
+                let sampleDate = calendar.startOfDay(for: sample.startDate)
+                
+                if currentPeriodStart == nil {
+                    // First sample
+                    currentPeriodStart = sampleDate
+                    currentPeriodEnd = sampleDate
+                } else if let lastEnd = currentPeriodEnd {
+                    let daysDiff = calendar.dateComponents([.day], from: lastEnd, to: sampleDate).day ?? 0
+                    
+                    if daysDiff <= 1 {
+                        // Consecutive day - extend current period
+                        currentPeriodEnd = sampleDate
+                    } else {
+                        // Gap detected - save current period and start new one
+                        if let start = currentPeriodStart, let end = currentPeriodEnd {
+                            periods.append(DateInterval(start: start, end: end))
+                        }
+                        currentPeriodStart = sampleDate
+                        currentPeriodEnd = sampleDate
+                    }
+                }
+            }
+            
+            // Add the last period
+            if let start = currentPeriodStart, let end = currentPeriodEnd {
+                periods.append(DateInterval(start: start, end: end))
+            }
+            
+            completion(periods)
+        }
+        
+        healthStore.execute(query)
+    }
+
+    // Get menstrual dates as a Set (for easy calendar display)
+    func getAllMenstrualDates(completion: @escaping (Set<Date>) -> Void) {
+        getAllMenstrualPeriods { periods in
+            var allDates = Set<Date>()
+            let calendar = Calendar.current
+            
+            for period in periods {
+                var currentDate = period.start
+                while currentDate <= period.end {
+                    allDates.insert(calendar.startOfDay(for: currentDate))
+                    guard let nextDate = calendar.date(byAdding: .day, value: 1, to: currentDate) else { break }
+                    currentDate = nextDate
+                }
+            }
+            
+            completion(allDates)
+        }
+    }
         
     //    func syncCycleData(to userCycle: UserCycle) {
     //        getLastPeriodDate { date in
