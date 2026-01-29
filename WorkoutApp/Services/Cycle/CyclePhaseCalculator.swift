@@ -24,7 +24,7 @@ class CyclePhaseCalculator {
         
         let currentDayInCycle = (daysSinceStart % cycleLength) + 1
         
-        print("🩸 Days since last period: \(daysSinceStart) → current cycle day: \(currentDayInCycle)")
+//        print("🩸 Days since last period: \(daysSinceStart) → current cycle day: \(currentDayInCycle)")
         
         return phaseForDay(currentDayInCycle, cycleLength: cycleLength, periodDuration: menstrualDuration)
     }
