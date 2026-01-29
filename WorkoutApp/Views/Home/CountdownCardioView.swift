@@ -156,44 +156,11 @@ struct CountdownCardioView: View {
             
             // MARK: - Countdown Overlay
             if showCountdown {
-                ZStack {
-                    Color.black.opacity(0.4)
-                        .ignoresSafeArea()
-                    
-                    VStack(spacing: 0) {
-                        ZStack {
-                            Circle()
-                                .stroke(Color("pinkTextPrimary").opacity(0.9), lineWidth: 4)
-                                .frame(width: 150, height: 150)
-                            Circle()
-                                .fill(Color("pinkTextPrimary").opacity(0.9))
-                                .frame(width: 122, height: 122)
-                            Text("\(countdown)")
-                                .font(.system(size: 72, weight: .bold, design: .rounded))
-                                .foregroundColor(Color.white.opacity(0.7))
-                                .monospacedDigit()
-                        }
-                        .scaleEffect(scale)
-                        .opacity(opacity)
-                    }
-                    .padding(.bottom, 60)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
-                .transition(.opacity)
-                .onAppear {
-                    withAnimation(.spring(response: 0.42, dampingFraction: 0.62)) {
-                        scale = 1.0
-                        opacity = 1.0
-                    }
-                }
-                .onChange(of: countdown) { _, _ in
-                    scale = 0.78
-                    opacity = 0.5
-                    withAnimation(.spring(response: 0.31, dampingFraction: 0.7)) {
-                        scale = 1.0
-                        opacity = 1.0
-                    }
-                }
+                CountdownOverlay(
+                    countdown: countdown,
+                    scale: scale,
+                    opacity: opacity
+                )
             }
         }
         .navigationTitle(activityName)
